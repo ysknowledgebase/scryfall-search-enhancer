@@ -1,113 +1,228 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scryfall Advanced Search Enhancer</title>
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-  <div id="enhancer-container">
-    <!-- Row 1: Action Buttons -->
-    <div id="action-row">
-      <button id="searchButton">Search</button>
-      <button id="searchFrontierButton">Search Frontier</button>
-      <button id="clearAllButton">Clear All</button>
-    </div>
-    <!-- Row 2: Preset Management -->
-    <div id="preset-row">
-      <button id="savePresetButton">💾 Save Preset</button>
-      <select id="presetDropdown">
-        <option value="">Select a preset...</option>
-      </select>
-      <button id="deletePresetButton">🗑 Delete Preset</button>
-      <button id="exportPresetButton">⬇ Export Presets</button>
-      <button id="importPresetButton">⬆ Import Presets</button>
-      <input type="file" id="importFile" accept=".json" style="display:none;">
-    </div>
-    <!-- Search Options -->
-    <div id="search-options">
-      <div class="option-group">
-        <label for="format_selector">Format:</label>
-        <select id="format_selector">
-          <option value="">Select Format</option>
-          <option value="standard">Standard</option>
-          <option value="futureStandard">Future Standard</option>
-          <option value="frontier">Frontier</option>
-          <option value="fdn">FDN</option>
-          <option value="dft">DFT</option>
-        </select>
-      </div>
-      <div class="option-group">
-        <label>Colors:</label>
-        <div id="colorButtons">
-          <button class="color-btn" data-color="W">W</button>
-          <button class="color-btn" data-color="U">U</button>
-          <button class="color-btn" data-color="B">B</button>
-          <button class="color-btn" data-color="R">R</button>
-          <button class="color-btn" data-color="G">G</button>
-          <button class="color-btn" data-color="C">C</button>
-        </div>
-        <!-- Hidden checkboxes to keep track -->
-        <div id="colorCheckboxes" style="display:none;">
-          <input type="checkbox" name="color[]" value="W">
-          <input type="checkbox" name="color[]" value="U">
-          <input type="checkbox" name="color[]" value="B">
-          <input type="checkbox" name="color[]" value="R">
-          <input type="checkbox" name="color[]" value="G">
-          <input type="checkbox" name="color[]" value="C">
-        </div>
-      </div>
-      <div class="option-group">
-        <label>Types:</label>
-        <div id="typeButtons">
-          <button class="type-btn" data-type="artifact">AR</button>
-          <button class="type-btn" data-type="enchantment">EN</button>
-          <button class="type-btn" data-type="aura">AU</button>
-          <button class="type-btn" data-type="creature">CR</button>
-          <button class="type-btn" data-type="sorcery">SR</button>
-          <button class="type-btn" data-type="instant">IN</button>
-          <button class="type-btn" data-type="equipment">EQ</button>
-          <button class="type-btn" data-type="land">LD</button>
-          <button class="type-btn" data-type="planeswalker">PW</button>
-        </div>
-        <!-- Hidden checkboxes -->
-        <div id="typeCheckboxes" style="display:none;">
-          <input type="checkbox" name="type[]" value="artifact">
-          <input type="checkbox" name="type[]" value="enchantment">
-          <input type="checkbox" name="type[]" value="aura">
-          <input type="checkbox" name="type[]" value="creature">
-          <input type="checkbox" name="type[]" value="sorcery">
-          <input type="checkbox" name="type[]" value="instant">
-          <input type="checkbox" name="type[]" value="equipment">
-          <input type="checkbox" name="type[]" value="land">
-          <input type="checkbox" name="type[]" value="planeswalker">
-        </div>
-      </div>
-      <div class="option-group">
-        <label>Rarities:</label>
-        <div id="rarityButtons">
-          <button class="rarity-btn" data-rarity="C">C</button>
-          <button class="rarity-btn" data-rarity="U">U</button>
-          <button class="rarity-btn" data-rarity="R">R</button>
-          <button class="rarity-btn" data-rarity="M">M</button>
-        </div>
-        <!-- Hidden checkboxes -->
-        <div id="rarityCheckboxes" style="display:none;">
-          <input type="checkbox" name="rarity[]" value="C">
-          <input type="checkbox" name="rarity[]" value="U">
-          <input type="checkbox" name="rarity[]" value="R">
-          <input type="checkbox" name="rarity[]" value="M">
-        </div>
-      </div>
-      <div class="option-group">
-        <label for="oracle">Oracle Text:</label>
-        <textarea id="oracle" rows="3" placeholder="Enter keywords or oracle text..."></textarea>
-      </div>
-    </div>
-    <!-- Results will be displayed here -->
-    <div id="resultsContainer"></div>
-  </div>
-  <script src="js/app.js"></script>
-</body>
-</html>
+// When the page loads, attach event listeners and update preset dropdown
+document.addEventListener("DOMContentLoaded", function(){
+  // Color buttons: toggle hidden checkboxes and visual state
+  document.querySelectorAll(".color-btn").forEach(btn => {
+    btn.addEventListener("click", function(){
+      let color = btn.getAttribute("data-color");
+      let checkbox = document.querySelector(`input[name="color[]"][value="${color}"]`);
+      checkbox.checked = !checkbox.checked;
+      btn.classList.toggle("selected", checkbox.checked);
+    });
+  });
+  // Type buttons
+  document.querySelectorAll(".type-btn").forEach(btn => {
+    btn.addEventListener("click", function(){
+      let type = btn.getAttribute("data-type");
+      let checkbox = document.querySelector(`input[name="type[]"][value="${type}"]`);
+      checkbox.checked = !checkbox.checked;
+      btn.classList.toggle("selected", checkbox.checked);
+    });
+  });
+  // Rarity buttons
+  document.querySelectorAll(".rarity-btn").forEach(btn => {
+    btn.addEventListener("click", function(){
+      let rarity = btn.getAttribute("data-rarity");
+      let checkbox = document.querySelector(`input[name="rarity[]"][value="${rarity}"]`);
+      checkbox.checked = !checkbox.checked;
+      btn.classList.toggle("selected", checkbox.checked);
+    });
+  });
+
+  document.getElementById("searchButton").addEventListener("click", performSearch);
+  document.getElementById("searchFrontierButton").addEventListener("click", function(){
+    document.getElementById("format_selector").value = "frontier";
+    performSearch();
+  });
+  document.getElementById("clearAllButton").addEventListener("click", clearForm);
+  document.getElementById("savePresetButton").addEventListener("click", savePreset);
+  document.getElementById("presetDropdown").addEventListener("change", loadPreset);
+  document.getElementById("deletePresetButton").addEventListener("click", deletePreset);
+  document.getElementById("exportPresetButton").addEventListener("click", exportPresets);
+  document.getElementById("importPresetButton").addEventListener("click", function(){
+    document.getElementById("importFile").click();
+  });
+  document.getElementById("importFile").addEventListener("change", importPresetsFromFile);
+  updatePresetDropdown();
+});
+
+// Build query from form inputs and call Scryfall API
+function performSearch(){
+  let format = document.getElementById("format_selector").value;
+  let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
+  let types = Array.from(document.querySelectorAll('input[name="type[]"]:checked')).map(el => el.value);
+  let rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
+  let oracle = document.getElementById("oracle").value.trim();
+
+  let queryParts = [];
+
+  // Format mapping
+  if(format){
+    if(format === "standard") queryParts.push("is:standard");
+    else if(format === "futureStandard") queryParts.push("is:future-standard");
+    else if(format === "frontier") queryParts.push("is:frontier");
+    else if(format === "fdn") queryParts.push("is:fdn");
+    else if(format === "dft") queryParts.push("is:dft");
+  }
+  // Colors: use c>= operator to specify the colors present
+  if(colors.length > 0){
+    queryParts.push("c>=" + colors.join(""));
+  }
+  // Types: add each type with t:
+  types.forEach(t => {
+    queryParts.push("t:" + t);
+  });
+  // Rarities: map abbreviation to full word
+  if(rarities.length > 0){
+    const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
+    rarities.forEach(r => {
+      if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]);
+    });
+  }
+  // Oracle text: free text
+  if(oracle){
+    queryParts.push(oracle);
+  }
+  let query = queryParts.join(" ");
+  let apiUrl = "https://api.scryfall.com/cards/search?q=" + encodeURIComponent(query);
+  console.log("Query:", query);
+  console.log("API URL:", apiUrl);
+
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => displayResults(data))
+    .catch(err => {
+      console.error("Error fetching Scryfall data:", err);
+      document.getElementById("resultsContainer").innerHTML = "<p>Error fetching results.</p>";
+    });
+}
+
+// Display results in the results container
+function displayResults(data){
+  let container = document.getElementById("resultsContainer");
+  container.innerHTML = "";
+  if(data.object === "error"){
+    container.innerHTML = "<p>Error: " + data.details + "</p>";
+    return;
+  }
+  if(!data.data || data.data.length === 0){
+    container.innerHTML = "<p>No results found.</p>";
+    return;
+  }
+  data.data.forEach(card => {
+    let cardDiv = document.createElement("div");
+    cardDiv.className = "card";
+    let imgSrc = card.image_uris ? card.image_uris.small : "";
+    cardDiv.innerHTML = `<img src="${imgSrc}" alt="${card.name}"><p>${card.name}</p>`;
+    container.appendChild(cardDiv);
+  });
+}
+
+// Clear the form inputs and results
+function clearForm(){
+  document.getElementById("format_selector").value = "";
+  document.querySelectorAll('input[name="color[]"], input[name="type[]"], input[name="rarity[]"]').forEach(el => {
+    el.checked = false;
+  });
+  document.querySelectorAll(".color-btn, .type-btn, .rarity-btn").forEach(btn => btn.classList.remove("selected"));
+  document.getElementById("oracle").value = "";
+  document.getElementById("resultsContainer").innerHTML = "";
+}
+
+// Preset management functions
+function savePreset(){
+  let presetName = prompt("Enter a name for this preset:");
+  if(!presetName) return;
+  let preset = {
+    format: document.getElementById("format_selector").value,
+    colors: Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value),
+    types: Array.from(document.querySelectorAll('input[name="type[]"]:checked')).map(el => el.value),
+    rarities: Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value),
+    oracle: document.getElementById("oracle").value.trim()
+  };
+  localStorage.setItem("preset_" + presetName, JSON.stringify(preset));
+  updatePresetDropdown();
+  alert("Preset saved as: " + presetName);
+}
+
+function loadPreset(){
+  let dropdown = document.getElementById("presetDropdown");
+  let key = dropdown.value;
+  if(!key) return;
+  let preset = JSON.parse(localStorage.getItem(key));
+  document.getElementById("format_selector").value = preset.format || "";
+  document.querySelectorAll('input[name="color[]"]').forEach(el => {
+    el.checked = preset.colors.includes(el.value);
+    let btn = document.querySelector('.color-btn[data-color="' + el.value + '"]');
+    if(btn) btn.classList.toggle("selected", el.checked);
+  });
+  document.querySelectorAll('input[name="type[]"]').forEach(el => {
+    el.checked = preset.types.includes(el.value);
+    let btn = document.querySelector('.type-btn[data-type="' + el.value + '"]');
+    if(btn) btn.classList.toggle("selected", el.checked);
+  });
+  document.querySelectorAll('input[name="rarity[]"]').forEach(el => {
+    el.checked = preset.rarities.includes(el.value);
+    let btn = document.querySelector('.rarity-btn[data-rarity="' + el.value + '"]');
+    if(btn) btn.classList.toggle("selected", el.checked);
+  });
+  document.getElementById("oracle").value = preset.oracle || "";
+}
+
+function deletePreset(){
+  let dropdown = document.getElementById("presetDropdown");
+  let key = dropdown.value;
+  if(!key){
+    alert("Please select a preset to delete.");
+    return;
+  }
+  if(confirm("Are you sure you want to delete preset: " + key.replace("preset_", "") + "?")){
+    localStorage.removeItem(key);
+    updatePresetDropdown();
+  }
+}
+
+function updatePresetDropdown(){
+  let dropdown = document.getElementById("presetDropdown");
+  dropdown.innerHTML = "<option value=''>Select a preset...</option>";
+  Object.keys(localStorage).forEach(key => {
+    if(key.startsWith("preset_")){
+      let option = document.createElement("option");
+      option.value = key;
+      option.textContent = key.replace("preset_", "");
+      dropdown.appendChild(option);
+    }
+  });
+}
+
+function exportPresets(){
+  let exportObj = {};
+  Object.keys(localStorage).forEach(key => {
+    if(key.startsWith("preset_")){
+      exportObj[key] = JSON.parse(localStorage.getItem(key));
+    }
+  });
+  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+  let a = document.createElement("a");
+  a.href = dataStr;
+  a.download = "scryfall_presets.json";
+  a.click();
+}
+
+function importPresetsFromFile(event){
+  let file = event.target.files[0];
+  if(!file) return;
+  let reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      let imported = JSON.parse(e.target.result);
+      Object.keys(imported).forEach(key => {
+        localStorage.setItem(key, JSON.stringify(imported[key]));
+      });
+      updatePresetDropdown();
+      alert("Presets imported successfully.");
+    } catch(err){
+      alert("Error importing presets: " + err);
+    }
+  };
+  reader.readAsText(file);
+}
