@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scryfall Advanced Search Enhancer</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="enhancer-container">
+    <!-- Row 1: Action Buttons -->
+    <div id="action-row">
+      <button id="searchButton">Search</button>
+      <button id="searchFrontierButton">Search Frontier</button>
+      <button id="clearAllButton">Clear All</button>
+    </div>
+    <!-- Row 2: Preset Management -->
+    <div id="preset-row">
+      <button id="savePresetButton">💾 Save Preset</button>
+      <select id="presetDropdown">
+        <option value="">Select a preset...</option>
+      </select>
+      <button id="deletePresetButton">🗑 Delete Preset</button>
+      <button id="exportPresetButton">⬇ Export Presets</button>
+      <button id="importPresetButton">⬆ Import Presets</button>
+      <input type="file" id="importFile" accept=".json" style="display:none;">
+    </div>
+    <!-- Search Options -->
+    <div id="search-options">
+      <div class="option-group">
+        <label for="format_selector">Format:</label>
+        <select id="format_selector">
+          <option value="">Select Format</option>
+          <option value="standard">Standard</option>
+          <option value="futureStandard">Future Standard</option>
+          <option value="frontier">Frontier</option>
+          <option value="fdn">FDN</option>
+          <option value="dft">DFT</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <label>Colors:</label>
+        <div id="colorButtons">
+          <button class="color-btn" data-color="W">W</button>
+          <button class="color-btn" data-color="U">U</button>
+          <button class="color-btn" data-color="B">B</button>
+          <button class="color-btn" data-color="R">R</button>
+          <button class="color-btn" data-color="G">G</button>
+          <button class="color-btn" data-color="C">C</button>
+        </div>
+        <!-- Hidden checkboxes -->
+        <div id="colorCheckboxes" style="display:none;">
+          <input type="checkbox" name="color[]" value="W">
+          <input type="checkbox" name="color[]" value="U">
+          <input type="checkbox" name="color[]" value="B">
+          <input type="checkbox" name="color[]" value="R">
+          <input type="checkbox" name="color[]" value="G">
+          <input type="checkbox" name="color[]" value="C">
+        </div>
+      </div>
+      <div class="option-group">
+        <label>Types:</label>
+        <div id="typeButtons">
+          <button class="type-btn" data-type="artifact">AR</button>
+          <button class="type-btn" data-type="enchantment">EN</button>
+          <button class="type-btn" data-type="aura">AU</button>
+          <button class="type-btn" data-type="creature">CR</button>
+          <button class="type-btn" data-type="sorcery">SR</button>
+          <button class="type-btn" data-type="instant">IN</button>
+          <button class="type-btn" data-type="equipment">EQ</button>
+          <button class="type-btn" data-type="land">LD</button>
+          <button class="type-btn" data-type="planeswalker">PW</button>
+        </div>
+        <!-- Hidden checkboxes -->
+        <div id="typeCheckboxes" style="display:none;">
+          <input type="checkbox" name="type[]" value="artifact">
+          <input type="checkbox" name="type[]" value="enchantment">
+          <input type="checkbox" name="type[]" value="aura">
+          <input type="checkbox" name="type[]" value="creature">
+          <input type="checkbox" name="type[]" value="sorcery">
+          <input type="checkbox" name="type[]" value="instant">
+          <input type="checkbox" name="type[]" value="equipment">
+          <input type="checkbox" name="type[]" value="land">
+          <input type="checkbox" name="type[]" value="planeswalker">
+        </div>
+      </div>
+      <div class="option-group">
+        <label>Rarities:</label>
+        <div id="rarityButtons">
+          <button class="rarity-btn" data-rarity="C">C</button>
+          <button class="rarity-btn" data-rarity="U">U</button>
+          <button class="rarity-btn" data-rarity="R">R</button>
+          <button class="rarity-btn" data-rarity="M">M</button>
+        </div>
+        <!-- Hidden checkboxes -->
+        <div id="rarityCheckboxes" style="display:none;">
+          <input type="checkbox" name="rarity[]" value="C">
+          <input type="checkbox" name="rarity[]" value="U">
+          <input type="checkbox" name="rarity[]" value="R">
+          <input type="checkbox" name="rarity[]" value="M">
+        </div>
+      </div>
+      <div class="option-group">
+        <label for="oracle">Oracle Text:</label>
+        <textarea id="oracle" rows="3" placeholder="Enter keywords or oracle text..."></textarea>
+      </div>
+      <!-- Expansions Section -->
+      <div class="option-group">
+        <label>Expansions:</label>
+        <div id="expansionsContainer"></div>
+      </div>
+    </div>
+    <!-- Results -->
+    <div id="resultsContainer"></div>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

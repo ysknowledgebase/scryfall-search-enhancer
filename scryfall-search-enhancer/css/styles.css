@@ -1,0 +1,71 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+}
+#enhancer-container {
+  max-width: 900px;
+  margin: 20px auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
+#action-row, #preset-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.option-group {
+  margin-bottom: 15px;
+}
+.option-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+button {
+  padding: 8px 16px;
+  border: none;
+  background-color: #0078D4;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #005A9E;
+}
+select, textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+#colorButtons, #typeButtons, #rarityButtons {
+  display: flex;
+  gap: 5px;
+}
+button.selected {
+  background-color: #005A9E;
+}
+#expansionsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+#resultsContainer {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.card {
+  width: 150px;
+  text-align: center;
+}
+.card img {
+  width: 150px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
