@@ -1,3 +1,4 @@
+/* Version 0.5.10 */
 // CONFIG object – includes formats, original color scheme, types, and rarities.
 const CONFIG = {
   formatData: {
@@ -152,7 +153,7 @@ let quotesInserted = false;
 
 // On DOMContentLoaded, attach event listeners and build UI.
 document.addEventListener("DOMContentLoaded", function(){
-  // Color Buttons.
+  // --- Color Buttons ---
   document.querySelectorAll(".color-btn").forEach(btn => {
     let color = btn.getAttribute("data-color");
     btn.style.backgroundColor = "#f8f9fa";
@@ -163,6 +164,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }
     btn.addEventListener("click", function(){
       let checkbox = document.querySelector(`input[name="color[]"][value="${color}"]`);
+      // Mutual exclusion: if selecting colorless ("C"), unselect others.
       if(color === "C" && !checkbox.checked) {
         document.querySelectorAll('input[name="color[]"]').forEach(chk => {
           if(chk.value !== "C"){
@@ -198,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Type Buttons.
+  // --- Type Buttons ---
   document.querySelectorAll(".type-btn").forEach(btn => {
     btn.dataset.state = "default";
     updateTypeButtonStyle(btn);
@@ -210,11 +212,11 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Rarity Buttons.
+  // --- Rarity Buttons ---
   document.querySelectorAll(".rarity-btn").forEach(btn => {
     let rarity = btn.getAttribute("data-rarity");
     let rCfg = CONFIG.rarities.find(r => r.label === rarity);
-    // Default: transparent background, border in rarity color, black text.
+    // Default: transparent background with 2px border in designated color and black text.
     btn.style.backgroundColor = "transparent";
     btn.style.border = `2px solid ${rCfg.color}`;
     btn.style.color = "#000";
@@ -232,22 +234,22 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Partial Toggle for Types.
+  // --- Partial Toggle for Types ---
   document.getElementById("typePartialToggle").addEventListener("click", function(){
     let btn = document.getElementById("typePartialToggle");
     btn.textContent = (btn.textContent.trim() === "=") ? "≈" : "=";
   });
   
-  // Toggle for Color Matching.
+  // --- Toggle for Color Matching ---
   document.getElementById("colorToggle").addEventListener("click", function(){
     let btn = document.getElementById("colorToggle");
     btn.textContent = (btn.textContent.trim() === "At Most") ? "Exactly" : "At Most";
   });
   
-  // Build Expansions UI – groups collapsed by default.
+  // --- Build Expansions UI (Collapsed by Default) ---
   buildExpansionsToggles();
   
-  // Clear Buttons.
+  // --- Clear Buttons ---
   document.getElementById("clearFormat").addEventListener("click", function(){
     document.getElementById("format_selector").value = "";
   });
@@ -280,7 +282,7 @@ document.addEventListener("DOMContentLoaded", function(){
     document.getElementById("oracle").value = "";
   });
   
-  // Action Buttons.
+  // --- Action Buttons ---
   document.getElementById("searchActionButton").addEventListener("click", performSearch);
   document.getElementById("searchFrontierActionButton").addEventListener("click", function(){
     document.getElementById("format_selector").value = "frontier";
@@ -288,7 +290,7 @@ document.addEventListener("DOMContentLoaded", function(){
   });
   document.getElementById("clearAllButton").addEventListener("click", clearForm);
   
-  // Preset Management.
+  // --- Preset Management ---
   document.getElementById("savePresetButton").addEventListener("click", savePreset);
   document.getElementById("presetDropdown").addEventListener("change", loadPreset);
   document.getElementById("deletePresetButton").addEventListener("click", deletePreset);
@@ -301,7 +303,7 @@ document.addEventListener("DOMContentLoaded", function(){
   updatePresetDropdown();
 });
 
-// Helper: Update type button style.
+// Helper: Update type button style based on its state.
 function updateTypeButtonStyle(btn) {
   let state = btn.dataset.state;
   if(state === "default"){
@@ -310,7 +312,6 @@ function updateTypeButtonStyle(btn) {
     btn.style.color = "#000";
     btn.style.textDecoration = "none";
   } else if(state === "include"){
-    // If partial toggle is set to ≈ then use "≈t:" operator in search (handled later).
     btn.style.backgroundColor = "#90ee90";
     btn.style.border = "2px solid #90ee90";
     btn.style.color = "#000";
@@ -455,7 +456,7 @@ function removeLastOccurrence(oracle, sub) {
 }
 
 // Build Scryfall query and redirect.
-// Note: For types, if the partial toggle ("≈") is active, we use "≈t:" (or "-≈t:" for exclude).
+// For types, if the partial toggle is active ("≈"), then we use "≈t:" or "-≈t:".
 function performSearch(){
   let format = document.getElementById("format_selector").value;
   let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
@@ -489,7 +490,6 @@ function performSearch(){
   // Colors.
   if(colors.length > 0){
     let colorToggle = document.getElementById("colorToggle").textContent.trim();
-    // Use c<= for "At Most" and c= for "Exactly"
     queryParts.push((colorToggle === "Exactly" ? "c=" : "c<=") + colors.join(""));
   }
   
@@ -502,7 +502,7 @@ function performSearch(){
     rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
   }
   
-  // Oracle text.
+  // Oracle.
   if(oracle){
     queryParts.push("oracle:" + oracle);
     queryParts.push("(game:paper)");
@@ -517,10 +517,10 @@ function performSearch(){
 }
 
 // Preset management functions.
-// Save preset: Save current search URL (jumping URL) plus search parameters. If preset name is blank, save as URL.
+// Save preset: Saves the current search parameters along with a computed URL.
+// If preset name is left blank, the URL is used as the preset name.
 function savePreset(){
   let presetName = prompt("Enter a name for this preset (leave blank to use URL):");
-  // Compute the jumping URL.
   let format = document.getElementById("format_selector").value;
   let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
   let types = [];
