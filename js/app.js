@@ -1,4 +1,4 @@
-// CONFIG: Formats, colors, types, rarities (mirroring original)
+// CONFIG object including original color scheme details
 const CONFIG = {
   formatData: {
     formats: [
@@ -11,12 +11,12 @@ const CONFIG = {
     ]
   },
   colorData: [
-    { val: "W", icon: "{W}" },
-    { val: "U", icon: "{U}" },
-    { val: "B", icon: "{B}" },
-    { val: "R", icon: "{R}" },
-    { val: "G", icon: "{G}" },
-    { val: "C", icon: "{C}" }
+    { val: "W", icon: "{W}", color: "#ffd966", textColor: "#000" },
+    { val: "U", icon: "{U}", color: "#1e90ff", textColor: "#fff" },
+    { val: "B", icon: "{B}", color: "#000", textColor: "#fff" },
+    { val: "R", icon: "{R}", color: "#ff4500", textColor: "#fff" },
+    { val: "G", icon: "{G}", color: "#228b22", textColor: "#fff" },
+    { val: "C", icon: "{C}", color: "#808080", textColor: "#fff" }
   ],
   typeList: [
     { label: "AR", val: "artifact" },
@@ -37,7 +37,7 @@ const CONFIG = {
   ]
 };
 
-// Full EXPANSIONS_DATA (as provided)
+// Full expansions data (as provided)
 const EXPANSIONS_DATA = {
   common: [
     [
@@ -151,13 +151,26 @@ let quotesInserted = false;
 
 // On DOMContentLoaded, attach event listeners and build UI
 document.addEventListener("DOMContentLoaded", function(){
-  // Color buttons toggle
+  // Set up color buttons using CONFIG.colorData
   document.querySelectorAll(".color-btn").forEach(btn => {
+    let color = btn.getAttribute("data-color");
+    // Set default style for unselected state
+    btn.style.backgroundColor = "#f8f9fa";
+    btn.style.color = "#000";
+    // Attach click listener
     btn.addEventListener("click", function(){
-      let color = btn.getAttribute("data-color");
       let checkbox = document.querySelector(`input[name="color[]"][value="${color}"]`);
       checkbox.checked = !checkbox.checked;
-      btn.classList.toggle("selected", checkbox.checked);
+      if(checkbox.checked){
+        let cfg = CONFIG.colorData.find(c => c.val === color);
+        btn.style.backgroundColor = cfg.color;
+        btn.style.color = cfg.textColor;
+        btn.classList.add("selected");
+      } else {
+        btn.style.backgroundColor = "#f8f9fa";
+        btn.style.color = "#000";
+        btn.classList.remove("selected");
+      }
     });
   });
   // Type buttons toggle
@@ -179,7 +192,7 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Build expansions UI
+  // Build Expansions UI
   buildExpansionsToggles();
   
   // Action buttons
@@ -208,7 +221,7 @@ function buildExpansionsToggles() {
   const container = document.getElementById("expansionsContainer");
   container.innerHTML = "";
   
-  // Build 'common' expansions rows
+  // Build common expansions rows
   EXPANSIONS_DATA.common.forEach(row => {
     const rowDiv = document.createElement("div");
     rowDiv.className = "expansion-row";
@@ -348,7 +361,7 @@ function removeLastOccurrence(oracle, sub) {
   }
 }
 
-// Build Scryfall query and then jump to Scryfall's search results page
+// Build Scryfall query and jump to Scryfall results page
 function performSearch(){
   let format = document.getElementById("format_selector").value;
   let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
@@ -358,7 +371,7 @@ function performSearch(){
   
   let queryParts = [];
   
-  // Format: if the selected format has associated sets, build an OR clause; otherwise use "is:" operator.
+  // Format: if associated sets exist, use OR clause; else use is: operator.
   if(format){
     let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
     if(fmtObj && fmtObj.sets){
@@ -368,7 +381,7 @@ function performSearch(){
       queryParts.push("is:" + format);
     }
   }
-  // Colors: c>= operator
+  // Colors: use c>= operator
   if(colors.length > 0){
     queryParts.push("c>=" + colors.join(""));
   }
@@ -379,7 +392,7 @@ function performSearch(){
     const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
     rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
   }
-  // Oracle text (including any inserted expansions)
+  // Oracle text (free text, not mapped to name)
   if(oracle) queryParts.push(oracle);
   
   let query = queryParts.join(" ");
@@ -387,7 +400,7 @@ function performSearch(){
   console.log("Query:", query);
   console.log("Redirecting to:", targetUrl);
   
-  // Jump to the Scryfall search results page
+  // Jump to Scryfall results page
   window.location.href = targetUrl;
 }
 
@@ -406,7 +419,6 @@ function savePreset(){
   updatePresetDropdown();
   alert("Preset saved as: " + presetName);
 }
-
 function loadPreset(){
   let dropdown = document.getElementById("presetDropdown");
   let key = dropdown.value;
@@ -416,7 +428,16 @@ function loadPreset(){
   document.querySelectorAll('input[name="color[]"]').forEach(el => {
     el.checked = preset.colors.includes(el.value);
     let btn = document.querySelector('.color-btn[data-color="' + el.value + '"]');
-    if(btn) btn.classList.toggle("selected", el.checked);
+    if(btn){
+      let cfg = CONFIG.colorData.find(c => c.val === el.value);
+      if(el.checked){
+        btn.style.backgroundColor = cfg.color;
+        btn.style.color = cfg.textColor;
+      } else {
+        btn.style.backgroundColor = "#f8f9fa";
+        btn.style.color = "#000";
+      }
+    }
   });
   document.querySelectorAll('input[name="type[]"]').forEach(el => {
     el.checked = preset.types.includes(el.value);
@@ -430,7 +451,6 @@ function loadPreset(){
   });
   document.getElementById("oracle").value = preset.oracle || "";
 }
-
 function deletePreset(){
   let dropdown = document.getElementById("presetDropdown");
   let key = dropdown.value;
@@ -443,7 +463,6 @@ function deletePreset(){
     updatePresetDropdown();
   }
 }
-
 function updatePresetDropdown(){
   let dropdown = document.getElementById("presetDropdown");
   dropdown.innerHTML = "<option value=''>Select a preset...</option>";
@@ -456,7 +475,6 @@ function updatePresetDropdown(){
     }
   });
 }
-
 function exportPresets(){
   let exportObj = {};
   Object.keys(localStorage).forEach(key => {
@@ -470,7 +488,6 @@ function exportPresets(){
   a.download = "scryfall_presets.json";
   a.click();
 }
-
 function importPresetsFromFile(event){
   let file = event.target.files[0];
   if(!file) return;

@@ -15,14 +15,14 @@ body {
   position: relative;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
-/* First row: action buttons */
+/* Action buttons (first row) */
 #action-row {
   display: flex;
   justify-content: center;
   gap: 10px;
   margin-bottom: 10px;
 }
-/* Second row: preset management */
+/* Preset management (second row) */
 #preset-row {
   display: flex;
   justify-content: center;
@@ -62,7 +62,7 @@ button:hover {
   background-color: #005A9E;
 }
 button.selected {
-  background-color: #005A9E;
+  /* The selected state for color buttons is set inline from JS based on CONFIG values */
 }
 #expansionsContainer {
   display: flex;
