@@ -1,4 +1,4 @@
-// CONFIG: Formats, colors with original scheme, types, and rarities.
+// CONFIG object – includes formats, original color scheme, types, and rarities.
 const CONFIG = {
   formatData: {
     formats: [
@@ -37,7 +37,7 @@ const CONFIG = {
   ]
 };
 
-// EXPANSIONS_DATA: full data as provided.
+// EXPANSIONS_DATA: full expansions data from your original code.
 const EXPANSIONS_DATA = {
   common: [
     [
@@ -144,14 +144,14 @@ const EXPANSIONS_DATA = {
   ]
 };
 
-// Global variables for expansions logic
+// Global variables for expansions handling
 let expansionsInserted = new Map();
 let expansionsCycleIdx = new Map();
 let quotesInserted = false;
 
-// Attach event listeners on DOMContentLoaded
+// On DOMContentLoaded, attach event listeners and build UI
 document.addEventListener("DOMContentLoaded", function(){
-  // Set up color buttons using CONFIG.colorData and original color scheme
+  // Set up color buttons using original color scheme
   document.querySelectorAll(".color-btn").forEach(btn => {
     let color = btn.getAttribute("data-color");
     btn.style.backgroundColor = "#f8f9fa";
@@ -240,6 +240,7 @@ function buildExpansionsToggles() {
     });
     container.appendChild(rowDiv);
   });
+  
   // Build types expansions row
   const typesRow = document.createElement("div");
   typesRow.className = "expansion-row";
@@ -257,6 +258,7 @@ function buildExpansionsToggles() {
     typesRow.appendChild(btn);
   });
   container.appendChild(typesRow);
+  
   // Build abilities expansions row
   const abilitiesRow = document.createElement("div");
   abilitiesRow.className = "expansion-row";
@@ -274,7 +276,8 @@ function buildExpansionsToggles() {
     abilitiesRow.appendChild(btn);
   });
   container.appendChild(abilitiesRow);
-  // Add a clear expansions button
+  
+  // Add Clear Expansions button
   const clearBtn = document.createElement("button");
   clearBtn.className = "expansion-clear-btn";
   clearBtn.textContent = "Clear Expansions";
@@ -360,8 +363,8 @@ function removeLastOccurrence(oracle, sub) {
   }
 }
 
-// Build Scryfall query and redirect to results page
-// IMPORTANT: Oracle text is now forced to be searched via "oracle:" operator, and we append "(game:paper)".
+// Build Scryfall query and redirect to Scryfall's results page.
+// IMPORTANT: Oracle text is now mapped as "oracle:" and appended with "(game:paper)".
 function performSearch(){
   let format = document.getElementById("format_selector").value;
   let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
@@ -371,7 +374,7 @@ function performSearch(){
   
   let queryParts = [];
   
-  // Format handling: if format has associated sets, build OR clause; otherwise, use is: operator.
+  // Format: if associated sets exist, build an OR clause; otherwise, use "is:" operator.
   if(format){
     let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
     if(fmtObj && fmtObj.sets){
@@ -387,12 +390,12 @@ function performSearch(){
   }
   // Types: add each type with t:
   types.forEach(t => { queryParts.push("t:" + t); });
-  // Rarities: map abbreviations to full words
+  // Rarities: map abbreviation to full word
   if(rarities.length > 0){
     const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
     rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
   }
-  // Oracle text: force searching within Oracle text; append (game:paper)
+  // Oracle text: force searching within Oracle text
   if(oracle){
     queryParts.push("oracle:" + oracle);
     queryParts.push("(game:paper)");
