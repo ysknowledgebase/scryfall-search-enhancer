@@ -37,7 +37,7 @@ const CONFIG = {
   ]
 };
 
-// EXPANSIONS_DATA: full expansions data from your original code.
+// EXPANSIONS_DATA – full expansions from your original code.
 const EXPANSIONS_DATA = {
   common: [
     [
@@ -144,7 +144,7 @@ const EXPANSIONS_DATA = {
   ]
 };
 
-// Global variables for expansions handling
+// Global variables for expansions logic
 let expansionsInserted = new Map();
 let expansionsCycleIdx = new Map();
 let quotesInserted = false;
@@ -158,6 +158,31 @@ document.addEventListener("DOMContentLoaded", function(){
     btn.style.color = "#000";
     btn.addEventListener("click", function(){
       let checkbox = document.querySelector(`input[name="color[]"][value="${color}"]`);
+      // Enforce mutually exclusive selection between any color and colorless ("C")
+      if(color === "C" && checkbox.checked === false) {
+        // If colorless is being selected, unselect any others
+        document.querySelectorAll('input[name="color[]"]').forEach(chk => {
+          if(chk.value !== "C") {
+            chk.checked = false;
+            let otherBtn = document.querySelector(`.color-btn[data-color="${chk.value}"]`);
+            if(otherBtn) {
+              otherBtn.style.backgroundColor = "#f8f9fa";
+              otherBtn.style.color = "#000";
+              otherBtn.classList.remove("selected");
+            }
+          }
+        });
+      } else if(color !== "C" && document.querySelector('input[name="color[]"][value="C"]').checked) {
+        // If selecting a colored option while colorless is selected, unselect colorless
+        let colorlessChk = document.querySelector('input[name="color[]"][value="C"]');
+        colorlessChk.checked = false;
+        let colorlessBtn = document.querySelector('.color-btn[data-color="C"]');
+        if(colorlessBtn) {
+          colorlessBtn.style.backgroundColor = "#f8f9fa";
+          colorlessBtn.style.color = "#000";
+          colorlessBtn.classList.remove("selected");
+        }
+      }
       checkbox.checked = !checkbox.checked;
       if(checkbox.checked){
         let cfg = CONFIG.colorData.find(c => c.val === color);
@@ -172,17 +197,18 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Type buttons toggle
+  // Type buttons toggle with border cues (simulate original style)
   document.querySelectorAll(".type-btn").forEach(btn => {
     btn.addEventListener("click", function(){
       let type = btn.getAttribute("data-type");
       let checkbox = document.querySelector(`input[name="type[]"][value="${type}"]`);
       checkbox.checked = !checkbox.checked;
       btn.classList.toggle("selected", checkbox.checked);
+      // You can add additional border styling here if needed.
     });
   });
   
-  // Rarity buttons toggle
+  // Rarity buttons toggle with border cues
   document.querySelectorAll(".rarity-btn").forEach(btn => {
     btn.addEventListener("click", function(){
       let rarity = btn.getAttribute("data-rarity");
@@ -192,8 +218,34 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Build Expansions UI
+  // Build Expansions UI (expanded by default)
   buildExpansionsToggles();
+  
+  // Clear buttons for selectors
+  document.getElementById("clearFormat").addEventListener("click", function(){
+    document.getElementById("format_selector").value = "";
+  });
+  document.getElementById("clearColor").addEventListener("click", function(){
+    document.querySelectorAll('input[name="color[]"]').forEach(chk => {
+      chk.checked = false;
+    });
+    document.querySelectorAll(".color-btn").forEach(btn => {
+      btn.style.backgroundColor = "#f8f9fa";
+      btn.style.color = "#000";
+      btn.classList.remove("selected");
+    });
+  });
+  document.getElementById("clearType").addEventListener("click", function(){
+    document.querySelectorAll('input[name="type[]"]').forEach(chk => { chk.checked = false; });
+    document.querySelectorAll(".type-btn").forEach(btn => { btn.classList.remove("selected"); });
+  });
+  document.getElementById("clearRarity").addEventListener("click", function(){
+    document.querySelectorAll('input[name="rarity[]"]').forEach(chk => { chk.checked = false; });
+    document.querySelectorAll(".rarity-btn").forEach(btn => { btn.classList.remove("selected"); });
+  });
+  document.getElementById("clearOracle").addEventListener("click", function(){
+    document.getElementById("oracle").value = "";
+  });
   
   // Action buttons
   document.getElementById("searchButton").addEventListener("click", performSearch);
@@ -216,12 +268,23 @@ document.addEventListener("DOMContentLoaded", function(){
   updatePresetDropdown();
 });
 
-// Build Expansions UI from EXPANSIONS_DATA
+// Build Expansions UI from EXPANSIONS_DATA – groups are uncollapsed by default.
 function buildExpansionsToggles() {
   const container = document.getElementById("expansionsContainer");
   container.innerHTML = "";
   
-  // Build common expansions rows
+  // For each group in common, typesExpansions, abilitiesExpansions, build a labeled section.
+  // Common group:
+  let commonHeader = document.createElement("div");
+  commonHeader.className = "expansion-header";
+  commonHeader.textContent = "Common";
+  commonHeader.addEventListener("click", function(){
+    let content = commonHeader.nextElementSibling;
+    content.style.display = (content.style.display === "none") ? "flex" : "none";
+  });
+  container.appendChild(commonHeader);
+  const commonRow = document.createElement("div");
+  commonRow.className = "expansion-group";
   EXPANSIONS_DATA.common.forEach(row => {
     const rowDiv = document.createElement("div");
     rowDiv.className = "expansion-row";
@@ -238,12 +301,21 @@ function buildExpansionsToggles() {
       });
       rowDiv.appendChild(btn);
     });
-    container.appendChild(rowDiv);
+    commonRow.appendChild(rowDiv);
   });
+  container.appendChild(commonRow);
   
-  // Build types expansions row
+  // Types group:
+  let typesHeader = document.createElement("div");
+  typesHeader.className = "expansion-header";
+  typesHeader.textContent = "Types";
+  typesHeader.addEventListener("click", function(){
+    let content = typesHeader.nextElementSibling;
+    content.style.display = (content.style.display === "none") ? "flex" : "none";
+  });
+  container.appendChild(typesHeader);
   const typesRow = document.createElement("div");
-  typesRow.className = "expansion-row";
+  typesRow.className = "expansion-group";
   EXPANSIONS_DATA.typesExpansions.forEach(item => {
     const btn = document.createElement("button");
     btn.className = "expansion-btn";
@@ -259,9 +331,17 @@ function buildExpansionsToggles() {
   });
   container.appendChild(typesRow);
   
-  // Build abilities expansions row
+  // Abilities group:
+  let abilitiesHeader = document.createElement("div");
+  abilitiesHeader.className = "expansion-header";
+  abilitiesHeader.textContent = "Abilities";
+  abilitiesHeader.addEventListener("click", function(){
+    let content = abilitiesHeader.nextElementSibling;
+    content.style.display = (content.style.display === "none") ? "flex" : "none";
+  });
+  container.appendChild(abilitiesHeader);
   const abilitiesRow = document.createElement("div");
-  abilitiesRow.className = "expansion-row";
+  abilitiesRow.className = "expansion-group";
   EXPANSIONS_DATA.abilitiesExpansions.forEach(item => {
     const btn = document.createElement("button");
     btn.className = "expansion-btn";
@@ -277,7 +357,7 @@ function buildExpansionsToggles() {
   });
   container.appendChild(abilitiesRow);
   
-  // Add Clear Expansions button
+  // Clear Expansions button
   const clearBtn = document.createElement("button");
   clearBtn.className = "expansion-clear-btn";
   clearBtn.textContent = "Clear Expansions";
@@ -328,186 +408,3 @@ function multiCycleExp(arr) {
       idx++;
       if (idx === arr.length) {
         expansionsCycleIdx.set(key, arr.length);
-      } else {
-        expansionsCycleIdx.set(key, idx);
-      }
-    }
-  } else {
-    removeLastOccurrence(oracle, arr[arr.length - 1]);
-    expansionsCycleIdx.set(key, 0);
-  }
-}
-function toggleQuotes() {
-  const oracle = document.getElementById("oracle");
-  if (!oracle) return;
-  if (!quotesInserted) {
-    oracle.value = '"' + oracle.value + '"';
-    quotesInserted = true;
-  } else {
-    if (oracle.value.startsWith('"') && oracle.value.endsWith('"')) {
-      oracle.value = oracle.value.slice(1, -1);
-    }
-    quotesInserted = false;
-  }
-}
-function removeLastOccurrence(oracle, sub) {
-  const text = oracle.value;
-  let index = text.lastIndexOf(" " + sub);
-  if (index !== -1) {
-    oracle.value = text.slice(0, index) + text.slice(index + sub.length + 1);
-    return;
-  }
-  index = text.lastIndexOf(sub);
-  if (index !== -1) {
-    oracle.value = text.slice(0, index) + text.slice(index + sub.length);
-  }
-}
-
-// Build Scryfall query and redirect to Scryfall's results page.
-// IMPORTANT: Oracle text is now mapped as "oracle:" and appended with "(game:paper)".
-function performSearch(){
-  let format = document.getElementById("format_selector").value;
-  let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
-  let types = Array.from(document.querySelectorAll('input[name="type[]"]:checked')).map(el => el.value);
-  let rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
-  let oracle = document.getElementById("oracle").value.trim();
-  
-  let queryParts = [];
-  
-  // Format: if associated sets exist, build an OR clause; otherwise, use "is:" operator.
-  if(format){
-    let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
-    if(fmtObj && fmtObj.sets){
-      let clause = "(" + fmtObj.sets.map(s => "set:" + s).join(" OR ") + ")";
-      queryParts.push(clause);
-    } else {
-      queryParts.push("is:" + format);
-    }
-  }
-  // Colors: use c>= operator
-  if(colors.length > 0){
-    queryParts.push("c>=" + colors.join(""));
-  }
-  // Types: add each type with t:
-  types.forEach(t => { queryParts.push("t:" + t); });
-  // Rarities: map abbreviation to full word
-  if(rarities.length > 0){
-    const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
-    rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
-  }
-  // Oracle text: force searching within Oracle text
-  if(oracle){
-    queryParts.push("oracle:" + oracle);
-    queryParts.push("(game:paper)");
-  }
-  
-  let query = queryParts.join(" ");
-  let targetUrl = "https://scryfall.com/search?as=grid&order=name&q=" + encodeURIComponent(query);
-  console.log("Query:", query);
-  console.log("Redirecting to:", targetUrl);
-  
-  window.location.href = targetUrl;
-}
-
-// Preset management functions
-function savePreset(){
-  let presetName = prompt("Enter a name for this preset:");
-  if(!presetName) return;
-  let preset = {
-    format: document.getElementById("format_selector").value,
-    colors: Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value),
-    types: Array.from(document.querySelectorAll('input[name="type[]"]:checked')).map(el => el.value),
-    rarities: Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value),
-    oracle: document.getElementById("oracle").value.trim()
-  };
-  localStorage.setItem("preset_" + presetName, JSON.stringify(preset));
-  updatePresetDropdown();
-  alert("Preset saved as: " + presetName);
-}
-function loadPreset(){
-  let dropdown = document.getElementById("presetDropdown");
-  let key = dropdown.value;
-  if(!key) return;
-  let preset = JSON.parse(localStorage.getItem(key));
-  document.getElementById("format_selector").value = preset.format || "";
-  document.querySelectorAll('input[name="color[]"]').forEach(el => {
-    el.checked = preset.colors.includes(el.value);
-    let btn = document.querySelector('.color-btn[data-color="' + el.value + '"]');
-    if(btn){
-      let cfg = CONFIG.colorData.find(c => c.val === el.value);
-      if(el.checked){
-        btn.style.backgroundColor = cfg.color;
-        btn.style.color = cfg.textColor;
-      } else {
-        btn.style.backgroundColor = "#f8f9fa";
-        btn.style.color = "#000";
-      }
-    }
-  });
-  document.querySelectorAll('input[name="type[]"]').forEach(el => {
-    el.checked = preset.types.includes(el.value);
-    let btn = document.querySelector('.type-btn[data-type="' + el.value + '"]');
-    if(btn) btn.classList.toggle("selected", el.checked);
-  });
-  document.querySelectorAll('input[name="rarity[]"]').forEach(el => {
-    el.checked = preset.rarities.includes(el.value);
-    let btn = document.querySelector('.rarity-btn[data-rarity="' + el.value + '"]');
-    if(btn) btn.classList.toggle("selected", el.checked);
-  });
-  document.getElementById("oracle").value = preset.oracle || "";
-}
-function deletePreset(){
-  let dropdown = document.getElementById("presetDropdown");
-  let key = dropdown.value;
-  if(!key){
-    alert("Please select a preset to delete.");
-    return;
-  }
-  if(confirm("Are you sure you want to delete preset: " + key.replace("preset_", "") + "?")){
-    localStorage.removeItem(key);
-    updatePresetDropdown();
-  }
-}
-function updatePresetDropdown(){
-  let dropdown = document.getElementById("presetDropdown");
-  dropdown.innerHTML = "<option value=''>Select a preset...</option>";
-  Object.keys(localStorage).forEach(key => {
-    if(key.startsWith("preset_")){
-      let option = document.createElement("option");
-      option.value = key;
-      option.textContent = key.replace("preset_", "");
-      dropdown.appendChild(option);
-    }
-  });
-}
-function exportPresets(){
-  let exportObj = {};
-  Object.keys(localStorage).forEach(key => {
-    if(key.startsWith("preset_")){
-      exportObj[key] = JSON.parse(localStorage.getItem(key));
-    }
-  });
-  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
-  let a = document.createElement("a");
-  a.href = dataStr;
-  a.download = "scryfall_presets.json";
-  a.click();
-}
-function importPresetsFromFile(event){
-  let file = event.target.files[0];
-  if(!file) return;
-  let reader = new FileReader();
-  reader.onload = function(e){
-    try{
-      let imported = JSON.parse(e.target.result);
-      Object.keys(imported).forEach(key => {
-        localStorage.setItem(key, JSON.stringify(imported[key]));
-      });
-      updatePresetDropdown();
-      alert("Presets imported successfully.");
-    } catch(err){
-      alert("Error importing presets: " + err);
-    }
-  };
-  reader.readAsText(file);
-}
