@@ -54,6 +54,18 @@ button.selected {
   flex-wrap: wrap;
   gap: 5px;
 }
+.expansion-row {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.expansion-btn {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+.expansion-clear-btn {
+  background-color: #6c757d;
+}
 #resultsContainer {
   margin-top: 20px;
   display: flex;
