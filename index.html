@@ -1,60 +1,74 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scryfall Advanced Search Enhancer</title>
-    <link rel="stylesheet" type="text/css" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scryfall Search Enhancer</title>
+  <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Scryfall Advanced Search Enhancer</h1>
-        
-        <label for="format_selector">Format:</label>
-        <select id="format_selector" onchange="updateFormat()">
-            <option value="">Select Format</option>
-            <option value="standard">Standard</option>
-            <option value="futureStandard">Future Standard</option>
-            <option value="frontier">Frontier</option>
-        </select>
+  <div class="container">
+    <h1>Scryfall Search Enhancer</h1>
+    <form id="searchForm" onsubmit="performSearch(); return false;">
+      <label for="format_selector">Format:</label>
+      <select id="format_selector">
+        <option value="">-- Select Format --</option>
+        <option value="standard">Standard</option>
+        <option value="futureStandard">Future Standard</option>
+        <option value="frontier">Frontier</option>
+        <option value="fdn">FDN</option>
+        <option value="dft">DFT</option>
+      </select>
 
-        <fieldset>
-            <legend>Colors:</legend>
-            <label><input type="checkbox" name="color[]" value="W"> White</label>
-            <label><input type="checkbox" name="color[]" value="U"> Blue</label>
-            <label><input type="checkbox" name="color[]" value="B"> Black</label>
-            <label><input type="checkbox" name="color[]" value="R"> Red</label>
-            <label><input type="checkbox" name="color[]" value="G"> Green</label>
-        </fieldset>
+      <fieldset>
+        <legend>Colors:</legend>
+        <label><input type="checkbox" name="color[]" value="W"> White</label>
+        <label><input type="checkbox" name="color[]" value="U"> Blue</label>
+        <label><input type="checkbox" name="color[]" value="B"> Black</label>
+        <label><input type="checkbox" name="color[]" value="R"> Red</label>
+        <label><input type="checkbox" name="color[]" value="G"> Green</label>
+      </fieldset>
 
-        <fieldset>
-            <legend>Rarities:</legend>
-            <label><input type="checkbox" name="rarity[]" value="C"> Common</label>
-            <label><input type="checkbox" name="rarity[]" value="U"> Uncommon</label>
-            <label><input type="checkbox" name="rarity[]" value="R"> Rare</label>
-            <label><input type="checkbox" name="rarity[]" value="M"> Mythic</label>
-        </fieldset>
+      <fieldset>
+        <legend>Types:</legend>
+        <label><input type="checkbox" name="type[]" value="creature"> Creature</label>
+        <label><input type="checkbox" name="type[]" value="artifact"> Artifact</label>
+        <label><input type="checkbox" name="type[]" value="enchantment"> Enchantment</label>
+        <label><input type="checkbox" name="type[]" value="instant"> Instant</label>
+        <label><input type="checkbox" name="type[]" value="sorcery"> Sorcery</label>
+        <label><input type="checkbox" name="type[]" value="land"> Land</label>
+        <label><input type="checkbox" name="type[]" value="planeswalker"> Planeswalker</label>
+      </fieldset>
 
-        <label for="oracle">Oracle Text:</label>
-        <textarea id="oracle" rows="3"></textarea>
+      <fieldset>
+        <legend>Rarities:</legend>
+        <label><input type="checkbox" name="rarity[]" value="C"> Common</label>
+        <label><input type="checkbox" name="rarity[]" value="U"> Uncommon</label>
+        <label><input type="checkbox" name="rarity[]" value="R"> Rare</label>
+        <label><input type="checkbox" name="rarity[]" value="M"> Mythic</label>
+      </fieldset>
 
-        <div class="button-group">
-            <button onclick="performSearch()">🔍 Search</button>
-            <button onclick="clearAll()">🗑️ Clear All</button>
-            <button onclick="savePreset()">💾 Save Preset</button>
-            <button onclick="exportPresets()">⬇️ Export Presets</button>
-            <button onclick="importPresets()">⬆️ Import Presets</button>
-        </div>
+      <label for="oracle">Oracle Text:</label>
+      <textarea id="oracle" rows="3" placeholder="Enter keywords..."></textarea>
 
-        <label for="preset_dropdown">Load Preset:</label>
-        <select id="preset_dropdown" onchange="loadPreset()">
-            <option value="">Select Preset...</option>
-        </select>
+      <div class="button-group">
+        <button type="submit">Search</button>
+        <button type="button" onclick="clearForm()">Clear</button>
+        <button type="button" id="savePresetButton">💾 Save Preset</button>
+      </div>
+    </form>
 
-        <input type="file" id="import_file" accept=".json" onchange="importPresetsFromFile()" hidden>
+    <div class="preset-group">
+      <label for="preset_dropdown">Load Preset:</label>
+      <select id="preset_dropdown">
+        <option value="">Select a preset...</option>
+      </select>
+      <button type="button" id="deletePresetButton">🗑 Delete Preset</button>
+      <button type="button" id="exportPresetButton">⬇ Export Presets</button>
+      <button type="button" id="importPresetButton">⬆ Import Presets</button>
+      <input type="file" id="import_file" accept=".json" style="display:none;">
     </div>
-
-    <script src="js/app.js"></script>
+  </div>
+  <script src="js/app.js"></script>
 </body>
 </html>
