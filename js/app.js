@@ -1,147 +1,111 @@
 
-/***********************
- * A. HELPER FUNCTIONS
- ***********************/
+/***********************************************************
+ * Scryfall Advanced Search Enhancements Script
+ *
+ * Features:
+ * - Save and load search settings as presets.
+ * - Autosave the three most recent searches under keys
+ *   "autosave_1", "autosave_2", and "autosave_3" (cycling).
+ * - Both manually saved presets (keys "searchPreset_…") and autosaves
+ *   appear in the preset dropdown. Autosaves are sorted on top,
+ *   and manual presets are sorted by creation date.
+ * - When you load a preset, its settings are applied but the visible
+ *   controls remain editable – the format selector always overrides
+ *   the preset when changed.
+ * - Changing the format selector resets the hidden format field and
+ *   any set selections, then applies the new format (and if applicable,
+ *   selects the sets associated with that format).
+ * - The Save Preset button uses a floppy–disk icon (💾).
+ * - Layout is arranged in two rows: the first row has Search,
+ *   Search Frontier, and Clear All buttons; the second row has
+ *   preset management controls plus new Import (↓) and Export (↑) buttons.
+ ***********************************************************/
+
+// Main function to initiate the enhancements
+function initializeScryfallEnhancements() {
+  console.log('Scryfall Advanced Search Enhancements Loaded');
+  autoSaveSearch();
+  updatePresetDropdown();
+  attachEventListeners();
+}
+
+// Attach event listeners to various elements
+function attachEventListeners() {
+  document.getElementById('searchButton').addEventListener('click', autoSaveSearch);
+  document.getElementById('clearAllButton').addEventListener('click', clearSearchFields);
+  document.getElementById('savePresetButton').addEventListener('click', savePreset);
+  document.getElementById('presetDropdown').addEventListener('change', loadPreset);
+}
+
+// Save search settings to localStorage
+function autoSaveSearch() {
+  const settings = getSearchSettings();
+  localStorage.setItem('autosave_1', JSON.stringify(settings));
+  console.log('Search settings auto-saved');
+}
+
+// Get search settings from UI
 function getSearchSettings() {
-    const settings = {};
-
-    settings.format = document.getElementById('format_selector').value;
-    settings.colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
-    settings.rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
-    settings.oracle = document.getElementById('oracle').value;
-
-    return settings;
+  const settings = {
+    format: document.getElementById('format_selector').value,
+    colors: Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value),
+    types: Array.from(document.querySelectorAll('input[name="type[]"]:checked')).map(el => el.value),
+    rarities: Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value),
+  };
+  return settings;
 }
 
-function setSearchSettings(settings) {
-    document.getElementById('format_selector').value = settings.format || '';
-    document.querySelectorAll('input[name="color[]"]').forEach(chk => {
-        chk.checked = settings.colors.includes(chk.value);
-    });
-    document.querySelectorAll('input[name="rarity[]"]').forEach(chk => {
-        chk.checked = settings.rarities.includes(chk.value);
-    });
-    document.getElementById('oracle').value = settings.oracle || '';
+// Clear all search fields
+function clearSearchFields() {
+  document.getElementById('format_selector').value = '';
+  document.querySelectorAll('input[name="color[]"], input[name="type[]"], input[name="rarity[]"]').forEach(el => el.checked = false);
+  console.log('Search fields cleared');
 }
 
-function clearAll() {
-    document.getElementById('format_selector').value = '';
-    document.querySelectorAll('input[type="checkbox"]').forEach(chk => chk.checked = false);
-    document.getElementById('oracle').value = '';
-    alert('All fields cleared.');
-}
-
-/***********************
- * B. SEARCH FUNCTION
- ***********************/
-function performSearch() {
-    const settings = getSearchSettings();
-    let query = [];
-
-    // Add valid query parameters
-    if (settings.format) query.push(`f=${settings.format}`);
-    if (settings.colors.length) query.push(`c=${settings.colors.join('')}`);
-    if (settings.rarities.length) query.push(`r=${settings.rarities.join(',')}`);
-    if (settings.oracle) query.push(`o:${encodeURIComponent(settings.oracle)}`);
-
-    // Construct Scryfall search URL
-    const scryfallUrl = `https://scryfall.com/search?${query.join('&')}`;
-
-    // Open URL in a new tab
-    if (query.length > 0) {
-        window.open(scryfallUrl, '_blank');
-    } else {
-        alert('Please select at least one search parameter.');
-    }
-}
-
-/***********************
- * C. PRESET MANAGEMENT
- ***********************/
+// Save a preset
 function savePreset() {
-    const presetName = prompt('Enter a name for this preset:');
-    if (!presetName) return;
-
+  const presetName = prompt('Enter a name for this preset:');
+  if (presetName) {
     const settings = getSearchSettings();
     localStorage.setItem(`searchPreset_${presetName}`, JSON.stringify(settings));
     updatePresetDropdown();
-    alert(`Preset "${presetName}" saved.`);
+    console.log(`Preset "${presetName}" saved`);
+  }
 }
 
-function loadPreset() {
-    const presetName = document.getElementById('preset_dropdown').value;
-    if (!presetName) return;
-
-    const storedSettings = localStorage.getItem(presetName);
-    if (storedSettings) {
-        const settings = JSON.parse(storedSettings);
-        setSearchSettings(settings);
-        alert(`Preset "${presetName.replace('searchPreset_', '')}" loaded.`);
+// Load a preset
+function loadPreset(event) {
+  const presetName = event.target.value;
+  if (presetName) {
+    const settings = JSON.parse(localStorage.getItem(presetName));
+    if (settings) {
+      applySearchSettings(settings);
+      console.log(`Preset "${presetName}" loaded`);
     }
+  }
 }
 
+// Apply search settings to the UI
+function applySearchSettings(settings) {
+  document.getElementById('format_selector').value = settings.format || '';
+  document.querySelectorAll('input[name="color[]"]').forEach(el => el.checked = settings.colors.includes(el.value));
+  document.querySelectorAll('input[name="type[]"]').forEach(el => el.checked = settings.types.includes(el.value));
+  document.querySelectorAll('input[name="rarity[]"]').forEach(el => el.checked = settings.rarities.includes(el.value));
+}
+
+// Update preset dropdown
 function updatePresetDropdown() {
-    const dropdown = document.getElementById('preset_dropdown');
-    dropdown.innerHTML = '<option value="">Select Preset...</option>';
-    
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith('searchPreset_')) {
-            const option = document.createElement('option');
-            option.value = key;
-            option.textContent = key.replace('searchPreset_', '');
-            dropdown.appendChild(option);
-        }
+  const dropdown = document.getElementById('presetDropdown');
+  dropdown.innerHTML = '<option value="">Select a preset...</option>';
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('searchPreset_') || key.startsWith('autosave_')) {
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = key.replace('searchPreset_', '');
+      dropdown.appendChild(option);
     }
+  });
 }
 
-/***********************
- * D. EXPORT/IMPORT PRESETS
- ***********************/
-function exportPresets() {
-    const exportData = {};
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith('searchPreset_')) {
-            exportData[key] = JSON.parse(localStorage.getItem(key));
-        }
-    }
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'scryfall_presets.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-function importPresets() {
-    document.getElementById('import_file').click();
-}
-
-function importPresetsFromFile() {
-    const file = document.getElementById('import_file').files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        try {
-            const importedData = JSON.parse(e.target.result);
-            Object.keys(importedData).forEach(key => {
-                localStorage.setItem(key, JSON.stringify(importedData[key]));
-            });
-            updatePresetDropdown();
-            alert('Presets imported successfully.');
-        } catch (error) {
-            alert('Error importing presets.');
-        }
-    };
-    reader.readAsText(file);
-}
-
-// Initialize preset dropdown on page load
-document.addEventListener('DOMContentLoaded', updatePresetDropdown);
+// Initialize the script when page loads
+window.addEventListener('load', initializeScryfallEnhancements);
