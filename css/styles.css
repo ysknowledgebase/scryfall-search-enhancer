@@ -129,11 +129,14 @@ button:hover {
     align-items: stretch;
   }
 }
-  
-/* Rarity buttons: default state with colored border */
+
+/* Rarity buttons: default state has transparent background with colored border and black text.
+   When selected, background fills and text becomes white. */
 .rarity-btn {
   background-color: transparent;
-  border: 2px solid #007bff;
+  border: 2px solid;
+  /* border-color is set in JS */
+  color: #000;
 }
 .rarity-btn.selected {
   color: #fff;

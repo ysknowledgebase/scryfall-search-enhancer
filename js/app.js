@@ -145,14 +145,14 @@ const EXPANSIONS_DATA = {
   ]
 };
 
-// Global variables for expansions handling
+// Global variables for expansions handling.
 let expansionsInserted = new Map();
 let expansionsCycleIdx = new Map();
 let quotesInserted = false;
 
-// On DOMContentLoaded, attach event listeners and build UI
+// On DOMContentLoaded, attach event listeners and build UI.
 document.addEventListener("DOMContentLoaded", function(){
-  // Set up color buttons with mana icons and proper color scheme.
+  // Color Buttons.
   document.querySelectorAll(".color-btn").forEach(btn => {
     let color = btn.getAttribute("data-color");
     btn.style.backgroundColor = "#f8f9fa";
@@ -163,7 +163,6 @@ document.addEventListener("DOMContentLoaded", function(){
     }
     btn.addEventListener("click", function(){
       let checkbox = document.querySelector(`input[name="color[]"][value="${color}"]`);
-      // Mutual exclusion: if selecting colorless, clear others; if selecting a color while colorless is selected, unselect colorless.
       if(color === "C" && !checkbox.checked) {
         document.querySelectorAll('input[name="color[]"]').forEach(chk => {
           if(chk.value !== "C"){
@@ -199,7 +198,7 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Set up type buttons: cycle through three states.
+  // Type Buttons.
   document.querySelectorAll(".type-btn").forEach(btn => {
     btn.dataset.state = "default";
     updateTypeButtonStyle(btn);
@@ -211,31 +210,35 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Set up rarity buttons: default state has a colored border.
+  // Rarity Buttons.
   document.querySelectorAll(".rarity-btn").forEach(btn => {
     let rarity = btn.getAttribute("data-rarity");
     let rCfg = CONFIG.rarities.find(r => r.label === rarity);
+    // Default: transparent background, border in rarity color, black text.
     btn.style.backgroundColor = "transparent";
     btn.style.border = `2px solid ${rCfg.color}`;
+    btn.style.color = "#000";
     btn.addEventListener("click", function(){
       let checkbox = document.querySelector(`input[name="rarity[]"][value="${rarity}"]`);
       checkbox.checked = !checkbox.checked;
       if(checkbox.checked){
         btn.style.backgroundColor = rCfg.color;
+        btn.style.color = "#fff";
       } else {
         btn.style.backgroundColor = "transparent";
+        btn.style.color = "#000";
       }
       btn.classList.toggle("selected", checkbox.checked);
     });
   });
   
-  // Partial toggle for types: "=" vs "≈".
+  // Partial Toggle for Types.
   document.getElementById("typePartialToggle").addEventListener("click", function(){
     let btn = document.getElementById("typePartialToggle");
     btn.textContent = (btn.textContent.trim() === "=") ? "≈" : "=";
   });
   
-  // Toggle for color matching.
+  // Toggle for Color Matching.
   document.getElementById("colorToggle").addEventListener("click", function(){
     let btn = document.getElementById("colorToggle");
     btn.textContent = (btn.textContent.trim() === "At Most") ? "Exactly" : "At Most";
@@ -244,7 +247,7 @@ document.addEventListener("DOMContentLoaded", function(){
   // Build Expansions UI – groups collapsed by default.
   buildExpansionsToggles();
   
-  // Clear buttons.
+  // Clear Buttons.
   document.getElementById("clearFormat").addEventListener("click", function(){
     document.getElementById("format_selector").value = "";
   });
@@ -269,6 +272,7 @@ document.addEventListener("DOMContentLoaded", function(){
       let rarity = btn.getAttribute("data-rarity");
       let rCfg = CONFIG.rarities.find(r => r.label === rarity);
       btn.style.backgroundColor = "transparent";
+      btn.style.color = "#000";
       btn.classList.remove("selected");
     });
   });
@@ -276,7 +280,7 @@ document.addEventListener("DOMContentLoaded", function(){
     document.getElementById("oracle").value = "";
   });
   
-  // Action buttons.
+  // Action Buttons.
   document.getElementById("searchActionButton").addEventListener("click", performSearch);
   document.getElementById("searchFrontierActionButton").addEventListener("click", function(){
     document.getElementById("format_selector").value = "frontier";
@@ -284,7 +288,7 @@ document.addEventListener("DOMContentLoaded", function(){
   });
   document.getElementById("clearAllButton").addEventListener("click", clearForm);
   
-  // Preset management.
+  // Preset Management.
   document.getElementById("savePresetButton").addEventListener("click", savePreset);
   document.getElementById("presetDropdown").addEventListener("change", loadPreset);
   document.getElementById("deletePresetButton").addEventListener("click", deletePreset);
@@ -306,6 +310,7 @@ function updateTypeButtonStyle(btn) {
     btn.style.color = "#000";
     btn.style.textDecoration = "none";
   } else if(state === "include"){
+    // If partial toggle is set to ≈ then use "≈t:" operator in search (handled later).
     btn.style.backgroundColor = "#90ee90";
     btn.style.border = "2px solid #90ee90";
     btn.style.color = "#000";
@@ -327,7 +332,6 @@ function buildExpansionsToggles() {
     let header = document.createElement("div");
     header.className = "expansion-header";
     header.textContent = headerText;
-    // Create group container; collapsed by default.
     let groupContainer = document.createElement("div");
     groupContainer.className = "expansion-group";
     groupContainer.style.display = "none";
@@ -451,18 +455,19 @@ function removeLastOccurrence(oracle, sub) {
 }
 
 // Build Scryfall query and redirect.
-// Oracle text is forced with "oracle:" and appended with "(game:paper)".
+// Note: For types, if the partial toggle ("≈") is active, we use "≈t:" (or "-≈t:" for exclude).
 function performSearch(){
   let format = document.getElementById("format_selector").value;
   let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
   let types = [];
+  let partial = (document.getElementById("typePartialToggle").textContent.trim() === "≈");
   document.querySelectorAll(".type-btn").forEach(btn => {
     let state = btn.dataset.state;
     let type = btn.getAttribute("data-type");
     if(state === "include") {
-      types.push("t:" + type);
+      types.push((partial ? "≈t:" : "t:") + type);
     } else if(state === "exclude") {
-      types.push("-t:" + type);
+      types.push("-" + (partial ? "≈t:" : "t:") + type);
     }
   });
   let rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
@@ -470,7 +475,7 @@ function performSearch(){
   
   let queryParts = [];
   
-  // Format handling.
+  // Format.
   if(format){
     let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
     if(fmtObj && fmtObj.sets){
@@ -484,11 +489,8 @@ function performSearch(){
   // Colors.
   if(colors.length > 0){
     let colorToggle = document.getElementById("colorToggle").textContent.trim();
-    if(colorToggle === "Exactly"){
-      queryParts.push("c=" + colors.join(""));
-    } else {
-      queryParts.push("c>=" + colors.join(""));
-    }
+    // Use c<= for "At Most" and c= for "Exactly"
+    queryParts.push((colorToggle === "Exactly" ? "c=" : "c<=") + colors.join(""));
   }
   
   // Types.
@@ -511,23 +513,68 @@ function performSearch(){
   console.log("Query:", query);
   console.log("Redirecting to:", targetUrl);
   
-  // Finally, perform the redirect.
   window.location.href = targetUrl;
 }
 
 // Preset management functions.
+// Save preset: Save current search URL (jumping URL) plus search parameters. If preset name is blank, save as URL.
 function savePreset(){
-  let presetName = prompt("Enter a name for this preset:");
-  if(!presetName) return;
+  let presetName = prompt("Enter a name for this preset (leave blank to use URL):");
+  // Compute the jumping URL.
+  let format = document.getElementById("format_selector").value;
+  let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
+  let types = [];
+  let partial = (document.getElementById("typePartialToggle").textContent.trim() === "≈");
+  document.querySelectorAll(".type-btn").forEach(btn => {
+    let state = btn.dataset.state;
+    let type = btn.getAttribute("data-type");
+    if(state === "include") {
+      types.push((partial ? "≈t:" : "t:") + type);
+    } else if(state === "exclude") {
+      types.push("-" + (partial ? "≈t:" : "t:") + type);
+    }
+  });
+  let rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
+  let oracle = document.getElementById("oracle").value.trim();
+  
+  let queryParts = [];
+  if(format){
+    let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
+    if(fmtObj && fmtObj.sets){
+      let clause = "(" + fmtObj.sets.map(s => "set:" + s).join(" OR ") + ")";
+      queryParts.push(clause);
+    } else {
+      queryParts.push("is:" + format);
+    }
+  }
+  if(colors.length > 0){
+    let colorToggle = document.getElementById("colorToggle").textContent.trim();
+    queryParts.push((colorToggle === "Exactly" ? "c=" : "c<=") + colors.join(""));
+  }
+  queryParts = queryParts.concat(types);
+  if(rarities.length > 0){
+    const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
+    rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
+  }
+  if(oracle){
+    queryParts.push("oracle:" + oracle);
+    queryParts.push("(game:paper)");
+  }
+  let url = "https://scryfall.com/search?as=grid&order=name&q=" + encodeURIComponent(queryParts.join(" "));
+  
   let preset = {
-    format: document.getElementById("format_selector").value,
-    colors: Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value),
+    format: format,
+    colors: colors,
     types: Array.from(document.querySelectorAll(".type-btn")).map(btn => {
       return { type: btn.getAttribute("data-type"), state: btn.dataset.state };
     }),
-    rarities: Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value),
-    oracle: document.getElementById("oracle").value.trim()
+    rarities: rarities,
+    oracle: oracle,
+    url: url
   };
+  if(!presetName || presetName.trim() === ""){
+    presetName = url;
+  }
   localStorage.setItem("preset_" + presetName, JSON.stringify(preset));
   updatePresetDropdown();
   alert("Preset saved as: " + presetName);
@@ -578,8 +625,10 @@ function loadPreset(){
     if(btn){
       if(el.checked){
         btn.style.backgroundColor = rCfg.color;
+        btn.style.color = "#fff";
       } else {
         btn.style.backgroundColor = "transparent";
+        btn.style.color = "#000";
       }
       btn.classList.toggle("selected", el.checked);
     }
