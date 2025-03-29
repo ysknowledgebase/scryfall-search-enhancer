@@ -61,9 +61,7 @@ button {
 button:hover {
   background-color: #005A9E;
 }
-button.selected {
-  /* The selected state for color buttons is set inline from JS based on CONFIG values */
-}
+/* For color buttons, the selected state is set inline by JS */
 #expansionsContainer {
   display: flex;
   flex-wrap: wrap;
