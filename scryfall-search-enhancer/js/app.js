@@ -1,4 +1,4 @@
-// Global configuration and variables
+// CONFIG object with formats, colors, types, and rarities
 const CONFIG = {
   formatData: {
     formats: [
@@ -37,7 +37,7 @@ const CONFIG = {
   ]
 };
 
-// Expansions configuration (a subset of original data)
+// Full expansions data from your original code
 const EXPANSIONS_DATA = {
   common: [
     [
@@ -54,8 +54,93 @@ const EXPANSIONS_DATA = {
       { label: "LB", expansions: ["library", "libraries"] },
       { label: "hand", expansions: ["hand"] },
       { label: "life", expansions: ["life"] },
-      { label: "perm", expansions: ["permanent"] }
+      { label: "perm", expansions: ["permanent"] },
+      { label: "NC", expansions: ["noncreature"] },
+      { label: "spell", expansions: ["spell"] },
+      { label: "~", expansions: ["~"] },
+      { label: "Tkn", expansions: ["token"] },
+      { label: "Cnt", expansions: ["counter"] },
+      { label: "mana", expansions: ["mana"] },
+      { label: "pwr", expansions: ["power"] },
+      { label: "tgh", expansions: ["toughness"] }
+    ],
+    [
+      { label: "cyc", expansions: ["cycle"] },
+      { label: "mil", expansions: ["mill"] },
+      { label: "lev", expansions: ["leave"] },
+      { label: "atk", expansions: ["attack"] },
+      { label: "blk", expansions: ["block"] },
+      { label: "dsd", expansions: ["descend"] },
+      { label: "pay", expansions: ["pay"] },
+      { label: "dst", expansions: ["destroy"] },
+      { label: "DC", expansions: ["discard"] },
+      { label: "EX", expansions: ["exile"] },
+      { label: "sac", expansions: ["sacrifice"] },
+      { label: "dmg", expansions: ["damage"] },
+      { label: "lose", expansions: ["lose", "lost"] },
+      { label: "gain", expansions: ["gain"] },
+      { label: "draw", expansions: ["draw"] },
+      { label: "die", expansions: ["die", "died"] },
+      { label: "rtn", expansions: ["return"] },
+      { label: "cast", expansions: ["cast"] },
+      { label: "play", expansions: ["play"] },
+      { label: "add", expansions: ["add"] },
+      { label: "tap", expansions: ["tap"] }
+    ],
+    [
+      { label: "ACT", expansions: ['": "'] },
+      { label: "EB", expansions: ["enter battlefield", "enters", "enters the battlefield", "entered"] },
+      { label: "+1", expansions: ["+1/+1"] },
+      { label: "\"\"", expansions: undefined },
+      { label: "you", expansions: ["you"] },
+      { label: "ctrl", expansions: ["control"] },
+      { label: "x", expansions: [' " x " '] }
     ]
+  ],
+  typesExpansions: [
+    { label: "Art", expansions: ["artifact"] },
+    { label: "Ench", expansions: ["enchantment"] },
+    { label: "Aura", expansions: ["aura"] },
+    { label: "Creat", expansions: ["creature"] },
+    { label: "Sorc", expansions: ["sorcery"] },
+    { label: "Inst", expansions: ["instant"] },
+    { label: "Eqp", expansions: ["equipment"] },
+    { label: "Land", expansions: ["land"] },
+    { label: "PW", expansions: ["planeswalker"] }
+  ],
+  abilitiesExpansions: [
+    { label: "Deathtouch", expansions: ["deathtouch"] },
+    { label: "Defender", expansions: ["defender"] },
+    { label: "Double Strike", expansions: ["double strike"] },
+    { label: "Equip", expansions: ["equip"] },
+    { label: "First Strike", expansions: ["first strike"] },
+    { label: "Flash", expansions: ["flash"] },
+    { label: "Flying", expansions: ["flying"] },
+    { label: "Haste", expansions: ["haste"] },
+    { label: "Hexproof", expansions: ["hexproof"] },
+    { label: "Indestructible", expansions: ["indestructible"] },
+    { label: "Lifelink", expansions: ["lifelink"] },
+    { label: "Protection", expansions: ["protection"] },
+    { label: "Reach", expansions: ["reach"] },
+    { label: "Trample", expansions: ["trample"] },
+    { label: "Vigilance", expansions: ["vigilance"] },
+    { label: "Shadow", expansions: ["shadow"] },
+    { label: "Cycling", expansions: ["cycling"] },
+    { label: "Kicker", expansions: ["kicker"] },
+    { label: "Flashback", expansions: ["flashback"] },
+    { label: "Affinity", expansions: ["affinity"] },
+    { label: "Ninjutsu", expansions: ["ninjutsu"] },
+    { label: "Convoke", expansions: ["convoke"] },
+    { label: "Suspend", expansions: ["suspend"] },
+    { label: "Hideaway", expansions: ["hideaway"] },
+    { label: "Wither", expansions: ["wither"] },
+    { label: "Unearth", expansions: ["unearth"] },
+    { label: "Level", expansions: ["level"] },
+    { label: "Infect", expansions: ["infect"] },
+    { label: "Undying", expansions: ["undying"] },
+    { label: "Menace", expansions: ["menace"] },
+    { label: "Prowess", expansions: ["prowess"] },
+    { label: "Crew", expansions: ["crew"] }
   ]
 };
 
@@ -64,7 +149,7 @@ let expansionsInserted = new Map();
 let expansionsCycleIdx = new Map();
 let quotesInserted = false;
 
-// On DOM load, attach event listeners and build UI components
+// Attach event listeners and build UI on DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function(){
   // Toggle for color buttons
   document.querySelectorAll(".color-btn").forEach(btn => {
@@ -118,11 +203,12 @@ document.addEventListener("DOMContentLoaded", function(){
   updatePresetDropdown();
 });
 
-// Build the expansions toggles UI in the designated container
+// Build the Expansions UI using EXPANSIONS_DATA
 function buildExpansionsToggles() {
   const container = document.getElementById("expansionsContainer");
   container.innerHTML = "";
-  // For each row in EXPANSIONS_DATA.common, create a row of buttons
+  
+  // Build common expansions rows
   EXPANSIONS_DATA.common.forEach(row => {
     const rowDiv = document.createElement("div");
     rowDiv.className = "expansion-row";
@@ -141,7 +227,44 @@ function buildExpansionsToggles() {
     });
     container.appendChild(rowDiv);
   });
-  // Add a clear button for expansions
+  
+  // Build types expansions row
+  const typesRow = document.createElement("div");
+  typesRow.className = "expansion-row";
+  EXPANSIONS_DATA.typesExpansions.forEach(item => {
+    const btn = document.createElement("button");
+    btn.className = "expansion-btn";
+    btn.textContent = item.label;
+    btn.addEventListener("click", function(){
+      if (!item.expansions) {
+        toggleQuotes();
+      } else {
+        expansionsClick(item.expansions);
+      }
+    });
+    typesRow.appendChild(btn);
+  });
+  container.appendChild(typesRow);
+  
+  // Build abilities expansions row
+  const abilitiesRow = document.createElement("div");
+  abilitiesRow.className = "expansion-row";
+  EXPANSIONS_DATA.abilitiesExpansions.forEach(item => {
+    const btn = document.createElement("button");
+    btn.className = "expansion-btn";
+    btn.textContent = item.label;
+    btn.addEventListener("click", function(){
+      if (!item.expansions) {
+        toggleQuotes();
+      } else {
+        expansionsClick(item.expansions);
+      }
+    });
+    abilitiesRow.appendChild(btn);
+  });
+  container.appendChild(abilitiesRow);
+  
+  // Clear expansions button
   const clearBtn = document.createElement("button");
   clearBtn.className = "expansion-clear-btn";
   clearBtn.textContent = "Clear Expansions";
@@ -154,7 +277,7 @@ function buildExpansionsToggles() {
   container.appendChild(clearBtn);
 }
 
-// Handle expansion button clicks – if one expansion token, toggle it; if multiple, cycle through them
+// Expansion handling functions
 function expansionsClick(arr) {
   if(arr.length === 1) {
     toggleExpansion(arr[0]);
@@ -162,8 +285,6 @@ function expansionsClick(arr) {
     multiCycleExp(arr);
   }
 }
-
-// Toggle a single expansion token in the oracle text field
 function toggleExpansion(token) {
   const oracle = document.getElementById("oracle");
   if (!oracle) return;
@@ -177,8 +298,6 @@ function toggleExpansion(token) {
     expansionsInserted.set(token, false);
   }
 }
-
-// Cycle through multiple expansion tokens
 function multiCycleExp(arr) {
   const key = arr[0];
   let idx = expansionsCycleIdx.get(key) || 0;
@@ -205,8 +324,6 @@ function multiCycleExp(arr) {
     expansionsCycleIdx.set(key, 0);
   }
 }
-
-// Toggle quotes around the oracle text
 function toggleQuotes() {
   const oracle = document.getElementById("oracle");
   if (!oracle) return;
@@ -220,8 +337,6 @@ function toggleQuotes() {
     quotesInserted = false;
   }
 }
-
-// Remove the last occurrence of a substring from the oracle text
 function removeLastOccurrence(oracle, sub) {
   const text = oracle.value;
   let index = text.lastIndexOf(" " + sub);
@@ -235,7 +350,7 @@ function removeLastOccurrence(oracle, sub) {
   }
 }
 
-// Build Scryfall query from form inputs and call the API
+// Build Scryfall query and perform search using API
 function performSearch(){
   let format = document.getElementById("format_selector").value;
   let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
@@ -245,26 +360,28 @@ function performSearch(){
   
   let queryParts = [];
   
-  // Format: use is: operator
+  // Format: use sets clause if defined; otherwise, "is:" operator.
   if(format){
-    if(format === "standard") queryParts.push("is:standard");
-    else if(format === "futureStandard") queryParts.push("is:future-standard");
-    else if(format === "frontier") queryParts.push("is:frontier");
-    else if(format === "fdn") queryParts.push("is:fdn");
-    else if(format === "dft") queryParts.push("is:dft");
+    let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
+    if(fmtObj && fmtObj.sets){
+      let clause = "(" + fmtObj.sets.map(s => "set:" + s).join(" OR ") + ")";
+      queryParts.push(clause);
+    } else if(format){
+      queryParts.push("is:" + format);
+    }
   }
   // Colors: use c>= operator
   if(colors.length > 0){
     queryParts.push("c>=" + colors.join(""));
   }
-  // Types: add each with t:
+  // Types: each type with t:
   types.forEach(t => { queryParts.push("t:" + t); });
   // Rarities: map abbreviation to full word
   if(rarities.length > 0){
     const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
     rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
   }
-  // Oracle text: free text search
+  // Oracle text (including any expansions)
   if(oracle) queryParts.push(oracle);
   
   let query = queryParts.join(" ");
@@ -281,7 +398,7 @@ function performSearch(){
     });
 }
 
-// Display fetched card results
+// Display results returned by the API
 function displayResults(data){
   let container = document.getElementById("resultsContainer");
   container.innerHTML = "";
@@ -302,7 +419,7 @@ function displayResults(data){
   });
 }
 
-// Clear form fields and results
+// Clear all form fields and results
 function clearForm(){
   document.getElementById("format_selector").value = "";
   document.querySelectorAll('input[name="color[]"], input[name="type[]"], input[name="rarity[]"]').forEach(el => {
