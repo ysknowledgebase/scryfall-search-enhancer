@@ -9,9 +9,10 @@
 <body>
   <div id="enhancer-container">
     <!-- Version Indicator -->
-    <div id="versionIndicator">Version 0.5.5</div>
+    <div id="versionIndicator">Version 0.5.6</div>
     
     <!-- Search Options (ordered top-to-bottom) -->
+    
     <!-- 1. Format Selector -->
     <div class="option-group" id="formatGroup">
       <label for="format_selector">Format:</label>
@@ -33,12 +34,12 @@
     <div class="option-group" id="colorGroup">
       <label>Colors:</label>
       <div class="selector-row" id="colorButtons">
-        <button class="color-btn" data-color="W"><img src="assets/white.svg" alt="W"></button>
-        <button class="color-btn" data-color="U"><img src="assets/blue.svg" alt="U"></button>
-        <button class="color-btn" data-color="B"><img src="assets/black.svg" alt="B"></button>
-        <button class="color-btn" data-color="R"><img src="assets/red.svg" alt="R"></button>
-        <button class="color-btn" data-color="G"><img src="assets/green.svg" alt="G"></button>
-        <button class="color-btn" data-color="C"><img src="assets/colorless.svg" alt="C"></button>
+        <button class="color-btn" data-color="W"><img src="assets/white.svg" alt="W" class="mana-icon"></button>
+        <button class="color-btn" data-color="U"><img src="assets/blue.svg" alt="U" class="mana-icon"></button>
+        <button class="color-btn" data-color="B"><img src="assets/black.svg" alt="B" class="mana-icon"></button>
+        <button class="color-btn" data-color="R"><img src="assets/red.svg" alt="R" class="mana-icon"></button>
+        <button class="color-btn" data-color="G"><img src="assets/green.svg" alt="G" class="mana-icon"></button>
+        <button class="color-btn" data-color="C"><img src="assets/colorless.svg" alt="C" class="mana-icon"></button>
         <button class="toggle-btn" id="colorToggle">At Most</button>
         <button class="clear-btn" id="clearColor">Clear</button>
       </div>
@@ -106,7 +107,7 @@
       <button class="clear-btn" id="clearOracle">Clear</button>
     </div>
     
-    <!-- 6. Expansions Section (Grouped, uncollapsed by default) -->
+    <!-- 6. Expansions Section -->
     <div class="option-group" id="expansionGroup">
       <label>Expansions:</label>
       <div id="expansionsContainer"></div>
