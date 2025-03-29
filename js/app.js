@@ -1,4 +1,4 @@
-// CONFIG object – includes original formats and color scheme details.
+// CONFIG object – includes formats, colors (with original color scheme), types, and rarities.
 const CONFIG = {
   formatData: {
     formats: [
@@ -37,7 +37,7 @@ const CONFIG = {
   ]
 };
 
-// EXPANSIONS_DATA as provided
+// Full EXPANSIONS_DATA from original code.
 const EXPANSIONS_DATA = {
   common: [
     [
@@ -144,14 +144,14 @@ const EXPANSIONS_DATA = {
   ]
 };
 
-// Global variables for expansions logic
+// Global variables for expansions handling
 let expansionsInserted = new Map();
 let expansionsCycleIdx = new Map();
 let quotesInserted = false;
 
-// Attach event listeners on DOMContentLoaded
+// On DOMContentLoaded, attach event listeners and build UI
 document.addEventListener("DOMContentLoaded", function(){
-  // Set up color buttons with proper color scheme
+  // Set up color buttons with original color scheme
   document.querySelectorAll(".color-btn").forEach(btn => {
     let color = btn.getAttribute("data-color");
     btn.style.backgroundColor = "#f8f9fa";
@@ -196,4 +196,27 @@ document.addEventListener("DOMContentLoaded", function(){
   buildExpansionsToggles();
   
   // Action buttons
-  document.getElementById("searchButton").addEventListener("click", performSearch
+  document.getElementById("searchButton").addEventListener("click", performSearch);
+  document.getElementById("searchFrontierButton").addEventListener("click", function(){
+    document.getElementById("format_selector").value = "frontier";
+    performSearch();
+  });
+  document.getElementById("clearAllButton").addEventListener("click", clearForm);
+  
+  // Preset management
+  document.getElementById("savePresetButton").addEventListener("click", savePreset);
+  document.getElementById("presetDropdown").addEventListener("change", loadPreset);
+  document.getElementById("deletePresetButton").addEventListener("click", deletePreset);
+  document.getElementById("exportPresetButton").addEventListener("click", exportPresets);
+  document.getElementById("importPresetButton").addEventListener("click", function(){
+    document.getElementById("importFile").click();
+  });
+  document.getElementById("importFile").addEventListener("change", importPresetsFromFile);
+  
+  updatePresetDropdown();
+});
+
+// Build Expansions UI from EXPANSIONS_DATA
+function buildExpansionsToggles() {
+  const container = document.getElementById("expansionsContainer");
+  container.inner

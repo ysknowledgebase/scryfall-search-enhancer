@@ -8,6 +8,9 @@
 </head>
 <body>
   <div id="enhancer-container">
+    <!-- Version Indicator -->
+    <div id="versionIndicator">Version 0.5.2</div>
+    
     <!-- Row 1: Action Buttons -->
     <div id="action-row">
       <button id="searchButton">Search</button>
@@ -27,6 +30,7 @@
     </div>
     <!-- Search Options -->
     <div id="search-options">
+      <!-- Format Selector -->
       <div class="option-group">
         <label for="format_selector">Format:</label>
         <select id="format_selector">
@@ -38,6 +42,7 @@
           <option value="dft">DFT</option>
         </select>
       </div>
+      <!-- Color Selector -->
       <div class="option-group">
         <label>Colors:</label>
         <div id="colorButtons">
@@ -58,6 +63,7 @@
           <input type="checkbox" name="color[]" value="C">
         </div>
       </div>
+      <!-- Type Selector -->
       <div class="option-group">
         <label>Types:</label>
         <div id="typeButtons">
@@ -84,6 +90,7 @@
           <input type="checkbox" name="type[]" value="planeswalker">
         </div>
       </div>
+      <!-- Rarity Selector -->
       <div class="option-group">
         <label>Rarities:</label>
         <div id="rarityButtons">
@@ -100,9 +107,10 @@
           <input type="checkbox" name="rarity[]" value="M">
         </div>
       </div>
+      <!-- Oracle Text Field -->
       <div class="option-group">
         <label for="oracle">Oracle Text:</label>
-        <textarea id="oracle" rows="3" placeholder="Enter keywords or oracle text..."></textarea>
+        <textarea id="oracle" rows="3" placeholder="Enter oracle text..."></textarea>
       </div>
       <!-- Expansions Section -->
       <div class="option-group">
