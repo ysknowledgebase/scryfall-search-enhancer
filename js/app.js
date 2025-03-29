@@ -1,4 +1,4 @@
-// CONFIG object – includes formats, color scheme, types, and rarities.
+// CONFIG object – includes formats, original color scheme, types, and rarities.
 const CONFIG = {
   formatData: {
     formats: [
@@ -31,10 +31,10 @@ const CONFIG = {
     { label: "PW", val: "planeswalker" }
   ],
   rarities: [
-    { label: "C", full: "common" },
-    { label: "U", full: "uncommon" },
-    { label: "R", full: "rare" },
-    { label: "M", full: "mythic" }
+    { label: "C", full: "common", color: "#007bff" },
+    { label: "U", full: "uncommon", color: "#28a745" },
+    { label: "R", full: "rare", color: "#ffc107" },
+    { label: "M", full: "mythic", color: "#dc3545" }
   ]
 };
 
@@ -152,7 +152,7 @@ let quotesInserted = false;
 
 // On DOMContentLoaded, attach event listeners and build UI
 document.addEventListener("DOMContentLoaded", function(){
-  // Set up color buttons with mana icons and proper color scheme
+  // Set up color buttons with mana icons and proper color scheme.
   document.querySelectorAll(".color-btn").forEach(btn => {
     let color = btn.getAttribute("data-color");
     btn.style.backgroundColor = "#f8f9fa";
@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }
     btn.addEventListener("click", function(){
       let checkbox = document.querySelector(`input[name="color[]"][value="${color}"]`);
-      // Enforce mutual exclusion: if selecting colorless, clear others and vice versa.
+      // Mutual exclusion: if selecting colorless, unselect others.
       if(color === "C" && !checkbox.checked) {
         document.querySelectorAll('input[name="color[]"]').forEach(chk => {
           if(chk.value !== "C"){
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Type buttons: cycle through three states (default, include, exclude)
+  // Set up type buttons (three states: default, include, exclude)
   document.querySelectorAll(".type-btn").forEach(btn => {
     btn.dataset.state = "default";
     updateTypeButtonStyle(btn);
@@ -211,32 +211,38 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Rarity buttons: simple toggle
+  // Rarity buttons: toggle with specific colors.
   document.querySelectorAll(".rarity-btn").forEach(btn => {
     btn.addEventListener("click", function(){
       let rarity = btn.getAttribute("data-rarity");
       let checkbox = document.querySelector(`input[name="rarity[]"][value="${rarity}"]`);
       checkbox.checked = !checkbox.checked;
+      if(checkbox.checked){
+        let rCfg = CONFIG.rarities.find(r => r.label === rarity);
+        btn.style.backgroundColor = rCfg.color;
+      } else {
+        btn.style.backgroundColor = "#007bff";
+      }
       btn.classList.toggle("selected", checkbox.checked);
     });
   });
   
-  // Partial toggle for types: "=" vs "≈"
+  // Partial toggle for type matching.
   document.getElementById("typePartialToggle").addEventListener("click", function(){
     let btn = document.getElementById("typePartialToggle");
     btn.textContent = (btn.textContent.trim() === "=") ? "≈" : "=";
   });
   
-  // Toggle for color matching: "At Most" vs "Exactly"
+  // Toggle for color matching.
   document.getElementById("colorToggle").addEventListener("click", function(){
     let btn = document.getElementById("colorToggle");
     btn.textContent = (btn.textContent.trim() === "At Most") ? "Exactly" : "At Most";
   });
   
-  // Build Expansions UI (grouped, uncollapsed by default)
+  // Build Expansions UI – groups collapsed by default.
   buildExpansionsToggles();
   
-  // Clear buttons for selectors (attached via their IDs)
+  // Clear buttons.
   document.getElementById("clearFormat").addEventListener("click", function(){
     document.getElementById("format_selector").value = "";
   });
@@ -254,13 +260,16 @@ document.addEventListener("DOMContentLoaded", function(){
   });
   document.getElementById("clearRarity").addEventListener("click", function(){
     document.querySelectorAll('input[name="rarity[]"]').forEach(chk => { chk.checked = false; });
-    document.querySelectorAll(".rarity-btn").forEach(btn => { btn.classList.remove("selected"); });
+    document.querySelectorAll(".rarity-btn").forEach(btn => { 
+      btn.classList.remove("selected");
+      btn.style.backgroundColor = "#007bff";
+    });
   });
   document.getElementById("clearOracle").addEventListener("click", function(){
     document.getElementById("oracle").value = "";
   });
   
-  // Action buttons
+  // Action buttons.
   document.getElementById("searchButton").addEventListener("click", performSearch);
   document.getElementById("searchFrontierButton").addEventListener("click", function(){
     document.getElementById("format_selector").value = "frontier";
@@ -268,7 +277,7 @@ document.addEventListener("DOMContentLoaded", function(){
   });
   document.getElementById("clearAllButton").addEventListener("click", clearForm);
   
-  // Preset management
+  // Preset management.
   document.getElementById("savePresetButton").addEventListener("click", savePreset);
   document.getElementById("presetDropdown").addEventListener("change", loadPreset);
   document.getElementById("deletePresetButton").addEventListener("click", deletePreset);
@@ -302,7 +311,7 @@ function updateTypeButtonStyle(btn) {
   }
 }
 
-// Build Expansions UI with grouped collapsible sections.
+// Build Expansions UI with groups collapsed by default.
 function buildExpansionsToggles() {
   const container = document.getElementById("expansionsContainer");
   container.innerHTML = "";
@@ -311,10 +320,10 @@ function buildExpansionsToggles() {
     let header = document.createElement("div");
     header.className = "expansion-header";
     header.textContent = headerText;
-    // Default: uncollapsed
+    // Start collapsed.
     let groupContainer = document.createElement("div");
     groupContainer.className = "expansion-group";
-    groupContainer.style.display = "flex";
+    groupContainer.style.display = "none";
     items.forEach(item => {
       let btn = document.createElement("button");
       btn.className = "expansion-btn";
@@ -328,7 +337,6 @@ function buildExpansionsToggles() {
       });
       groupContainer.appendChild(btn);
     });
-    // Header click toggles collapse/expand
     header.addEventListener("click", function(){
       groupContainer.style.display = (groupContainer.style.display === "none") ? "flex" : "none";
     });
@@ -336,20 +344,20 @@ function buildExpansionsToggles() {
     container.appendChild(groupContainer);
   }
   
-  // Common group
+  // Common group.
   let commonItems = [];
   EXPANSIONS_DATA.common.forEach(row => {
     row.forEach(item => { commonItems.push(item); });
   });
   createGroup("Common", commonItems);
   
-  // Types group
+  // Types group.
   createGroup("Types", EXPANSIONS_DATA.typesExpansions);
   
-  // Abilities group
+  // Abilities group.
   createGroup("Abilities", EXPANSIONS_DATA.abilitiesExpansions);
   
-  // Clear Expansions button
+  // Clear Expansions button.
   let clearBtn = document.createElement("button");
   clearBtn.className = "expansion-clear-btn";
   clearBtn.textContent = "Clear Expansions";
@@ -435,13 +443,12 @@ function removeLastOccurrence(oracle, sub) {
   }
 }
 
-// Build Scryfall query and redirect to the results page.
-// Oracle text is forced to use "oracle:" and appended with "(game:paper)".
+// Build Scryfall query and redirect.
+// Oracle text is forced with "oracle:" and appended with "(game:paper)".
 function performSearch(){
   let format = document.getElementById("format_selector").value;
   let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
   let types = [];
-  // For each type button, check its state
   document.querySelectorAll(".type-btn").forEach(btn => {
     let state = btn.dataset.state;
     let type = btn.getAttribute("data-type");
@@ -456,7 +463,7 @@ function performSearch(){
   
   let queryParts = [];
   
-  // Format: if there are associated sets, build an OR clause; else use "is:" operator.
+  // Format handling.
   if(format){
     let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
     if(fmtObj && fmtObj.sets){
@@ -467,7 +474,7 @@ function performSearch(){
     }
   }
   
-  // Colors: use operator based on toggle ("Exactly" means c=, "At Most" means c>=)
+  // Colors handling.
   if(colors.length > 0){
     let colorToggle = document.getElementById("colorToggle").textContent.trim();
     if(colorToggle === "Exactly"){
@@ -477,16 +484,16 @@ function performSearch(){
     }
   }
   
-  // Types: add from the array already built
+  // Types handling.
   queryParts = queryParts.concat(types);
   
-  // Rarities: map abbreviations to full words.
+  // Rarities handling.
   if(rarities.length > 0){
     const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
     rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
   }
   
-  // Oracle text: prepend "oracle:" and append "(game:paper)"
+  // Oracle text.
   if(oracle){
     queryParts.push("oracle:" + oracle);
     queryParts.push("(game:paper)");
@@ -500,14 +507,13 @@ function performSearch(){
   window.location.href = targetUrl;
 }
 
-// Preset management functions
+// Preset management functions.
 function savePreset(){
   let presetName = prompt("Enter a name for this preset:");
   if(!presetName) return;
   let preset = {
     format: document.getElementById("format_selector").value,
     colors: Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value),
-    // For types, store the state for each type button.
     types: Array.from(document.querySelectorAll(".type-btn")).map(btn => {
       return { type: btn.getAttribute("data-type"), state: btn.dataset.state };
     }),
@@ -524,7 +530,8 @@ function loadPreset(){
   if(!key) return;
   let preset = JSON.parse(localStorage.getItem(key));
   document.getElementById("format_selector").value = preset.format || "";
-  // Load colors
+  
+  // Load colors.
   document.querySelectorAll('input[name="color[]"]').forEach(el => {
     el.checked = preset.colors.includes(el.value);
     let btn = document.querySelector('.color-btn[data-color="' + el.value + '"]');
@@ -539,7 +546,8 @@ function loadPreset(){
       }
     }
   });
-  // Load types: reset all buttons then apply saved state.
+  
+  // Load types.
   document.querySelectorAll(".type-btn").forEach(btn => {
     btn.dataset.state = "default";
     updateTypeButtonStyle(btn);
@@ -553,14 +561,22 @@ function loadPreset(){
       }
     });
   }
-  // Load rarities
+  
+  // Load rarities.
   document.querySelectorAll('input[name="rarity[]"]').forEach(el => {
     el.checked = preset.rarities.includes(el.value);
     let btn = document.querySelector('.rarity-btn[data-rarity="' + el.value + '"]');
     if(btn){
+      if(el.checked){
+        let rCfg = CONFIG.rarities.find(r => r.label === el.value);
+        btn.style.backgroundColor = rCfg.color;
+      } else {
+        btn.style.backgroundColor = "#007bff";
+      }
       btn.classList.toggle("selected", el.checked);
     }
   });
+  
   document.getElementById("oracle").value = preset.oracle || "";
 }
 function deletePreset(){

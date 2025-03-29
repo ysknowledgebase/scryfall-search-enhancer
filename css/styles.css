@@ -83,7 +83,7 @@ button:hover {
   cursor: pointer;
 }
 .expansion-group {
-  display: flex;
+  display: none;  /* collapsed by default */
   flex-wrap: wrap;
   gap: 5px;
   margin-bottom: 10px;
