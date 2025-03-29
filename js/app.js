@@ -4,19 +4,20 @@ const CONFIG = {
     formats: [
       { value: "", text: "Select Format", color: "#007bff", sets: null },
       { value: "standard", text: "Standard", color: "blue", sets: null },
-      { value: "futureStandard", text: "Future Standard", color: "green", sets: ["dsk", "blb", "otj", "big", "mkm", "lci", "woe", "fdn", "dft"] },
-      { value: "frontier", text: "Frontier", color: "purple", sets: ["dsk", "blb", "otj", "big", "mkm", "fdn", "dft"] },
+      { value: "futureStandard", text: "Future Standard", color: "green", sets: ["dsk", "blb", "otj", "big", "mkm", "lci", "woe", "fdn", "dft", "tdm"] },
+      { value: "frontier", text: "Frontier", color: "purple", sets: ["dsk", "blb", "otj", "big", "mkm", "fdn", "dft", "tdm"] },
       { value: "fdn", text: "FDN", color: "orange", sets: ["fdn"] },
-      { value: "dft", text: "DFT", color: "brown", sets: ["dft"] }
+      { value: "dft", text: "DFT", color: "brown", sets: ["dft"] },
+      { value: "tdm", text: "TDM", color: "#8a2be2", sets: ["tdm"] }
     ]
   },
   colorData: [
-    { val: "W", icon: "{W}", color: "#ffd966", textColor: "#000" },
-    { val: "U", icon: "{U}", color: "#1e90ff", textColor: "#fff" },
-    { val: "B", icon: "{B}", color: "#000", textColor: "#fff" },
-    { val: "R", icon: "{R}", color: "#ff4500", textColor: "#fff" },
-    { val: "G", icon: "{G}", color: "#228b22", textColor: "#fff" },
-    { val: "C", icon: "{C}", color: "#808080", textColor: "#fff" }
+    { val: "W", icon: "assets/white.svg", color: "#ffd966", textColor: "#000" },
+    { val: "U", icon: "assets/blue.svg", color: "#1e90ff", textColor: "#fff" },
+    { val: "B", icon: "assets/black.svg", color: "#000", textColor: "#fff" },
+    { val: "R", icon: "assets/red.svg", color: "#ff4500", textColor: "#fff" },
+    { val: "G", icon: "assets/green.svg", color: "#228b22", textColor: "#fff" },
+    { val: "C", icon: "assets/colorless.svg", color: "#808080", textColor: "#fff" }
   ],
   typeList: [
     { label: "AR", val: "artifact" },
@@ -37,7 +38,7 @@ const CONFIG = {
   ]
 };
 
-// EXPANSIONS_DATA – full expansions from your original code.
+// EXPANSIONS_DATA – full expansions from the original code.
 const EXPANSIONS_DATA = {
   common: [
     [
@@ -144,28 +145,32 @@ const EXPANSIONS_DATA = {
   ]
 };
 
-// Global variables for expansions logic
+// Global variables for expansions handling
 let expansionsInserted = new Map();
 let expansionsCycleIdx = new Map();
 let quotesInserted = false;
 
 // On DOMContentLoaded, attach event listeners and build UI
 document.addEventListener("DOMContentLoaded", function(){
-  // Set up color buttons using original color scheme
+  // Set up color buttons using original color scheme and mana icons.
   document.querySelectorAll(".color-btn").forEach(btn => {
     let color = btn.getAttribute("data-color");
     btn.style.backgroundColor = "#f8f9fa";
     btn.style.color = "#000";
+    // Set the image icon inside the button.
+    let cfg = CONFIG.colorData.find(c => c.val === color);
+    if(cfg){
+      btn.innerHTML = `<img src="${cfg.icon}" alt="${color}" class="mana-icon">`;
+    }
     btn.addEventListener("click", function(){
       let checkbox = document.querySelector(`input[name="color[]"][value="${color}"]`);
-      // Enforce mutually exclusive selection between any color and colorless ("C")
-      if(color === "C" && checkbox.checked === false) {
-        // If colorless is being selected, unselect any others
+      // Enforce mutually exclusive selection: if selecting colorless ("C"), uncheck others.
+      if(color === "C" && !checkbox.checked) {
         document.querySelectorAll('input[name="color[]"]').forEach(chk => {
-          if(chk.value !== "C") {
+          if(chk.value !== "C"){
             chk.checked = false;
             let otherBtn = document.querySelector(`.color-btn[data-color="${chk.value}"]`);
-            if(otherBtn) {
+            if(otherBtn){
               otherBtn.style.backgroundColor = "#f8f9fa";
               otherBtn.style.color = "#000";
               otherBtn.classList.remove("selected");
@@ -173,11 +178,10 @@ document.addEventListener("DOMContentLoaded", function(){
           }
         });
       } else if(color !== "C" && document.querySelector('input[name="color[]"][value="C"]').checked) {
-        // If selecting a colored option while colorless is selected, unselect colorless
         let colorlessChk = document.querySelector('input[name="color[]"][value="C"]');
         colorlessChk.checked = false;
         let colorlessBtn = document.querySelector('.color-btn[data-color="C"]');
-        if(colorlessBtn) {
+        if(colorlessBtn){
           colorlessBtn.style.backgroundColor = "#f8f9fa";
           colorlessBtn.style.color = "#000";
           colorlessBtn.classList.remove("selected");
@@ -185,7 +189,6 @@ document.addEventListener("DOMContentLoaded", function(){
       }
       checkbox.checked = !checkbox.checked;
       if(checkbox.checked){
-        let cfg = CONFIG.colorData.find(c => c.val === color);
         btn.style.backgroundColor = cfg.color;
         btn.style.color = cfg.textColor;
         btn.classList.add("selected");
@@ -197,18 +200,28 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Type buttons toggle with border cues (simulate original style)
+  // Set up type buttons with 3 states: default, include, exclude.
   document.querySelectorAll(".type-btn").forEach(btn => {
+    // We'll store a state property on each button: "default", "include", or "exclude"
+    btn.dataset.state = "default";
+    updateTypeButtonStyle(btn);
     btn.addEventListener("click", function(){
-      let type = btn.getAttribute("data-type");
-      let checkbox = document.querySelector(`input[name="type[]"][value="${type}"]`);
-      checkbox.checked = !checkbox.checked;
-      btn.classList.toggle("selected", checkbox.checked);
-      // You can add additional border styling here if needed.
+      let current = btn.dataset.state;
+      // Cycle state: default -> include -> exclude -> default
+      let next;
+      if(current === "default"){
+        next = "include";
+      } else if(current === "include"){
+        next = "exclude";
+      } else {
+        next = "default";
+      }
+      btn.dataset.state = next;
+      updateTypeButtonStyle(btn);
     });
   });
   
-  // Rarity buttons toggle with border cues
+  // Rarity buttons: simple toggle
   document.querySelectorAll(".rarity-btn").forEach(btn => {
     btn.addEventListener("click", function(){
       let rarity = btn.getAttribute("data-rarity");
@@ -218,34 +231,30 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Build Expansions UI (expanded by default)
+  // Partial toggle for types: "=" vs "≈"
+  document.getElementById("typePartialToggle").addEventListener("click", function(){
+    let btn = document.getElementById("typePartialToggle");
+    if(btn.textContent.trim() === "="){
+      btn.textContent = "≈";
+    } else {
+      btn.textContent = "=";
+    }
+  });
+  
+  // Toggle for color matching: "At Most" vs "Exactly"
+  document.getElementById("colorToggle").addEventListener("click", function(){
+    let btn = document.getElementById("colorToggle");
+    if(btn.textContent.trim() === "At Most"){
+      btn.textContent = "Exactly";
+    } else {
+      btn.textContent = "At Most";
+    }
+  });
+  
+  // Build Expansions UI – grouped and uncollapsed by default.
   buildExpansionsToggles();
   
-  // Clear buttons for selectors
-  document.getElementById("clearFormat").addEventListener("click", function(){
-    document.getElementById("format_selector").value = "";
-  });
-  document.getElementById("clearColor").addEventListener("click", function(){
-    document.querySelectorAll('input[name="color[]"]').forEach(chk => {
-      chk.checked = false;
-    });
-    document.querySelectorAll(".color-btn").forEach(btn => {
-      btn.style.backgroundColor = "#f8f9fa";
-      btn.style.color = "#000";
-      btn.classList.remove("selected");
-    });
-  });
-  document.getElementById("clearType").addEventListener("click", function(){
-    document.querySelectorAll('input[name="type[]"]').forEach(chk => { chk.checked = false; });
-    document.querySelectorAll(".type-btn").forEach(btn => { btn.classList.remove("selected"); });
-  });
-  document.getElementById("clearRarity").addEventListener("click", function(){
-    document.querySelectorAll('input[name="rarity[]"]').forEach(chk => { chk.checked = false; });
-    document.querySelectorAll(".rarity-btn").forEach(btn => { btn.classList.remove("selected"); });
-  });
-  document.getElementById("clearOracle").addEventListener("click", function(){
-    document.getElementById("oracle").value = "";
-  });
+  // Clear buttons for each selector already attached in index.html
   
   // Action buttons
   document.getElementById("searchButton").addEventListener("click", performSearch);
@@ -268,28 +277,50 @@ document.addEventListener("DOMContentLoaded", function(){
   updatePresetDropdown();
 });
 
-// Build Expansions UI from EXPANSIONS_DATA – groups are uncollapsed by default.
+// Helper: Update type button style based on its state.
+function updateTypeButtonStyle(btn) {
+  let state = btn.dataset.state;
+  // Default: light border, transparent fill
+  if(state === "default"){
+    btn.style.backgroundColor = "transparent";
+    btn.style.border = "2px solid #90ee90"; // unselected border
+    btn.style.color = "#000";
+    btn.style.textDecoration = "none";
+  }
+  // Include: filled with green
+  else if(state === "include"){
+    btn.style.backgroundColor = "#90ee90";
+    btn.style.border = "2px solid #90ee90";
+    btn.style.color = "#000";
+    btn.style.textDecoration = "none";
+  }
+  // Exclude: filled with red, crossed out text
+  else if(state === "exclude"){
+    btn.style.backgroundColor = "#ffa8a8";
+    btn.style.border = "2px solid #ffa8a8";
+    btn.style.color = "#000";
+    btn.style.textDecoration = "line-through";
+  }
+}
+
+// Build Expansions UI from EXPANSIONS_DATA with grouped collapsible sections.
 function buildExpansionsToggles() {
   const container = document.getElementById("expansionsContainer");
   container.innerHTML = "";
   
-  // For each group in common, typesExpansions, abilitiesExpansions, build a labeled section.
-  // Common group:
-  let commonHeader = document.createElement("div");
-  commonHeader.className = "expansion-header";
-  commonHeader.textContent = "Common";
-  commonHeader.addEventListener("click", function(){
-    let content = commonHeader.nextElementSibling;
-    content.style.display = (content.style.display === "none") ? "flex" : "none";
-  });
-  container.appendChild(commonHeader);
-  const commonRow = document.createElement("div");
-  commonRow.className = "expansion-group";
-  EXPANSIONS_DATA.common.forEach(row => {
-    const rowDiv = document.createElement("div");
-    rowDiv.className = "expansion-row";
-    row.forEach(item => {
-      const btn = document.createElement("button");
+  // Build a function to create a group.
+  function createGroup(headerText, items) {
+    let header = document.createElement("div");
+    header.className = "expansion-header";
+    header.textContent = headerText;
+    header.addEventListener("click", function(){
+      let group = header.nextElementSibling;
+      group.style.display = (group.style.display === "none") ? "flex" : "none";
+    });
+    let groupContainer = document.createElement("div");
+    groupContainer.className = "expansion-group";
+    items.forEach(item => {
+      let btn = document.createElement("button");
       btn.className = "expansion-btn";
       btn.textContent = item.label;
       btn.addEventListener("click", function(){
@@ -299,66 +330,27 @@ function buildExpansionsToggles() {
           expansionsClick(item.expansions);
         }
       });
-      rowDiv.appendChild(btn);
+      groupContainer.appendChild(btn);
     });
-    commonRow.appendChild(rowDiv);
-  });
-  container.appendChild(commonRow);
+    container.appendChild(header);
+    container.appendChild(groupContainer);
+  }
   
-  // Types group:
-  let typesHeader = document.createElement("div");
-  typesHeader.className = "expansion-header";
-  typesHeader.textContent = "Types";
-  typesHeader.addEventListener("click", function(){
-    let content = typesHeader.nextElementSibling;
-    content.style.display = (content.style.display === "none") ? "flex" : "none";
+  // Common group
+  let commonItems = [];
+  EXPANSIONS_DATA.common.forEach(row => {
+    row.forEach(item => commonItems.push(item));
   });
-  container.appendChild(typesHeader);
-  const typesRow = document.createElement("div");
-  typesRow.className = "expansion-group";
-  EXPANSIONS_DATA.typesExpansions.forEach(item => {
-    const btn = document.createElement("button");
-    btn.className = "expansion-btn";
-    btn.textContent = item.label;
-    btn.addEventListener("click", function(){
-      if (!item.expansions) {
-        toggleQuotes();
-      } else {
-        expansionsClick(item.expansions);
-      }
-    });
-    typesRow.appendChild(btn);
-  });
-  container.appendChild(typesRow);
+  createGroup("Common", commonItems);
   
-  // Abilities group:
-  let abilitiesHeader = document.createElement("div");
-  abilitiesHeader.className = "expansion-header";
-  abilitiesHeader.textContent = "Abilities";
-  abilitiesHeader.addEventListener("click", function(){
-    let content = abilitiesHeader.nextElementSibling;
-    content.style.display = (content.style.display === "none") ? "flex" : "none";
-  });
-  container.appendChild(abilitiesHeader);
-  const abilitiesRow = document.createElement("div");
-  abilitiesRow.className = "expansion-group";
-  EXPANSIONS_DATA.abilitiesExpansions.forEach(item => {
-    const btn = document.createElement("button");
-    btn.className = "expansion-btn";
-    btn.textContent = item.label;
-    btn.addEventListener("click", function(){
-      if (!item.expansions) {
-        toggleQuotes();
-      } else {
-        expansionsClick(item.expansions);
-      }
-    });
-    abilitiesRow.appendChild(btn);
-  });
-  container.appendChild(abilitiesRow);
+  // Types group
+  createGroup("Types", EXPANSIONS_DATA.typesExpansions);
   
-  // Clear Expansions button
-  const clearBtn = document.createElement("button");
+  // Abilities group
+  createGroup("Abilities", EXPANSIONS_DATA.abilitiesExpansions);
+  
+  // Clear Expansions button at end of group section
+  let clearBtn = document.createElement("button");
   clearBtn.className = "expansion-clear-btn";
   clearBtn.textContent = "Clear Expansions";
   clearBtn.addEventListener("click", function(){
@@ -370,7 +362,7 @@ function buildExpansionsToggles() {
   container.appendChild(clearBtn);
 }
 
-// Expansions handling functions
+// Expansions handling functions (same as before)
 function expansionsClick(arr) {
   if(arr.length === 1) {
     toggleExpansion(arr[0]);
@@ -408,3 +400,208 @@ function multiCycleExp(arr) {
       idx++;
       if (idx === arr.length) {
         expansionsCycleIdx.set(key, arr.length);
+      } else {
+        expansionsCycleIdx.set(key, idx);
+      }
+    }
+  } else {
+    removeLastOccurrence(oracle, arr[arr.length - 1]);
+    expansionsCycleIdx.set(key, 0);
+  }
+}
+function toggleQuotes() {
+  const oracle = document.getElementById("oracle");
+  if (!oracle) return;
+  if (!quotesInserted) {
+    oracle.value = '"' + oracle.value + '"';
+    quotesInserted = true;
+  } else {
+    if (oracle.value.startsWith('"') && oracle.value.endsWith('"')) {
+      oracle.value = oracle.value.slice(1, -1);
+    }
+    quotesInserted = false;
+  }
+}
+function removeLastOccurrence(oracle, sub) {
+  const text = oracle.value;
+  let index = text.lastIndexOf(" " + sub);
+  if (index !== -1) {
+    oracle.value = text.slice(0, index) + text.slice(index + sub.length + 1);
+    return;
+  }
+  index = text.lastIndexOf(sub);
+  if (index !== -1) {
+    oracle.value = text.slice(0, index) + text.slice(index + sub.length);
+  }
+}
+
+// Build Scryfall query and redirect. Oracle text is forced with "oracle:" and appended with "(game:paper)".
+function performSearch(){
+  let format = document.getElementById("format_selector").value;
+  let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
+  let types = Array.from(document.querySelectorAll('input[name="type[]"]:checked')).map(el => el.value);
+  let rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
+  let oracle = document.getElementById("oracle").value.trim();
+  
+  let queryParts = [];
+  
+  // Format handling: if format has sets then build OR clause; else "is:" operator.
+  if(format){
+    let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
+    if(fmtObj && fmtObj.sets){
+      let clause = "(" + fmtObj.sets.map(s => "set:" + s).join(" OR ") + ")";
+      queryParts.push(clause);
+    } else {
+      queryParts.push("is:" + format);
+    }
+  }
+  // Colors: if toggle is "At Most" use "c<="; if "Exactly", use "c="
+  if(colors.length > 0){
+    let colorToggle = document.getElementById("colorToggle").textContent.trim();
+    if(colorToggle === "Exactly"){
+      queryParts.push("c=" + colors.join(""));
+    } else {
+      queryParts.push("c>=" + colors.join(""));
+    }
+  }
+  // Types: for each type, check the state (include/exclude)
+  document.querySelectorAll('input[name="type[]"]').forEach((chk, i) => {
+    let type = chk.value;
+    let btn = document.querySelector('.type-btn[data-type="' + type + '"]');
+    if(btn){
+      let state = btn.dataset.state;
+      if(state === "include"){
+        queryParts.push("t:" + type);
+      } else if(state === "exclude"){
+        queryParts.push("-t:" + type);
+      }
+    }
+  });
+  // Rarities
+  if(rarities.length > 0){
+    const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
+    rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
+  }
+  // Oracle text: prepend "oracle:" and append "(game:paper)"
+  if(oracle){
+    queryParts.push("oracle:" + oracle);
+    queryParts.push("(game:paper)");
+  }
+  
+  let query = queryParts.join(" ");
+  let targetUrl = "https://scryfall.com/search?as=grid&order=name&q=" + encodeURIComponent(query);
+  console.log("Query:", query);
+  console.log("Redirecting to:", targetUrl);
+  
+  window.location.href = targetUrl;
+}
+
+// Preset management functions
+function savePreset(){
+  let presetName = prompt("Enter a name for this preset:");
+  if(!presetName) return;
+  let preset = {
+    format: document.getElementById("format_selector").value,
+    colors: Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value),
+    types: Array.from(document.querySelectorAll('input[name="type[]"]:checked')).map(el => el.value),
+    rarities: Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value),
+    oracle: document.getElementById("oracle").value.trim()
+  };
+  localStorage.setItem("preset_" + presetName, JSON.stringify(preset));
+  updatePresetDropdown();
+  alert("Preset saved as: " + presetName);
+}
+function loadPreset(){
+  let dropdown = document.getElementById("presetDropdown");
+  let key = dropdown.value;
+  if(!key) return;
+  let preset = JSON.parse(localStorage.getItem(key));
+  document.getElementById("format_selector").value = preset.format || "";
+  document.querySelectorAll('input[name="color[]"]').forEach(el => {
+    el.checked = preset.colors.includes(el.value);
+    let btn = document.querySelector('.color-btn[data-color="' + el.value + '"]');
+    if(btn){
+      let cfg = CONFIG.colorData.find(c => c.val === el.value);
+      if(el.checked){
+        btn.style.backgroundColor = cfg.color;
+        btn.style.color = cfg.textColor;
+      } else {
+        btn.style.backgroundColor = "#f8f9fa";
+        btn.style.color = "#000";
+      }
+    }
+  });
+  document.querySelectorAll('input[name="type[]"]').forEach(el => {
+    el.checked = preset.types.includes(el.value);
+    let btn = document.querySelector('.type-btn[data-type="' + el.value + '"]');
+    if(btn){
+      btn.dataset.state = "default"; // reset state
+      if(preset.types.includes(el.value)){
+        // assume included by default; you might store the state in preset if needed.
+        btn.dataset.state = "include";
+      }
+      updateTypeButtonStyle(btn);
+    }
+  });
+  document.querySelectorAll('input[name="rarity[]"]').forEach(el => {
+    el.checked = preset.rarities.includes(el.value);
+    let btn = document.querySelector('.rarity-btn[data-rarity="' + el.value + '"]');
+    if(btn) btn.classList.toggle("selected", el.checked);
+  });
+  document.getElementById("oracle").value = preset.oracle || "";
+}
+function deletePreset(){
+  let dropdown = document.getElementById("presetDropdown");
+  let key = dropdown.value;
+  if(!key){
+    alert("Please select a preset to delete.");
+    return;
+  }
+  if(confirm("Are you sure you want to delete preset: " + key.replace("preset_", "") + "?")){
+    localStorage.removeItem(key);
+    updatePresetDropdown();
+  }
+}
+function updatePresetDropdown(){
+  let dropdown = document.getElementById("presetDropdown");
+  dropdown.innerHTML = "<option value=''>Select a preset...</option>";
+  Object.keys(localStorage).forEach(key => {
+    if(key.startsWith("preset_")){
+      let option = document.createElement("option");
+      option.value = key;
+      option.textContent = key.replace("preset_", "");
+      dropdown.appendChild(option);
+    }
+  });
+}
+function exportPresets(){
+  let exportObj = {};
+  Object.keys(localStorage).forEach(key => {
+    if(key.startsWith("preset_")){
+      exportObj[key] = JSON.parse(localStorage.getItem(key));
+    }
+  });
+  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+  let a = document.createElement("a");
+  a.href = dataStr;
+  a.download = "scryfall_presets.json";
+  a.click();
+}
+function importPresetsFromFile(event){
+  let file = event.target.files[0];
+  if(!file) return;
+  let reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      let imported = JSON.parse(e.target.result);
+      Object.keys(imported).forEach(key => {
+        localStorage.setItem(key, JSON.stringify(imported[key]));
+      });
+      updatePresetDropdown();
+      alert("Presets imported successfully.");
+    } catch(err){
+      alert("Error importing presets: " + err);
+    }
+  };
+  reader.readAsText(file);
+}

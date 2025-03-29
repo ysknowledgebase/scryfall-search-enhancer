@@ -9,119 +9,116 @@
 <body>
   <div id="enhancer-container">
     <!-- Version Indicator -->
-    <div id="versionIndicator">Version 0.5.4</div>
+    <div id="versionIndicator">Version 0.5.5</div>
     
-    <!-- Search Options -->
-    <div id="search-options">
-      <!-- Format Selector -->
-      <div class="option-group" id="formatGroup">
-        <label for="format_selector">Format:</label>
-        <div class="selector-row">
-          <select id="format_selector">
-            <option value="">Select Format</option>
-            <option value="standard">Standard</option>
-            <option value="futureStandard">Future Standard</option>
-            <option value="frontier">Frontier</option>
-            <option value="fdn">FDN</option>
-            <option value="dft">DFT</option>
-          </select>
-          <button class="clear-btn" id="clearFormat">Clear</button>
-        </div>
-      </div>
-      
-      <!-- Color Selector -->
-      <div class="option-group" id="colorGroup">
-        <label>Colors:</label>
-        <div class="selector-row" id="colorButtons">
-          <button class="color-btn" data-color="W">W</button>
-          <button class="color-btn" data-color="U">U</button>
-          <button class="color-btn" data-color="B">B</button>
-          <button class="color-btn" data-color="R">R</button>
-          <button class="color-btn" data-color="G">G</button>
-          <button class="color-btn" data-color="C">C</button>
-          <button class="clear-btn" id="clearColor">Clear</button>
-        </div>
-        <!-- Hidden checkboxes for colors -->
-        <div id="colorCheckboxes" style="display:none;">
-          <input type="checkbox" name="color[]" value="W">
-          <input type="checkbox" name="color[]" value="U">
-          <input type="checkbox" name="color[]" value="B">
-          <input type="checkbox" name="color[]" value="R">
-          <input type="checkbox" name="color[]" value="G">
-          <input type="checkbox" name="color[]" value="C">
-        </div>
-      </div>
-      
-      <!-- Type Selector -->
-      <div class="option-group" id="typeGroup">
-        <label>Types:</label>
-        <div class="selector-row" id="typeButtons">
-          <button class="type-btn" data-type="artifact">AR</button>
-          <button class="type-btn" data-type="enchantment">EN</button>
-          <button class="type-btn" data-type="aura">AU</button>
-          <button class="type-btn" data-type="creature">CR</button>
-          <button class="type-btn" data-type="sorcery">SR</button>
-          <button class="type-btn" data-type="instant">IN</button>
-          <button class="type-btn" data-type="equipment">EQ</button>
-          <button class="type-btn" data-type="land">LD</button>
-          <button class="type-btn" data-type="planeswalker">PW</button>
-          <button class="clear-btn" id="clearType">Clear</button>
-        </div>
-        <!-- Hidden checkboxes for types -->
-        <div id="typeCheckboxes" style="display:none;">
-          <input type="checkbox" name="type[]" value="artifact">
-          <input type="checkbox" name="type[]" value="enchantment">
-          <input type="checkbox" name="type[]" value="aura">
-          <input type="checkbox" name="type[]" value="creature">
-          <input type="checkbox" name="type[]" value="sorcery">
-          <input type="checkbox" name="type[]" value="instant">
-          <input type="checkbox" name="type[]" value="equipment">
-          <input type="checkbox" name="type[]" value="land">
-          <input type="checkbox" name="type[]" value="planeswalker">
-        </div>
-      </div>
-      
-      <!-- Rarity Selector -->
-      <div class="option-group" id="rarityGroup">
-        <label>Rarities:</label>
-        <div class="selector-row" id="rarityButtons">
-          <button class="rarity-btn" data-rarity="C">C</button>
-          <button class="rarity-btn" data-rarity="U">U</button>
-          <button class="rarity-btn" data-rarity="R">R</button>
-          <button class="rarity-btn" data-rarity="M">M</button>
-          <button class="clear-btn" id="clearRarity">Clear</button>
-        </div>
-        <!-- Hidden checkboxes for rarities -->
-        <div id="rarityCheckboxes" style="display:none;">
-          <input type="checkbox" name="rarity[]" value="C">
-          <input type="checkbox" name="rarity[]" value="U">
-          <input type="checkbox" name="rarity[]" value="R">
-          <input type="checkbox" name="rarity[]" value="M">
-        </div>
-      </div>
-      
-      <!-- Oracle Text Field -->
-      <div class="option-group" id="oracleGroup">
-        <label for="oracle">Oracle Text:</label>
-        <textarea id="oracle" rows="3" placeholder="Enter oracle text..."></textarea>
-        <button class="clear-btn" id="clearOracle">Clear</button>
-      </div>
-      
-      <!-- Expansions Section -->
-      <div class="option-group" id="expansionGroup">
-        <label>Expansions:</label>
-        <div id="expansionsContainer"></div>
-        <!-- This section is uncollapsed by default. Group headers can be added if desired. -->
+    <!-- Search Options (ordered top-to-bottom) -->
+    <!-- 1. Format Selector -->
+    <div class="option-group" id="formatGroup">
+      <label for="format_selector">Format:</label>
+      <div class="selector-row">
+        <select id="format_selector">
+          <option value="">Select Format</option>
+          <option value="standard">Standard</option>
+          <option value="futureStandard">Future Standard</option>
+          <option value="frontier">Frontier</option>
+          <option value="fdn">FDN</option>
+          <option value="dft">DFT</option>
+          <option value="tdm">TDM</option>
+        </select>
+        <button class="clear-btn" id="clearFormat">Clear</button>
       </div>
     </div>
     
-    <!-- Search Buttons -->
+    <!-- 2. Color Selector -->
+    <div class="option-group" id="colorGroup">
+      <label>Colors:</label>
+      <div class="selector-row" id="colorButtons">
+        <button class="color-btn" data-color="W"><img src="assets/white.svg" alt="W"></button>
+        <button class="color-btn" data-color="U"><img src="assets/blue.svg" alt="U"></button>
+        <button class="color-btn" data-color="B"><img src="assets/black.svg" alt="B"></button>
+        <button class="color-btn" data-color="R"><img src="assets/red.svg" alt="R"></button>
+        <button class="color-btn" data-color="G"><img src="assets/green.svg" alt="G"></button>
+        <button class="color-btn" data-color="C"><img src="assets/colorless.svg" alt="C"></button>
+        <button class="toggle-btn" id="colorToggle">At Most</button>
+        <button class="clear-btn" id="clearColor">Clear</button>
+      </div>
+      <div id="colorCheckboxes" style="display:none;">
+        <input type="checkbox" name="color[]" value="W">
+        <input type="checkbox" name="color[]" value="U">
+        <input type="checkbox" name="color[]" value="B">
+        <input type="checkbox" name="color[]" value="R">
+        <input type="checkbox" name="color[]" value="G">
+        <input type="checkbox" name="color[]" value="C">
+      </div>
+    </div>
+    
+    <!-- 3. Type Selector -->
+    <div class="option-group" id="typeGroup">
+      <label>Types:</label>
+      <div class="selector-row" id="typeButtons">
+        <button class="type-btn" data-type="artifact">AR</button>
+        <button class="type-btn" data-type="enchantment">EN</button>
+        <button class="type-btn" data-type="aura">AU</button>
+        <button class="type-btn" data-type="creature">CR</button>
+        <button class="type-btn" data-type="sorcery">SR</button>
+        <button class="type-btn" data-type="instant">IN</button>
+        <button class="type-btn" data-type="equipment">EQ</button>
+        <button class="type-btn" data-type="land">LD</button>
+        <button class="type-btn" data-type="planeswalker">PW</button>
+        <button class="toggle-btn" id="typePartialToggle">=</button>
+        <button class="clear-btn" id="clearType">Clear</button>
+      </div>
+      <div id="typeCheckboxes" style="display:none;">
+        <input type="checkbox" name="type[]" value="artifact">
+        <input type="checkbox" name="type[]" value="enchantment">
+        <input type="checkbox" name="type[]" value="aura">
+        <input type="checkbox" name="type[]" value="creature">
+        <input type="checkbox" name="type[]" value="sorcery">
+        <input type="checkbox" name="type[]" value="instant">
+        <input type="checkbox" name="type[]" value="equipment">
+        <input type="checkbox" name="type[]" value="land">
+        <input type="checkbox" name="type[]" value="planeswalker">
+      </div>
+    </div>
+    
+    <!-- 4. Rarity Selector -->
+    <div class="option-group" id="rarityGroup">
+      <label>Rarities:</label>
+      <div class="selector-row" id="rarityButtons">
+        <button class="rarity-btn" data-rarity="C">C</button>
+        <button class="rarity-btn" data-rarity="U">U</button>
+        <button class="rarity-btn" data-rarity="R">R</button>
+        <button class="rarity-btn" data-rarity="M">M</button>
+        <button class="clear-btn" id="clearRarity">Clear</button>
+      </div>
+      <div id="rarityCheckboxes" style="display:none;">
+        <input type="checkbox" name="rarity[]" value="C">
+        <input type="checkbox" name="rarity[]" value="U">
+        <input type="checkbox" name="rarity[]" value="R">
+        <input type="checkbox" name="rarity[]" value="M">
+      </div>
+    </div>
+    
+    <!-- 5. Oracle Text Field -->
+    <div class="option-group" id="oracleGroup">
+      <label for="oracle">Oracle Text:</label>
+      <textarea id="oracle" rows="3" placeholder="Enter oracle text..."></textarea>
+      <button class="clear-btn" id="clearOracle">Clear</button>
+    </div>
+    
+    <!-- 6. Expansions Section (Grouped, uncollapsed by default) -->
+    <div class="option-group" id="expansionGroup">
+      <label>Expansions:</label>
+      <div id="expansionsContainer"></div>
+    </div>
+    
+    <!-- 7. Search Buttons -->
     <div id="searchButtons">
       <button id="searchActionButton" class="action-btn">Search</button>
       <button id="searchFrontierActionButton" class="action-btn">Search Frontier</button>
     </div>
     
-    <!-- Preset Management Section -->
+    <!-- 8. Preset Management Section -->
     <div id="preset-section">
       <h3>Search Presets</h3>
       <button id="savePresetButton">💾 Save Preset</button>
