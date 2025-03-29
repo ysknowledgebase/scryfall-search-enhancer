@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scryfall Advanced Search Enhancer</title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Scryfall Advanced Search Enhancer</h1>
+        
+        <label for="format_selector">Format:</label>
+        <select id="format_selector" onchange="updateFormat()">
+            <option value="">Select Format</option>
+            <option value="standard">Standard</option>
+            <option value="futureStandard">Future Standard</option>
+            <option value="frontier">Frontier</option>
+        </select>
+
+        <fieldset>
+            <legend>Colors:</legend>
+            <label><input type="checkbox" name="color[]" value="W"> White</label>
+            <label><input type="checkbox" name="color[]" value="U"> Blue</label>
+            <label><input type="checkbox" name="color[]" value="B"> Black</label>
+            <label><input type="checkbox" name="color[]" value="R"> Red</label>
+            <label><input type="checkbox" name="color[]" value="G"> Green</label>
+        </fieldset>
+
+        <fieldset>
+            <legend>Rarities:</legend>
+            <label><input type="checkbox" name="rarity[]" value="C"> Common</label>
+            <label><input type="checkbox" name="rarity[]" value="U"> Uncommon</label>
+            <label><input type="checkbox" name="rarity[]" value="R"> Rare</label>
+            <label><input type="checkbox" name="rarity[]" value="M"> Mythic</label>
+        </fieldset>
+
+        <label for="oracle">Oracle Text:</label>
+        <textarea id="oracle" rows="3"></textarea>
+
+        <div class="button-group">
+            <button onclick="performSearch()">🔍 Search</button>
+            <button onclick="clearAll()">🗑️ Clear All</button>
+            <button onclick="savePreset()">💾 Save Preset</button>
+            <button onclick="exportPresets()">⬇️ Export Presets</button>
+            <button onclick="importPresets()">⬆️ Import Presets</button>
+        </div>
+
+        <label for="preset_dropdown">Load Preset:</label>
+        <select id="preset_dropdown" onchange="loadPreset()">
+            <option value="">Select Preset...</option>
+        </select>
+
+        <input type="file" id="import_file" accept=".json" onchange="importPresetsFromFile()" hidden>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
