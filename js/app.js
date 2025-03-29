@@ -1,4 +1,4 @@
-// CONFIG object with formats, colors, types, and rarities
+// CONFIG: Formats, colors, types, rarities (mirroring original)
 const CONFIG = {
   formatData: {
     formats: [
@@ -37,7 +37,7 @@ const CONFIG = {
   ]
 };
 
-// Full expansions data from your original code
+// Full EXPANSIONS_DATA (as provided)
 const EXPANSIONS_DATA = {
   common: [
     [
@@ -149,9 +149,9 @@ let expansionsInserted = new Map();
 let expansionsCycleIdx = new Map();
 let quotesInserted = false;
 
-// Attach event listeners and build UI on DOMContentLoaded
+// On DOMContentLoaded, attach event listeners and build UI
 document.addEventListener("DOMContentLoaded", function(){
-  // Toggle for color buttons
+  // Color buttons toggle
   document.querySelectorAll(".color-btn").forEach(btn => {
     btn.addEventListener("click", function(){
       let color = btn.getAttribute("data-color");
@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function(){
       btn.classList.toggle("selected", checkbox.checked);
     });
   });
-  // Toggle for type buttons
+  // Type buttons toggle
   document.querySelectorAll(".type-btn").forEach(btn => {
     btn.addEventListener("click", function(){
       let type = btn.getAttribute("data-type");
@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", function(){
       btn.classList.toggle("selected", checkbox.checked);
     });
   });
-  // Toggle for rarity buttons
+  // Rarity buttons toggle
   document.querySelectorAll(".rarity-btn").forEach(btn => {
     btn.addEventListener("click", function(){
       let rarity = btn.getAttribute("data-rarity");
@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Build Expansions UI
+  // Build expansions UI
   buildExpansionsToggles();
   
   // Action buttons
@@ -203,12 +203,12 @@ document.addEventListener("DOMContentLoaded", function(){
   updatePresetDropdown();
 });
 
-// Build the Expansions UI using EXPANSIONS_DATA
+// Build Expansions UI from EXPANSIONS_DATA
 function buildExpansionsToggles() {
   const container = document.getElementById("expansionsContainer");
   container.innerHTML = "";
   
-  // Build common expansions rows
+  // Build 'common' expansions rows
   EXPANSIONS_DATA.common.forEach(row => {
     const rowDiv = document.createElement("div");
     rowDiv.className = "expansion-row";
@@ -227,7 +227,6 @@ function buildExpansionsToggles() {
     });
     container.appendChild(rowDiv);
   });
-  
   // Build types expansions row
   const typesRow = document.createElement("div");
   typesRow.className = "expansion-row";
@@ -245,7 +244,6 @@ function buildExpansionsToggles() {
     typesRow.appendChild(btn);
   });
   container.appendChild(typesRow);
-  
   // Build abilities expansions row
   const abilitiesRow = document.createElement("div");
   abilitiesRow.className = "expansion-row";
@@ -277,7 +275,7 @@ function buildExpansionsToggles() {
   container.appendChild(clearBtn);
 }
 
-// Expansion handling functions
+// Expansions handling functions
 function expansionsClick(arr) {
   if(arr.length === 1) {
     toggleExpansion(arr[0]);
@@ -350,7 +348,7 @@ function removeLastOccurrence(oracle, sub) {
   }
 }
 
-// Build Scryfall query and perform search using API
+// Build Scryfall query and then jump to Scryfall's search results page
 function performSearch(){
   let format = document.getElementById("format_selector").value;
   let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
@@ -360,7 +358,7 @@ function performSearch(){
   
   let queryParts = [];
   
-  // Format: use sets clause if defined; otherwise, "is:" operator.
+  // Format: if the selected format has associated sets, build an OR clause; otherwise use "is:" operator.
   if(format){
     let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
     if(fmtObj && fmtObj.sets){
@@ -370,64 +368,27 @@ function performSearch(){
       queryParts.push("is:" + format);
     }
   }
-  // Colors: use c>= operator
+  // Colors: c>= operator
   if(colors.length > 0){
     queryParts.push("c>=" + colors.join(""));
   }
-  // Types: each type with t:
+  // Types: add each type with t:
   types.forEach(t => { queryParts.push("t:" + t); });
   // Rarities: map abbreviation to full word
   if(rarities.length > 0){
     const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
     rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
   }
-  // Oracle text (including any expansions)
+  // Oracle text (including any inserted expansions)
   if(oracle) queryParts.push(oracle);
   
   let query = queryParts.join(" ");
-  let apiUrl = "https://api.scryfall.com/cards/search?q=" + encodeURIComponent(query);
+  let targetUrl = "https://scryfall.com/search?q=" + encodeURIComponent(query);
   console.log("Query:", query);
-  console.log("API URL:", apiUrl);
+  console.log("Redirecting to:", targetUrl);
   
-  fetch(apiUrl)
-    .then(response => response.json())
-    .then(data => displayResults(data))
-    .catch(err => {
-      console.error("Error fetching Scryfall data:", err);
-      document.getElementById("resultsContainer").innerHTML = "<p>Error fetching results.</p>";
-    });
-}
-
-// Display results returned by the API
-function displayResults(data){
-  let container = document.getElementById("resultsContainer");
-  container.innerHTML = "";
-  if(data.object === "error"){
-    container.innerHTML = "<p>Error: " + data.details + "</p>";
-    return;
-  }
-  if(!data.data || data.data.length === 0){
-    container.innerHTML = "<p>No results found.</p>";
-    return;
-  }
-  data.data.forEach(card => {
-    let cardDiv = document.createElement("div");
-    cardDiv.className = "card";
-    let imgSrc = (card.image_uris && card.image_uris.small) ? card.image_uris.small : "";
-    cardDiv.innerHTML = `<img src="${imgSrc}" alt="${card.name}"><p>${card.name}</p>`;
-    container.appendChild(cardDiv);
-  });
-}
-
-// Clear all form fields and results
-function clearForm(){
-  document.getElementById("format_selector").value = "";
-  document.querySelectorAll('input[name="color[]"], input[name="type[]"], input[name="rarity[]"]').forEach(el => {
-    el.checked = false;
-  });
-  document.querySelectorAll(".color-btn, .type-btn, .rarity-btn").forEach(btn => btn.classList.remove("selected"));
-  document.getElementById("oracle").value = "";
-  document.getElementById("resultsContainer").innerHTML = "";
+  // Jump to the Scryfall search results page
+  window.location.href = targetUrl;
 }
 
 // Preset management functions
