@@ -1,4 +1,4 @@
-/* Version 0.5.10 */
+/* Version 0.5.11 */
 // CONFIG object – includes formats, original color scheme, types, and rarities.
 const CONFIG = {
   formatData: {
@@ -164,7 +164,6 @@ document.addEventListener("DOMContentLoaded", function(){
     }
     btn.addEventListener("click", function(){
       let checkbox = document.querySelector(`input[name="color[]"][value="${color}"]`);
-      // Mutual exclusion: if selecting colorless ("C"), unselect others.
       if(color === "C" && !checkbox.checked) {
         document.querySelectorAll('input[name="color[]"]').forEach(chk => {
           if(chk.value !== "C"){
@@ -216,7 +215,6 @@ document.addEventListener("DOMContentLoaded", function(){
   document.querySelectorAll(".rarity-btn").forEach(btn => {
     let rarity = btn.getAttribute("data-rarity");
     let rCfg = CONFIG.rarities.find(r => r.label === rarity);
-    // Default: transparent background with 2px border in designated color and black text.
     btn.style.backgroundColor = "transparent";
     btn.style.border = `2px solid ${rCfg.color}`;
     btn.style.color = "#000";
@@ -456,27 +454,13 @@ function removeLastOccurrence(oracle, sub) {
 }
 
 // Build Scryfall query and redirect.
-// For types, if the partial toggle is active ("≈"), then we use "≈t:" or "-≈t:".
+// For types, if the partial toggle ("≈") is active, group all included types with OR.
 function performSearch(){
   let format = document.getElementById("format_selector").value;
   let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
-  let types = [];
-  let partial = (document.getElementById("typePartialToggle").textContent.trim() === "≈");
-  document.querySelectorAll(".type-btn").forEach(btn => {
-    let state = btn.dataset.state;
-    let type = btn.getAttribute("data-type");
-    if(state === "include") {
-      types.push((partial ? "≈t:" : "t:") + type);
-    } else if(state === "exclude") {
-      types.push("-" + (partial ? "≈t:" : "t:") + type);
-    }
-  });
-  let rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
-  let oracle = document.getElementById("oracle").value.trim();
-  
   let queryParts = [];
   
-  // Format.
+  // Format handling.
   if(format){
     let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
     if(fmtObj && fmtObj.sets){
@@ -493,16 +477,39 @@ function performSearch(){
     queryParts.push((colorToggle === "Exactly" ? "c=" : "c<=") + colors.join(""));
   }
   
-  // Types.
-  queryParts = queryParts.concat(types);
+  // Type handling.
+  let partial = (document.getElementById("typePartialToggle").textContent.trim() === "≈");
+  if(partial){
+    let included = [];
+    document.querySelectorAll(".type-btn").forEach(btn => {
+      if(btn.dataset.state === "include"){
+        included.push("type:" + btn.getAttribute("data-type"));
+      }
+    });
+    if(included.length > 0){
+      queryParts.push("(" + included.join(" OR ") + ")");
+    }
+  } else {
+    document.querySelectorAll(".type-btn").forEach(btn => {
+      let state = btn.dataset.state;
+      let type = btn.getAttribute("data-type");
+      if(state === "include") {
+        queryParts.push("t:" + type);
+      } else if(state === "exclude") {
+        queryParts.push("-t:" + type);
+      }
+    });
+  }
   
   // Rarities.
+  let rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
   if(rarities.length > 0){
     const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
     rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
   }
   
-  // Oracle.
+  // Oracle text.
+  let oracle = document.getElementById("oracle").value.trim();
   if(oracle){
     queryParts.push("oracle:" + oracle);
     queryParts.push("(game:paper)");
@@ -517,8 +524,8 @@ function performSearch(){
 }
 
 // Preset management functions.
-// Save preset: Saves the current search parameters along with a computed URL.
-// If preset name is left blank, the URL is used as the preset name.
+// Save preset: Save current search state along with the computed jumping URL.
+// If the user leaves the preset name blank, use the URL as the preset name.
 function savePreset(){
   let presetName = prompt("Enter a name for this preset (leave blank to use URL):");
   let format = document.getElementById("format_selector").value;

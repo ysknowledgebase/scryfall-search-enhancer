@@ -1,4 +1,4 @@
-/* Version 0.5.10 */
+/* Version 0.5.11 */
 /* styles.css */
 body {
   font-family: Arial, sans-serif;
@@ -130,7 +130,8 @@ button:hover {
     align-items: stretch;
   }
 }
-/* Rarity buttons: default state shows transparent background with colored border and black text. When selected, background fills and text becomes white. */
+/* Rarity buttons: default state shows transparent background with colored border and black text.
+   When selected, background fills with designated color and text turns white. */
 .rarity-btn {
   background-color: transparent;
   border: 2px solid; /* border-color set via JS */
