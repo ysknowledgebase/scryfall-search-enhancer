@@ -1,4 +1,4 @@
-// CONFIG object – includes formats, colors (with original color scheme), types, and rarities.
+// CONFIG: Formats, colors with original scheme, types, and rarities.
 const CONFIG = {
   formatData: {
     formats: [
@@ -37,7 +37,7 @@ const CONFIG = {
   ]
 };
 
-// Full EXPANSIONS_DATA from original code.
+// EXPANSIONS_DATA: full data as provided.
 const EXPANSIONS_DATA = {
   common: [
     [
@@ -144,14 +144,14 @@ const EXPANSIONS_DATA = {
   ]
 };
 
-// Global variables for expansions handling
+// Global variables for expansions logic
 let expansionsInserted = new Map();
 let expansionsCycleIdx = new Map();
 let quotesInserted = false;
 
-// On DOMContentLoaded, attach event listeners and build UI
+// Attach event listeners on DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function(){
-  // Set up color buttons with original color scheme
+  // Set up color buttons using CONFIG.colorData and original color scheme
   document.querySelectorAll(".color-btn").forEach(btn => {
     let color = btn.getAttribute("data-color");
     btn.style.backgroundColor = "#f8f9fa";
@@ -219,4 +219,292 @@ document.addEventListener("DOMContentLoaded", function(){
 // Build Expansions UI from EXPANSIONS_DATA
 function buildExpansionsToggles() {
   const container = document.getElementById("expansionsContainer");
-  container.inner
+  container.innerHTML = "";
+  
+  // Build common expansions rows
+  EXPANSIONS_DATA.common.forEach(row => {
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "expansion-row";
+    row.forEach(item => {
+      const btn = document.createElement("button");
+      btn.className = "expansion-btn";
+      btn.textContent = item.label;
+      btn.addEventListener("click", function(){
+        if (!item.expansions) {
+          toggleQuotes();
+        } else {
+          expansionsClick(item.expansions);
+        }
+      });
+      rowDiv.appendChild(btn);
+    });
+    container.appendChild(rowDiv);
+  });
+  // Build types expansions row
+  const typesRow = document.createElement("div");
+  typesRow.className = "expansion-row";
+  EXPANSIONS_DATA.typesExpansions.forEach(item => {
+    const btn = document.createElement("button");
+    btn.className = "expansion-btn";
+    btn.textContent = item.label;
+    btn.addEventListener("click", function(){
+      if (!item.expansions) {
+        toggleQuotes();
+      } else {
+        expansionsClick(item.expansions);
+      }
+    });
+    typesRow.appendChild(btn);
+  });
+  container.appendChild(typesRow);
+  // Build abilities expansions row
+  const abilitiesRow = document.createElement("div");
+  abilitiesRow.className = "expansion-row";
+  EXPANSIONS_DATA.abilitiesExpansions.forEach(item => {
+    const btn = document.createElement("button");
+    btn.className = "expansion-btn";
+    btn.textContent = item.label;
+    btn.addEventListener("click", function(){
+      if (!item.expansions) {
+        toggleQuotes();
+      } else {
+        expansionsClick(item.expansions);
+      }
+    });
+    abilitiesRow.appendChild(btn);
+  });
+  container.appendChild(abilitiesRow);
+  // Add a clear expansions button
+  const clearBtn = document.createElement("button");
+  clearBtn.className = "expansion-clear-btn";
+  clearBtn.textContent = "Clear Expansions";
+  clearBtn.addEventListener("click", function(){
+    document.getElementById("oracle").value = "";
+    expansionsInserted.clear();
+    expansionsCycleIdx.clear();
+    quotesInserted = false;
+  });
+  container.appendChild(clearBtn);
+}
+
+// Expansions handling functions
+function expansionsClick(arr) {
+  if(arr.length === 1) {
+    toggleExpansion(arr[0]);
+  } else {
+    multiCycleExp(arr);
+  }
+}
+function toggleExpansion(token) {
+  const oracle = document.getElementById("oracle");
+  if (!oracle) return;
+  const inserted = expansionsInserted.get(token) || false;
+  if (!inserted) {
+    if (oracle.value && !oracle.value.endsWith(" ")) oracle.value += " ";
+    oracle.value += token;
+    expansionsInserted.set(token, true);
+  } else {
+    removeLastOccurrence(oracle, token);
+    expansionsInserted.set(token, false);
+  }
+}
+function multiCycleExp(arr) {
+  const key = arr[0];
+  let idx = expansionsCycleIdx.get(key) || 0;
+  const oracle = document.getElementById("oracle");
+  if (!oracle) return;
+  if (idx < arr.length) {
+    if (idx === 0) {
+      if (oracle.value && !oracle.value.endsWith(" ")) oracle.value += " ";
+      oracle.value += arr[0];
+      expansionsCycleIdx.set(key, 1);
+    } else {
+      removeLastOccurrence(oracle, arr[idx - 1]);
+      if (oracle.value && !oracle.value.endsWith(" ")) oracle.value += " ";
+      oracle.value += arr[idx];
+      idx++;
+      if (idx === arr.length) {
+        expansionsCycleIdx.set(key, arr.length);
+      } else {
+        expansionsCycleIdx.set(key, idx);
+      }
+    }
+  } else {
+    removeLastOccurrence(oracle, arr[arr.length - 1]);
+    expansionsCycleIdx.set(key, 0);
+  }
+}
+function toggleQuotes() {
+  const oracle = document.getElementById("oracle");
+  if (!oracle) return;
+  if (!quotesInserted) {
+    oracle.value = '"' + oracle.value + '"';
+    quotesInserted = true;
+  } else {
+    if (oracle.value.startsWith('"') && oracle.value.endsWith('"')) {
+      oracle.value = oracle.value.slice(1, -1);
+    }
+    quotesInserted = false;
+  }
+}
+function removeLastOccurrence(oracle, sub) {
+  const text = oracle.value;
+  let index = text.lastIndexOf(" " + sub);
+  if (index !== -1) {
+    oracle.value = text.slice(0, index) + text.slice(index + sub.length + 1);
+    return;
+  }
+  index = text.lastIndexOf(sub);
+  if (index !== -1) {
+    oracle.value = text.slice(0, index) + text.slice(index + sub.length);
+  }
+}
+
+// Build Scryfall query and redirect to results page
+// IMPORTANT: Oracle text is now forced to be searched via "oracle:" operator, and we append "(game:paper)".
+function performSearch(){
+  let format = document.getElementById("format_selector").value;
+  let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
+  let types = Array.from(document.querySelectorAll('input[name="type[]"]:checked')).map(el => el.value);
+  let rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
+  let oracle = document.getElementById("oracle").value.trim();
+  
+  let queryParts = [];
+  
+  // Format handling: if format has associated sets, build OR clause; otherwise, use is: operator.
+  if(format){
+    let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
+    if(fmtObj && fmtObj.sets){
+      let clause = "(" + fmtObj.sets.map(s => "set:" + s).join(" OR ") + ")";
+      queryParts.push(clause);
+    } else {
+      queryParts.push("is:" + format);
+    }
+  }
+  // Colors: use c>= operator
+  if(colors.length > 0){
+    queryParts.push("c>=" + colors.join(""));
+  }
+  // Types: add each type with t:
+  types.forEach(t => { queryParts.push("t:" + t); });
+  // Rarities: map abbreviations to full words
+  if(rarities.length > 0){
+    const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
+    rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
+  }
+  // Oracle text: force searching within Oracle text; append (game:paper)
+  if(oracle){
+    queryParts.push("oracle:" + oracle);
+    queryParts.push("(game:paper)");
+  }
+  
+  let query = queryParts.join(" ");
+  let targetUrl = "https://scryfall.com/search?as=grid&order=name&q=" + encodeURIComponent(query);
+  console.log("Query:", query);
+  console.log("Redirecting to:", targetUrl);
+  
+  window.location.href = targetUrl;
+}
+
+// Preset management functions
+function savePreset(){
+  let presetName = prompt("Enter a name for this preset:");
+  if(!presetName) return;
+  let preset = {
+    format: document.getElementById("format_selector").value,
+    colors: Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value),
+    types: Array.from(document.querySelectorAll('input[name="type[]"]:checked')).map(el => el.value),
+    rarities: Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value),
+    oracle: document.getElementById("oracle").value.trim()
+  };
+  localStorage.setItem("preset_" + presetName, JSON.stringify(preset));
+  updatePresetDropdown();
+  alert("Preset saved as: " + presetName);
+}
+function loadPreset(){
+  let dropdown = document.getElementById("presetDropdown");
+  let key = dropdown.value;
+  if(!key) return;
+  let preset = JSON.parse(localStorage.getItem(key));
+  document.getElementById("format_selector").value = preset.format || "";
+  document.querySelectorAll('input[name="color[]"]').forEach(el => {
+    el.checked = preset.colors.includes(el.value);
+    let btn = document.querySelector('.color-btn[data-color="' + el.value + '"]');
+    if(btn){
+      let cfg = CONFIG.colorData.find(c => c.val === el.value);
+      if(el.checked){
+        btn.style.backgroundColor = cfg.color;
+        btn.style.color = cfg.textColor;
+      } else {
+        btn.style.backgroundColor = "#f8f9fa";
+        btn.style.color = "#000";
+      }
+    }
+  });
+  document.querySelectorAll('input[name="type[]"]').forEach(el => {
+    el.checked = preset.types.includes(el.value);
+    let btn = document.querySelector('.type-btn[data-type="' + el.value + '"]');
+    if(btn) btn.classList.toggle("selected", el.checked);
+  });
+  document.querySelectorAll('input[name="rarity[]"]').forEach(el => {
+    el.checked = preset.rarities.includes(el.value);
+    let btn = document.querySelector('.rarity-btn[data-rarity="' + el.value + '"]');
+    if(btn) btn.classList.toggle("selected", el.checked);
+  });
+  document.getElementById("oracle").value = preset.oracle || "";
+}
+function deletePreset(){
+  let dropdown = document.getElementById("presetDropdown");
+  let key = dropdown.value;
+  if(!key){
+    alert("Please select a preset to delete.");
+    return;
+  }
+  if(confirm("Are you sure you want to delete preset: " + key.replace("preset_", "") + "?")){
+    localStorage.removeItem(key);
+    updatePresetDropdown();
+  }
+}
+function updatePresetDropdown(){
+  let dropdown = document.getElementById("presetDropdown");
+  dropdown.innerHTML = "<option value=''>Select a preset...</option>";
+  Object.keys(localStorage).forEach(key => {
+    if(key.startsWith("preset_")){
+      let option = document.createElement("option");
+      option.value = key;
+      option.textContent = key.replace("preset_", "");
+      dropdown.appendChild(option);
+    }
+  });
+}
+function exportPresets(){
+  let exportObj = {};
+  Object.keys(localStorage).forEach(key => {
+    if(key.startsWith("preset_")){
+      exportObj[key] = JSON.parse(localStorage.getItem(key));
+    }
+  });
+  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+  let a = document.createElement("a");
+  a.href = dataStr;
+  a.download = "scryfall_presets.json";
+  a.click();
+}
+function importPresetsFromFile(event){
+  let file = event.target.files[0];
+  if(!file) return;
+  let reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      let imported = JSON.parse(e.target.result);
+      Object.keys(imported).forEach(key => {
+        localStorage.setItem(key, JSON.stringify(imported[key]));
+      });
+      updatePresetDropdown();
+      alert("Presets imported successfully.");
+    } catch(err){
+      alert("Error importing presets: " + err);
+    }
+  };
+  reader.readAsText(file);
+}
