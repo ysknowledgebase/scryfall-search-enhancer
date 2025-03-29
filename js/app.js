@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }
     btn.addEventListener("click", function(){
       let checkbox = document.querySelector(`input[name="color[]"][value="${color}"]`);
-      // Mutual exclusion: if selecting colorless, unselect others.
+      // Mutual exclusion: if selecting colorless, clear others; if selecting a color while colorless is selected, unselect colorless.
       if(color === "C" && !checkbox.checked) {
         document.querySelectorAll('input[name="color[]"]').forEach(chk => {
           if(chk.value !== "C"){
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Set up type buttons (three states: default, include, exclude)
+  // Set up type buttons: cycle through three states.
   document.querySelectorAll(".type-btn").forEach(btn => {
     btn.dataset.state = "default";
     updateTypeButtonStyle(btn);
@@ -211,23 +211,25 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Rarity buttons: toggle with specific colors.
+  // Set up rarity buttons: default state has a colored border.
   document.querySelectorAll(".rarity-btn").forEach(btn => {
+    let rarity = btn.getAttribute("data-rarity");
+    let rCfg = CONFIG.rarities.find(r => r.label === rarity);
+    btn.style.backgroundColor = "transparent";
+    btn.style.border = `2px solid ${rCfg.color}`;
     btn.addEventListener("click", function(){
-      let rarity = btn.getAttribute("data-rarity");
       let checkbox = document.querySelector(`input[name="rarity[]"][value="${rarity}"]`);
       checkbox.checked = !checkbox.checked;
       if(checkbox.checked){
-        let rCfg = CONFIG.rarities.find(r => r.label === rarity);
         btn.style.backgroundColor = rCfg.color;
       } else {
-        btn.style.backgroundColor = "#007bff";
+        btn.style.backgroundColor = "transparent";
       }
       btn.classList.toggle("selected", checkbox.checked);
     });
   });
   
-  // Partial toggle for type matching.
+  // Partial toggle for types: "=" vs "≈".
   document.getElementById("typePartialToggle").addEventListener("click", function(){
     let btn = document.getElementById("typePartialToggle");
     btn.textContent = (btn.textContent.trim() === "=") ? "≈" : "=";
@@ -256,13 +258,18 @@ document.addEventListener("DOMContentLoaded", function(){
   });
   document.getElementById("clearType").addEventListener("click", function(){
     document.querySelectorAll('input[name="type[]"]').forEach(chk => { chk.checked = false; });
-    document.querySelectorAll(".type-btn").forEach(btn => { btn.dataset.state = "default"; updateTypeButtonStyle(btn); });
+    document.querySelectorAll(".type-btn").forEach(btn => { 
+      btn.dataset.state = "default";
+      updateTypeButtonStyle(btn);
+    });
   });
   document.getElementById("clearRarity").addEventListener("click", function(){
     document.querySelectorAll('input[name="rarity[]"]').forEach(chk => { chk.checked = false; });
     document.querySelectorAll(".rarity-btn").forEach(btn => { 
+      let rarity = btn.getAttribute("data-rarity");
+      let rCfg = CONFIG.rarities.find(r => r.label === rarity);
+      btn.style.backgroundColor = "transparent";
       btn.classList.remove("selected");
-      btn.style.backgroundColor = "#007bff";
     });
   });
   document.getElementById("clearOracle").addEventListener("click", function(){
@@ -270,8 +277,8 @@ document.addEventListener("DOMContentLoaded", function(){
   });
   
   // Action buttons.
-  document.getElementById("searchButton").addEventListener("click", performSearch);
-  document.getElementById("searchFrontierButton").addEventListener("click", function(){
+  document.getElementById("searchActionButton").addEventListener("click", performSearch);
+  document.getElementById("searchFrontierActionButton").addEventListener("click", function(){
     document.getElementById("format_selector").value = "frontier";
     performSearch();
   });
@@ -290,7 +297,7 @@ document.addEventListener("DOMContentLoaded", function(){
   updatePresetDropdown();
 });
 
-// Helper: Update type button style based on its state.
+// Helper: Update type button style.
 function updateTypeButtonStyle(btn) {
   let state = btn.dataset.state;
   if(state === "default"){
@@ -311,7 +318,7 @@ function updateTypeButtonStyle(btn) {
   }
 }
 
-// Build Expansions UI with groups collapsed by default.
+// Build Expansions UI with grouped collapsible sections (collapsed by default).
 function buildExpansionsToggles() {
   const container = document.getElementById("expansionsContainer");
   container.innerHTML = "";
@@ -320,7 +327,7 @@ function buildExpansionsToggles() {
     let header = document.createElement("div");
     header.className = "expansion-header";
     header.textContent = headerText;
-    // Start collapsed.
+    // Create group container; collapsed by default.
     let groupContainer = document.createElement("div");
     groupContainer.className = "expansion-group";
     groupContainer.style.display = "none";
@@ -474,7 +481,7 @@ function performSearch(){
     }
   }
   
-  // Colors handling.
+  // Colors.
   if(colors.length > 0){
     let colorToggle = document.getElementById("colorToggle").textContent.trim();
     if(colorToggle === "Exactly"){
@@ -484,10 +491,10 @@ function performSearch(){
     }
   }
   
-  // Types handling.
+  // Types.
   queryParts = queryParts.concat(types);
   
-  // Rarities handling.
+  // Rarities.
   if(rarities.length > 0){
     const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
     rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
@@ -504,6 +511,7 @@ function performSearch(){
   console.log("Query:", query);
   console.log("Redirecting to:", targetUrl);
   
+  // Finally, perform the redirect.
   window.location.href = targetUrl;
 }
 
@@ -566,12 +574,12 @@ function loadPreset(){
   document.querySelectorAll('input[name="rarity[]"]').forEach(el => {
     el.checked = preset.rarities.includes(el.value);
     let btn = document.querySelector('.rarity-btn[data-rarity="' + el.value + '"]');
+    let rCfg = CONFIG.rarities.find(r => r.label === el.value);
     if(btn){
       if(el.checked){
-        let rCfg = CONFIG.rarities.find(r => r.label === el.value);
         btn.style.backgroundColor = rCfg.color;
       } else {
-        btn.style.backgroundColor = "#007bff";
+        btn.style.backgroundColor = "transparent";
       }
       btn.classList.toggle("selected", el.checked);
     }
