@@ -1,4 +1,4 @@
-// CONFIG object – formats, colors (with original color scheme), types, and rarities.
+// CONFIG object – includes original formats and color scheme details.
 const CONFIG = {
   formatData: {
     formats: [
@@ -37,7 +37,7 @@ const CONFIG = {
   ]
 };
 
-// EXPANSIONS_DATA (full as provided)
+// EXPANSIONS_DATA as provided
 const EXPANSIONS_DATA = {
   common: [
     [
@@ -144,17 +144,16 @@ const EXPANSIONS_DATA = {
   ]
 };
 
-// Global variables for expansions handling
+// Global variables for expansions logic
 let expansionsInserted = new Map();
 let expansionsCycleIdx = new Map();
 let quotesInserted = false;
 
-// On DOMContentLoaded, attach event listeners and build UI
+// Attach event listeners on DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function(){
   // Set up color buttons with proper color scheme
   document.querySelectorAll(".color-btn").forEach(btn => {
     let color = btn.getAttribute("data-color");
-    // Set default unselected style
     btn.style.backgroundColor = "#f8f9fa";
     btn.style.color = "#000";
     btn.addEventListener("click", function(){
@@ -197,19 +196,4 @@ document.addEventListener("DOMContentLoaded", function(){
   buildExpansionsToggles();
   
   // Action buttons
-  document.getElementById("searchButton").addEventListener("click", performSearch);
-  document.getElementById("searchFrontierButton").addEventListener("click", function(){
-    document.getElementById("format_selector").value = "frontier";
-    performSearch();
-  });
-  document.getElementById("clearAllButton").addEventListener("click", clearForm);
-  
-  // Preset management
-  document.getElementById("savePresetButton").addEventListener("click", savePreset);
-  document.getElementById("presetDropdown").addEventListener("change", loadPreset);
-  document.getElementById("deletePresetButton").addEventListener("click", deletePreset);
-  document.getElementById("exportPresetButton").addEventListener("click", exportPresets);
-  document.getElementById("importPresetButton").addEventListener("click", function(){
-    document.getElementById("importFile").click();
-  });
-  document.getElementById
+  document.getElementById("searchButton").addEventListener("click", performSearch
