@@ -38,13 +38,21 @@ function performSearch() {
     const settings = getSearchSettings();
     let query = [];
 
-    if (settings.format) query.push(`format=${settings.format}`);
-    if (settings.colors.length) query.push(`color=${settings.colors.join('')}`);
-    if (settings.rarities.length) query.push(`rarity=${settings.rarities.join(',')}`);
-    if (settings.oracle) query.push(`oracle=${encodeURIComponent(settings.oracle)}`);
+    // Add valid query parameters
+    if (settings.format) query.push(`f=${settings.format}`);
+    if (settings.colors.length) query.push(`c=${settings.colors.join('')}`);
+    if (settings.rarities.length) query.push(`r=${settings.rarities.join(',')}`);
+    if (settings.oracle) query.push(`o:${encodeURIComponent(settings.oracle)}`);
 
+    // Construct Scryfall search URL
     const scryfallUrl = `https://scryfall.com/search?${query.join('&')}`;
-    window.open(scryfallUrl, '_blank');
+
+    // Open URL in a new tab
+    if (query.length > 0) {
+        window.open(scryfallUrl, '_blank');
+    } else {
+        alert('Please select at least one search parameter.');
+    }
 }
 
 /***********************
@@ -135,4 +143,5 @@ function importPresetsFromFile() {
     reader.readAsText(file);
 }
 
+// Initialize preset dropdown on page load
 document.addEventListener('DOMContentLoaded', updatePresetDropdown);
