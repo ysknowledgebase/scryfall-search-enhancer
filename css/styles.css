@@ -1,53 +1,64 @@
+/* styles.css */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f8f9fa;
+  background-color: #f0f0f0;
   margin: 0;
   padding: 0;
 }
-.container {
-  max-width: 700px;
-  margin: 40px auto;
-  padding: 20px;
+#enhancer-container {
+  max-width: 900px;
+  margin: 20px auto;
   background: #fff;
+  padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
-h1 {
-  text-align: center;
+#action-row, #preset-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
 }
-form {
-  margin-bottom: 20px;
+#search-options .option-group {
+  margin-bottom: 15px;
 }
-label, legend {
+#search-options label {
+  display: block;
+  margin-bottom: 5px;
   font-weight: bold;
 }
-fieldset {
-  margin: 10px 0;
-  padding: 10px;
-  border: 1px solid #ddd;
-}
-textarea, select {
-  width: 100%;
-  margin-top: 5px;
-  margin-bottom: 15px;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-}
-.button-group, .preset-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 15px;
-}
 button {
-  padding: 10px 20px;
+  padding: 8px 16px;
   border: none;
   background-color: #0078D4;
   color: #fff;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
 }
 button:hover {
+  background-color: #005A9E;
+}
+select, textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+#resultsContainer {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.card {
+  display: inline-block;
+  width: 150px;
+  text-align: center;
+}
+.card img {
+  width: 150px;
+  height: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+button.selected {
   background-color: #005A9E;
 }
