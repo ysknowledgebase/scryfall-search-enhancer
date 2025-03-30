@@ -72,7 +72,7 @@ button:hover {
   height: 20px;
 }
 
-/* Dual Slider (Attributes) */
+/* Dual Slider (Attributes) Styles */
 .attribute-slider {
   margin-bottom: 10px;
 }
@@ -100,7 +100,7 @@ button:hover {
   position: absolute;
   top: 50%;
   height: 4px;
-  background-color: rgba(0, 123, 255, 0.3);
+  background-color: rgba(0,123,255,0.3);
   transform: translateY(-50%);
   border-radius: 2px;
   display: none;
@@ -115,7 +115,6 @@ button:hover {
   cursor: pointer;
   display: none;
 }
-/* Outline = strict operator, Active = inclusive */
 .slider-handle.outline {
   background-color: #fff;
   border: 2px solid currentColor;

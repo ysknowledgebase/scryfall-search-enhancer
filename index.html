@@ -1,4 +1,4 @@
-<!-- Version 0.5.18 -->
+<!-- Version 0.5.18-final -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,7 +10,7 @@
 <body>
   <div id="enhancer-container">
     <!-- Version Indicator -->
-    <div id="versionIndicator">Version 0.5.18</div>
+    <div id="versionIndicator">Version 0.5.18-final</div>
     
     <!-- 1. Format Selector -->
     <div class="option-group" id="formatGroup">
@@ -29,14 +29,14 @@
       </div>
     </div>
     
-    <!-- 2. Attributes Section -->
+    <!-- 2. Attributes Section (Dual-handle sliders for mana value, power, toughness) -->
     <div class="option-group" id="attributeGroup">
       <!-- Mana Value Slider -->
       <div class="attribute-slider" id="cmcSlider">
         <span class="attr-label">Mana Value (cmc):</span>
         <div class="dual-slider">
           <div class="slider-track"></div>
-          <!-- Handles will appear when the user clicks -->
+          <!-- Lower and Upper handles (initially hidden) -->
           <div class="slider-handle lower-handle" id="cmcLowerHandle"></div>
           <div class="slider-handle upper-handle" id="cmcUpperHandle"></div>
           <div class="slider-fill" id="cmcFill"></div>
