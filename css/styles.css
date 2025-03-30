@@ -1,4 +1,4 @@
-/* Version 0.5.12 */
+/* Version 0.5.16 */
 /* styles.css */
 body {
   font-family: Arial, sans-serif;
@@ -71,6 +71,88 @@ button:hover {
   width: 20px;
   height: 20px;
 }
+
+/* Dual Slider (Attribute) Styles */
+.attribute-slider {
+  margin-bottom: 10px;
+}
+.attribute-slider .attr-label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.dual-slider {
+  position: relative;
+  height: 40px;
+  margin-bottom: 5px;
+}
+.slider-track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background-color: #ddd;
+  transform: translateY(-50%);
+  border-radius: 2px;
+}
+.slider-fill {
+  position: absolute;
+  top: 50%;
+  height: 4px;
+  background-color: rgba(0, 123, 255, 0.3);
+  transform: translateY(-50%);
+  border-radius: 2px;
+  display: none;
+}
+.slider-handle {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  display: none;
+}
+.slider-handle.outline {
+  background-color: #fff;
+  border: 2px solid currentColor;
+}
+.slider-handle.active {
+  background-color: currentColor;
+  border: 2px solid currentColor;
+}
+.slider-scale {
+  position: absolute;
+  top: 38px;
+  left: 0;
+  right: 0;
+  height: 20px;
+}
+.slider-scale .tick {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 6px;
+  background-color: #333;
+}
+.slider-scale .tick-label {
+  position: absolute;
+  top: 6px;
+  font-size: 10px;
+  transform: translateX(-50%);
+}
+
+/* Attribute color assignment */
+#cmcSlider .slider-handle { color: green; }
+#powSlider .slider-handle { color: red; }
+#touSlider .slider-handle { color: blue; }
+#cmcSlider .slider-fill { background-color: rgba(0,128,0,0.3); }
+#powSlider .slider-fill { background-color: rgba(255,0,0,0.3); }
+#touSlider .slider-fill { background-color: rgba(0,0,255,0.3); }
+
+/* Expansions */
 #expansionsContainer {
   display: flex;
   flex-direction: column;
@@ -84,7 +166,7 @@ button:hover {
   cursor: pointer;
 }
 .expansion-group {
-  display: none;  /* collapsed by default */
+  display: none;
   flex-wrap: wrap;
   gap: 5px;
   margin-bottom: 10px;
@@ -100,6 +182,8 @@ button:hover {
 .expansion-clear-btn {
   background-color: #dc3545;
 }
+
+/* Search Buttons */
 #searchButtons {
   display: flex;
   justify-content: center;
@@ -113,6 +197,8 @@ button:hover {
 .action-btn:hover {
   background-color: #218838;
 }
+
+/* Preset Section */
 #preset-section {
   border-top: 1px solid #ccc;
   padding-top: 15px;
@@ -120,6 +206,17 @@ button:hover {
 #preset-section h3 {
   margin-top: 0;
 }
+
+/* Rarity Buttons */
+.rarity-btn {
+  background-color: transparent;
+  border: 2px solid;
+  color: #000;
+}
+.rarity-btn.selected {
+  color: #fff;
+}
+
 @media (max-width: 600px) {
   #enhancer-container {
     margin: 10px;
@@ -129,14 +226,4 @@ button:hover {
     flex-direction: column;
     align-items: stretch;
   }
-}
-/* Rarity buttons: default state shows transparent background with a 2px colored border and black text.
-   When selected, the background fills with the designated color and text becomes white. */
-.rarity-btn {
-  background-color: transparent;
-  border: 2px solid; /* border-color set via JS */
-  color: #000;
-}
-.rarity-btn.selected {
-  color: #fff;
 }
