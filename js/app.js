@@ -1,4 +1,4 @@
-/* Version 0.5.11 */
+/* Version 0.5.12 */
 // CONFIG object – includes formats, original color scheme, types, and rarities.
 const CONFIG = {
   formatData: {
@@ -151,7 +151,98 @@ let expansionsInserted = new Map();
 let expansionsCycleIdx = new Map();
 let quotesInserted = false;
 
-// On DOMContentLoaded, attach event listeners and build UI.
+// Autosave: Save current search state as an autosave preset (cycling autosave_1, autosave_2, autosave_3).
+function autoSaveSearch(){
+  const settings = getSearchSettings();
+  const wrapper = { timestamp: Date.now(), settings: settings };
+  // Cycle autosave keys.
+  if(localStorage.getItem("autosave_3")){
+    localStorage.removeItem("autosave_3");
+  }
+  if(localStorage.getItem("autosave_2")){
+    localStorage.setItem("autosave_3", localStorage.getItem("autosave_2"));
+    localStorage.removeItem("autosave_2");
+  }
+  if(localStorage.getItem("autosave_1")){
+    localStorage.setItem("autosave_2", localStorage.getItem("autosave_1"));
+    localStorage.removeItem("autosave_1");
+  }
+  localStorage.setItem("autosave_1", JSON.stringify(wrapper));
+  updatePresetDropdown();
+}
+
+// getSearchSettings: Gather current search state.
+function getSearchSettings(){
+  let format = document.getElementById("format_selector").value;
+  let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
+  let types = [];
+  let partial = (document.getElementById("typePartialToggle").textContent.trim() === "≈");
+  document.querySelectorAll(".type-btn").forEach(btn => {
+    let state = btn.dataset.state;
+    let type = btn.getAttribute("data-type");
+    if(state !== "default"){
+      types.push({ type: type, state: state });
+    }
+  });
+  let rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
+  let oracle = document.getElementById("oracle").value.trim();
+  // Compute jump URL using performSearch logic.
+  let queryParts = [];
+  if(format){
+    let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
+    if(fmtObj && fmtObj.sets){
+      let clause = "(" + fmtObj.sets.map(s => "set:" + s).join(" OR ") + ")";
+      queryParts.push(clause);
+    } else {
+      queryParts.push("is:" + format);
+    }
+  }
+  if(colors.length > 0){
+    let colorToggle = document.getElementById("colorToggle").textContent.trim();
+    queryParts.push((colorToggle === "Exactly" ? "c=" : "c<=") + colors.join(""));
+  }
+  // For types, if partial toggle is active, group included types.
+  if(partial){
+    let included = [];
+    document.querySelectorAll(".type-btn").forEach(btn => {
+      if(btn.dataset.state === "include"){
+        included.push("type:" + btn.getAttribute("data-type"));
+      }
+    });
+    if(included.length > 0){
+      queryParts.push("(" + included.join(" OR ") + ")");
+    }
+  } else {
+    document.querySelectorAll(".type-btn").forEach(btn => {
+      let state = btn.dataset.state;
+      let type = btn.getAttribute("data-type");
+      if(state === "include"){
+        queryParts.push("t:" + type);
+      } else if(state === "exclude"){
+        queryParts.push("-t:" + type);
+      }
+    });
+  }
+  if(rarities.length > 0){
+    const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
+    rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
+  }
+  if(oracle){
+    queryParts.push("oracle:" + oracle);
+    queryParts.push("(game:paper)");
+  }
+  let url = "https://scryfall.com/search?as=grid&order=name&q=" + encodeURIComponent(queryParts.join(" "));
+  return {
+    format: format,
+    colors: colors,
+    types: types,
+    rarities: rarities,
+    oracle: oracle,
+    url: url
+  };
+}
+
+// On DOMContentLoaded.
 document.addEventListener("DOMContentLoaded", function(){
   // --- Color Buttons ---
   document.querySelectorAll(".color-btn").forEach(btn => {
@@ -281,12 +372,17 @@ document.addEventListener("DOMContentLoaded", function(){
   });
   
   // --- Action Buttons ---
-  document.getElementById("searchActionButton").addEventListener("click", performSearch);
-  document.getElementById("searchFrontierActionButton").addEventListener("click", function(){
-    document.getElementById("format_selector").value = "frontier";
+  document.getElementById("searchActionButton").addEventListener("click", function(){
+    autoSaveSearch();
     performSearch();
   });
-  document.getElementById("clearAllButton").addEventListener("click", clearForm);
+  document.getElementById("searchFrontierActionButton").addEventListener("click", function(){
+    document.getElementById("format_selector").value = "frontier";
+    autoSaveSearch();
+    performSearch();
+  });
+  // (Assuming a "Clear All" button exists if needed)
+  // document.getElementById("clearAllButton").addEventListener("click", clearForm);
   
   // --- Preset Management ---
   document.getElementById("savePresetButton").addEventListener("click", savePreset);
@@ -301,7 +397,7 @@ document.addEventListener("DOMContentLoaded", function(){
   updatePresetDropdown();
 });
 
-// Helper: Update type button style based on its state.
+// Helper: Update type button style.
 function updateTypeButtonStyle(btn) {
   let state = btn.dataset.state;
   if(state === "default"){
@@ -454,13 +550,13 @@ function removeLastOccurrence(oracle, sub) {
 }
 
 // Build Scryfall query and redirect.
-// For types, if the partial toggle ("≈") is active, group all included types with OR.
+// For types, if the partial toggle ("≈") is active, group included types with OR.
 function performSearch(){
   let format = document.getElementById("format_selector").value;
   let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
   let queryParts = [];
   
-  // Format handling.
+  // Format.
   if(format){
     let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
     if(fmtObj && fmtObj.sets){
@@ -477,7 +573,7 @@ function performSearch(){
     queryParts.push((colorToggle === "Exactly" ? "c=" : "c<=") + colors.join(""));
   }
   
-  // Type handling.
+  // Types.
   let partial = (document.getElementById("typePartialToggle").textContent.trim() === "≈");
   if(partial){
     let included = [];
@@ -508,7 +604,7 @@ function performSearch(){
     rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
   }
   
-  // Oracle text.
+  // Oracle.
   let oracle = document.getElementById("oracle").value.trim();
   if(oracle){
     queryParts.push("oracle:" + oracle);
@@ -524,65 +620,17 @@ function performSearch(){
 }
 
 // Preset management functions.
-// Save preset: Save current search state along with the computed jumping URL.
-// If the user leaves the preset name blank, use the URL as the preset name.
+// Save preset: saves current search state along with computed jump URL and timestamp.
+// If preset name is blank, use the URL as the name.
 function savePreset(){
   let presetName = prompt("Enter a name for this preset (leave blank to use URL):");
-  let format = document.getElementById("format_selector").value;
-  let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
-  let types = [];
-  let partial = (document.getElementById("typePartialToggle").textContent.trim() === "≈");
-  document.querySelectorAll(".type-btn").forEach(btn => {
-    let state = btn.dataset.state;
-    let type = btn.getAttribute("data-type");
-    if(state === "include") {
-      types.push((partial ? "≈t:" : "t:") + type);
-    } else if(state === "exclude") {
-      types.push("-" + (partial ? "≈t:" : "t:") + type);
-    }
-  });
-  let rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
-  let oracle = document.getElementById("oracle").value.trim();
-  
-  let queryParts = [];
-  if(format){
-    let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
-    if(fmtObj && fmtObj.sets){
-      let clause = "(" + fmtObj.sets.map(s => "set:" + s).join(" OR ") + ")";
-      queryParts.push(clause);
-    } else {
-      queryParts.push("is:" + format);
-    }
-  }
-  if(colors.length > 0){
-    let colorToggle = document.getElementById("colorToggle").textContent.trim();
-    queryParts.push((colorToggle === "Exactly" ? "c=" : "c<=") + colors.join(""));
-  }
-  queryParts = queryParts.concat(types);
-  if(rarities.length > 0){
-    const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
-    rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
-  }
-  if(oracle){
-    queryParts.push("oracle:" + oracle);
-    queryParts.push("(game:paper)");
-  }
-  let url = "https://scryfall.com/search?as=grid&order=name&q=" + encodeURIComponent(queryParts.join(" "));
-  
-  let preset = {
-    format: format,
-    colors: colors,
-    types: Array.from(document.querySelectorAll(".type-btn")).map(btn => {
-      return { type: btn.getAttribute("data-type"), state: btn.dataset.state };
-    }),
-    rarities: rarities,
-    oracle: oracle,
-    url: url
-  };
+  let settings = getSearchSettings();
+  // Add timestamp.
+  settings.timestamp = Date.now();
   if(!presetName || presetName.trim() === ""){
-    presetName = url;
+    presetName = settings.url;
   }
-  localStorage.setItem("preset_" + presetName, JSON.stringify(preset));
+  localStorage.setItem("preset_" + presetName, JSON.stringify(settings));
   updatePresetDropdown();
   alert("Preset saved as: " + presetName);
 }
@@ -656,21 +704,45 @@ function deletePreset(){
   }
 }
 function updatePresetDropdown(){
+  let autosaves = [];
+  let presets = [];
+  Object.keys(localStorage).forEach(key => {
+    if(key.startsWith("autosave_")){
+      try {
+        let item = JSON.parse(localStorage.getItem(key));
+        autosaves.push({ key: key, timestamp: item.timestamp || 0 });
+      } catch(e){}
+    } else if(key.startsWith("preset_")){
+      try {
+        let item = JSON.parse(localStorage.getItem(key));
+        presets.push({ key: key, timestamp: item.timestamp || 0 });
+      } catch(e){}
+    }
+  });
+  // Sort autosaves and presets descending by timestamp.
+  autosaves.sort((a,b) => b.timestamp - a.timestamp);
+  presets.sort((a,b) => b.timestamp - a.timestamp);
+  
   let dropdown = document.getElementById("presetDropdown");
   dropdown.innerHTML = "<option value=''>Select a preset...</option>";
-  Object.keys(localStorage).forEach(key => {
-    if(key.startsWith("preset_")){
-      let option = document.createElement("option");
-      option.value = key;
-      option.textContent = key.replace("preset_", "");
-      dropdown.appendChild(option);
-    }
+  autosaves.forEach(item => {
+    let option = document.createElement("option");
+    option.value = item.key;
+    option.textContent = item.key;
+    dropdown.appendChild(option);
+  });
+  presets.forEach(item => {
+    let option = document.createElement("option");
+    option.value = item.key;
+    // Strip "preset_" prefix for display.
+    option.textContent = item.key.replace("preset_", "");
+    dropdown.appendChild(option);
   });
 }
 function exportPresets(){
   let exportObj = {};
   Object.keys(localStorage).forEach(key => {
-    if(key.startsWith("preset_")){
+    if(key.startsWith("preset_") || key.startsWith("autosave_")){
       exportObj[key] = JSON.parse(localStorage.getItem(key));
     }
   });
@@ -697,4 +769,94 @@ function importPresetsFromFile(event){
     }
   };
   reader.readAsText(file);
+}
+
+// Also, autoSaveSearch is called when a search is performed.
+function autoSaveSearch(){
+  const settings = getSearchSettings();
+  // Wrap settings with a timestamp.
+  const wrapper = { timestamp: Date.now(), ...settings };
+  // Cycle autosave keys: autosave_1, autosave_2, autosave_3.
+  if(localStorage.getItem("autosave_3")){
+    localStorage.removeItem("autosave_3");
+  }
+  if(localStorage.getItem("autosave_2")){
+    localStorage.setItem("autosave_3", localStorage.getItem("autosave_2"));
+    localStorage.removeItem("autosave_2");
+  }
+  if(localStorage.getItem("autosave_1")){
+    localStorage.setItem("autosave_2", localStorage.getItem("autosave_1"));
+    localStorage.removeItem("autosave_1");
+  }
+  localStorage.setItem("autosave_1", JSON.stringify(wrapper));
+  updatePresetDropdown();
+}
+
+// getSearchSettings: Gather current search state.
+function getSearchSettings(){
+  let format = document.getElementById("format_selector").value;
+  let colors = Array.from(document.querySelectorAll('input[name="color[]"]:checked')).map(el => el.value);
+  let types = [];
+  let partial = (document.getElementById("typePartialToggle").textContent.trim() === "≈");
+  document.querySelectorAll(".type-btn").forEach(btn => {
+    let state = btn.dataset.state;
+    let type = btn.getAttribute("data-type");
+    if(state !== "default"){
+      types.push({ type: type, state: state });
+    }
+  });
+  let rarities = Array.from(document.querySelectorAll('input[name="rarity[]"]:checked')).map(el => el.value);
+  let oracle = document.getElementById("oracle").value.trim();
+  let queryParts = [];
+  if(format){
+    let fmtObj = CONFIG.formatData.formats.find(f => f.value === format);
+    if(fmtObj && fmtObj.sets){
+      let clause = "(" + fmtObj.sets.map(s => "set:" + s).join(" OR ") + ")";
+      queryParts.push(clause);
+    } else {
+      queryParts.push("is:" + format);
+    }
+  }
+  if(colors.length > 0){
+    let colorToggle = document.getElementById("colorToggle").textContent.trim();
+    queryParts.push((colorToggle === "Exactly" ? "c=" : "c<=") + colors.join(""));
+  }
+  if(partial){
+    let included = [];
+    document.querySelectorAll(".type-btn").forEach(btn => {
+      if(btn.dataset.state === "include"){
+        included.push("type:" + btn.getAttribute("data-type"));
+      }
+    });
+    if(included.length > 0){
+      queryParts.push("(" + included.join(" OR ") + ")");
+    }
+  } else {
+    document.querySelectorAll(".type-btn").forEach(btn => {
+      let state = btn.dataset.state;
+      let type = btn.getAttribute("data-type");
+      if(state === "include"){
+        queryParts.push("t:" + type);
+      } else if(state === "exclude"){
+        queryParts.push("-t:" + type);
+      }
+    });
+  }
+  if(rarities.length > 0){
+    const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
+    rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
+  }
+  if(oracle){
+    queryParts.push("oracle:" + oracle);
+    queryParts.push("(game:paper)");
+  }
+  let url = "https://scryfall.com/search?as=grid&order=name&q=" + encodeURIComponent(queryParts.join(" "));
+  return {
+    format: format,
+    colors: colors,
+    types: types,
+    rarities: rarities,
+    oracle: oracle,
+    url: url
+  };
 }
