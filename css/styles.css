@@ -72,7 +72,7 @@ button:hover {
   height: 20px;
 }
 
-/* Dual Slider (Attribute) Styles */
+/* Dual Slider (Attributes) */
 .attribute-slider {
   margin-bottom: 10px;
 }
@@ -115,6 +115,7 @@ button:hover {
   cursor: pointer;
   display: none;
 }
+/* Outline = strict operator, Active = inclusive */
 .slider-handle.outline {
   background-color: #fff;
   border: 2px solid currentColor;
@@ -144,7 +145,7 @@ button:hover {
   transform: translateX(-50%);
 }
 
-/* Attribute color assignment */
+/* Attribute Colors */
 #cmcSlider .slider-handle { color: green; }
 #powSlider .slider-handle { color: red; }
 #touSlider .slider-handle { color: blue; }
