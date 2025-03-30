@@ -56,7 +56,47 @@ const EXPANSIONS_DATA = {
       { label: "LB", expansions: ["library", "libraries"] },
       { label: "hand", expansions: ["hand"] },
       { label: "life", expansions: ["life"] },
-      { label: "perm", expansions: ["permanent"] }
+      { label: "perm", expansions: ["permanent"] },
+      { label: "NC", expansions: ["noncreature"] },
+      { label: "spell", expansions: ["spell"] },
+      { label: "~", expansions: ["~"] },
+      { label: "Tkn", expansions: ["token"] },
+      { label: "Cnt", expansions: ["counter"] },
+      { label: "mana", expansions: ["mana"] },
+      { label: "pwr", expansions: ["power"] },
+      { label: "tgh", expansions: ["toughness"] }
+    ],
+    [
+      { label: "cyc", expansions: ["cycle"] },
+      { label: "mil", expansions: ["mill"] },
+      { label: "lev", expansions: ["leave"] },
+      { label: "atk", expansions: ["attack"] },
+      { label: "blk", expansions: ["block"] },
+      { label: "dsd", expansions: ["descend"] },
+      { label: "pay", expansions: ["pay"] },
+      { label: "dst", expansions: ["destroy"] },
+      { label: "DC", expansions: ["discard"] },
+      { label: "EX", expansions: ["exile"] },
+      { label: "sac", expansions: ["sacrifice"] },
+      { label: "dmg", expansions: ["damage"] },
+      { label: "lose", expansions: ["lose", "lost"] },
+      { label: "gain", expansions: ["gain"] },
+      { label: "draw", expansions: ["draw"] },
+      { label: "die", expansions: ["die", "died"] },
+      { label: "rtn", expansions: ["return"] },
+      { label: "cast", expansions: ["cast"] },
+      { label: "play", expansions: ["play"] },
+      { label: "add", expansions: ["add"] },
+      { label: "tap", expansions: ["tap"] }
+    ],
+    [
+      { label: "ACT", expansions: ['": "'] },
+      { label: "EB", expansions: ["enter battlefield", "enters", "enters the battlefield", "entered"] },
+      { label: "+1", expansions: ["+1/+1"] },
+      { label: "\"\"", expansions: undefined },
+      { label: "you", expansions: ["you"] },
+      { label: "ctrl", expansions: ["control"] },
+      { label: "x", expansions: ['" x "'] }
     ]
   ],
   typesExpansions: [
@@ -73,9 +113,9 @@ const EXPANSIONS_DATA = {
   abilitiesExpansions: [
     { label: "Deathtouch", expansions: ["deathtouch"] },
     { label: "Defender", expansions: ["defender"] },
-    { label: "DoubleStrike", expansions: ["double strike"] },
+    { label: "Double Strike", expansions: ["double strike"] },
     { label: "Equip", expansions: ["equip"] },
-    { label: "FirstStrike", expansions: ["first strike"] },
+    { label: "First Strike", expansions: ["first strike"] },
     { label: "Flash", expansions: ["flash"] },
     { label: "Flying", expansions: ["flying"] },
     { label: "Haste", expansions: ["haste"] },
@@ -132,22 +172,21 @@ function setupDualSlider(sliderId, attrName) {
   upperHandle.style.display = "none";
   fill.style.display = "none";
   
-  // Helper: convert value to pixel position.
+  // Helpers.
   function valueToPos(val) {
     return (val - min) / (max - min) * slider.offsetWidth;
   }
-  // Helper: convert pixel position to nearest integer.
   function posToValue(pos) {
     return Math.round(pos / slider.offsetWidth * (max - min) + min);
   }
   
-  // Click handler on slider.
+  // Click handler on slider track.
   slider.addEventListener("click", function(e) {
     if(e.target.classList.contains("slider-handle")) return;
     const rect = slider.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     if(lowerHandle.style.display === "none" && upperHandle.style.display === "none"){
-      // Add first handle: set as exact "=".
+      // Add first handle.
       lowerHandle.style.display = "block";
       let snappedVal = posToValue(clickX);
       let snappedX = valueToPos(snappedVal);
@@ -159,7 +198,7 @@ function setupDualSlider(sliderId, attrName) {
     } else if(lowerHandle.style.display !== "none" && upperHandle.style.display === "none"){
       let currentX = parseFloat(lowerHandle.style.left);
       if(clickX > currentX){
-        // Add second handle: switch to range mode.
+        // Add second handle.
         upperHandle.style.display = "block";
         let snappedVal = posToValue(clickX);
         let snappedX = valueToPos(snappedVal);
@@ -167,12 +206,10 @@ function setupDualSlider(sliderId, attrName) {
         attributes[attrName].upper = snappedVal;
         attributes[attrName].upperOp = "<=";
         upperHandle.className = "slider-handle upper-handle active";
-        // Update lower handle operator to inclusive.
         attributes[attrName].lowerOp = ">=";
         lowerHandle.className = "slider-handle lower-handle active";
         updateFill();
       } else {
-        // Reposition lower handle.
         let snappedVal = posToValue(clickX);
         let snappedX = valueToPos(snappedVal);
         lowerHandle.style.left = snappedX + "px";
@@ -180,7 +217,7 @@ function setupDualSlider(sliderId, attrName) {
         updateFill();
       }
     } else {
-      // Both handles exist; reposition the closer one.
+      // Both handles exist; reposition the nearer one.
       let lowerX = parseFloat(lowerHandle.style.left);
       let upperX = parseFloat(upperHandle.style.left);
       if(Math.abs(clickX - lowerX) < Math.abs(clickX - upperX)){
@@ -198,7 +235,7 @@ function setupDualSlider(sliderId, attrName) {
     }
   });
   
-  // Double-click handler to remove handle.
+  // Double-click handler: remove handle.
   function addDoubleClickToHandle(handle, isLower) {
     handle.addEventListener("dblclick", function(e) {
       e.stopPropagation();
@@ -258,7 +295,6 @@ function setupDualSlider(sliderId, attrName) {
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mouseup", onMouseUp);
     });
-    // Toggle operator on click.
     handle.addEventListener("click", function(e) {
       e.stopPropagation();
       if(isLower){
@@ -387,10 +423,27 @@ function getSearchSettings(){
     }
   });
   if(oracle){
-    // Split oracle text into words and prepend each with oracle:
-    let words = oracle.split(/\s+/);
-    let oracleQuery = words.map(w => "oracle:" + w).join(" ");
-    queryParts.push(oracleQuery);
+    // Use regex to capture quoted phrases and remaining words.
+    let exactMatches = [];
+    let remainder = oracle;
+    // Match quoted phrases
+    let quoteRegex = /"([^"]+)"/g;
+    let match;
+    while((match = quoteRegex.exec(oracle)) !== null){
+      exactMatches.push(match[1]);
+      // Remove the matched phrase from remainder.
+      remainder = remainder.replace(match[0], "").trim();
+    }
+    // For exact matches, add oracle:"phrase" as is.
+    exactMatches.forEach(phrase => {
+      queryParts.push(`oracle:"${phrase}"`);
+    });
+    // For remainder, split by whitespace and prefix each with oracle:
+    if(remainder){
+      let words = remainder.split(/\s+/);
+      let wordQueries = words.map(w => "oracle:" + w).join(" ");
+      queryParts.push(wordQueries);
+    }
     queryParts.push("(game:paper)");
   } else {
     queryParts.push("(game:paper)");
@@ -588,21 +641,27 @@ function importPresetsFromFile(event){
   reader.readAsText(file);
 }
 
-/* --- Helper for Preset Loading --- */
+//////////////////////
+// Helper for Preset Loading
+//////////////////////
 function valueToPos(val) {
   const slider = document.getElementById("cmcSlider");
   const min = 0, max = 20;
   return (val - min) / (max - min) * slider.offsetWidth;
 }
 
-/* --- Search Function --- */
+//////////////////////
+// Search Function
+//////////////////////
 function performSearch(){
   let settings = getSearchSettings();
   console.log("Query:", settings.url);
   window.location.href = settings.url;
 }
 
-/* --- Type Button Style Update --- */
+//////////////////////
+// Type Button Style Update
+//////////////////////
 function updateTypeButtonStyle(btn){
   let state = btn.dataset.state;
   if(state === "default"){
@@ -623,7 +682,9 @@ function updateTypeButtonStyle(btn){
   }
 }
 
-/* --- Expansions Section --- */
+//////////////////////
+// Expansions Section
+//////////////////////
 function buildExpansionsToggles(){
   const container = document.getElementById("expansionsContainer");
   container.innerHTML = "";
@@ -650,6 +711,7 @@ function buildExpansionsToggles(){
     container.appendChild(header);
     container.appendChild(group);
   }
+  // Use full original expansions.
   let common = [];
   EXPANSIONS_DATA.common.forEach(row => {
     row.forEach(item => { common.push(item); });
