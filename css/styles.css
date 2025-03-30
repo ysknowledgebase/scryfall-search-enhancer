@@ -1,4 +1,4 @@
-/* Version 0.5.21 */
+/* Version 0.5.23 */
 /* styles.css */
 body {
   font-family: Arial, sans-serif;
@@ -72,7 +72,7 @@ button:hover {
   height: 20px;
 }
 
-/* Dual Slider Styles */
+/* Dual Slider (Reverting to 0.5.19-final behavior) */
 .attribute-slider {
   margin-bottom: 15px;
   display: flex;
@@ -88,6 +88,7 @@ button:hover {
   height: 40px;
   flex: 1;
   margin-right: 10px;
+  /* Use a fixed height to match older version */
 }
 .slider-track {
   position: absolute;

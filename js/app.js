@@ -1,4 +1,4 @@
-/* Version 0.5.21 */
+/* Version 0.5.23 */
 //////////////////////
 // CONFIG & DATA
 //////////////////////
@@ -142,7 +142,7 @@ let attributes = {
 };
 
 //////////////////////
-// DUAL SLIDER SETUP
+// DUAL SLIDER SETUP (Reverted to 0.5.19-final behavior)
 //////////////////////
 function setupDualSlider(sliderId, attrName) {
   const slider = document.getElementById(sliderId);
@@ -151,14 +151,14 @@ function setupDualSlider(sliderId, attrName) {
   const scale = slider.querySelector(".slider-scale");
   const min = 0, max = 20;
   
-  // Build tick marks.
+  // Build tick marks (as in older version).
   scale.innerHTML = "";
   for (let i = min; i <= max; i++) {
-    const tick = document.createElement("div");
+    let tick = document.createElement("div");
     tick.className = "tick";
     tick.style.left = ((i - min) / (max - min) * 100) + "%";
     scale.appendChild(tick);
-    const tickLabel = document.createElement("div");
+    let tickLabel = document.createElement("div");
     tickLabel.className = "tick-label";
     tickLabel.style.left = ((i - min) / (max - min) * 100) + "%";
     tickLabel.textContent = i;
@@ -172,7 +172,7 @@ function setupDualSlider(sliderId, attrName) {
   upperHandle.style.display = "none";
   fill.style.display = "none";
   
-  // Helpers.
+  // Helpers: (use original conversion functions)
   function valueToPos(val) {
     return (val - min) / (max - min) * slider.offsetWidth;
   }
@@ -180,29 +180,25 @@ function setupDualSlider(sliderId, attrName) {
     return Math.round(pos / slider.offsetWidth * (max - min) + min);
   }
   
-  // Click handler on slider track.
+  // Click handler on track.
   slider.addEventListener("click", function(e) {
-    if(e.target.classList.contains("slider-handle")) return;
+    if (e.target.classList.contains("slider-handle")) return;
     const rect = slider.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    if(lowerHandle.style.display === "none" && upperHandle.style.display === "none"){
-      // Add first handle.
+    if(lowerHandle.style.display === "none" && upperHandle.style.display === "none") {
       lowerHandle.style.display = "block";
       let snappedVal = posToValue(clickX);
-      let snappedX = valueToPos(snappedVal);
-      lowerHandle.style.left = snappedX + "px";
+      lowerHandle.style.left = valueToPos(snappedVal) + "px";
       attributes[attrName].lower = snappedVal;
       attributes[attrName].lowerOp = "=";
       lowerHandle.className = "slider-handle lower-handle active";
       updateFill();
-    } else if(lowerHandle.style.display !== "none" && upperHandle.style.display === "none"){
-      let currentX = parseFloat(lowerHandle.style.left);
-      if(clickX > currentX){
-        // Add second handle.
+    } else if(lowerHandle.style.display !== "none" && upperHandle.style.display === "none") {
+      let curX = parseFloat(lowerHandle.style.left);
+      if(clickX > curX) {
         upperHandle.style.display = "block";
         let snappedVal = posToValue(clickX);
-        let snappedX = valueToPos(snappedVal);
-        upperHandle.style.left = snappedX + "px";
+        upperHandle.style.left = valueToPos(snappedVal) + "px";
         attributes[attrName].upper = snappedVal;
         attributes[attrName].upperOp = "<=";
         upperHandle.className = "slider-handle upper-handle active";
@@ -211,39 +207,35 @@ function setupDualSlider(sliderId, attrName) {
         updateFill();
       } else {
         let snappedVal = posToValue(clickX);
-        let snappedX = valueToPos(snappedVal);
-        lowerHandle.style.left = snappedX + "px";
+        lowerHandle.style.left = valueToPos(snappedVal) + "px";
         attributes[attrName].lower = snappedVal;
         updateFill();
       }
     } else {
-      // Both handles exist; reposition the nearer one.
       let lowerX = parseFloat(lowerHandle.style.left);
       let upperX = parseFloat(upperHandle.style.left);
-      if(Math.abs(clickX - lowerX) < Math.abs(clickX - upperX)){
+      if(Math.abs(clickX - lowerX) < Math.abs(clickX - upperX)) {
         let snappedVal = posToValue(clickX);
-        let snappedX = valueToPos(snappedVal);
-        lowerHandle.style.left = snappedX + "px";
+        lowerHandle.style.left = valueToPos(snappedVal) + "px";
         attributes[attrName].lower = snappedVal;
       } else {
         let snappedVal = posToValue(clickX);
-        let snappedX = valueToPos(snappedVal);
-        upperHandle.style.left = snappedX + "px";
+        upperHandle.style.left = valueToPos(snappedVal) + "px";
         attributes[attrName].upper = snappedVal;
       }
       updateFill();
     }
   });
   
-  // Double-click handler: remove handle.
+  // Double-click to remove a handle.
   function addDoubleClickToHandle(handle, isLower) {
     handle.addEventListener("dblclick", function(e) {
       e.stopPropagation();
       handle.style.display = "none";
-      if(isLower){
+      if(isLower) {
         attributes[attrName].lower = null;
         attributes[attrName].lowerOp = "";
-        if(upperHandle.style.display !== "none"){
+        if(upperHandle.style.display !== "none") {
           lowerHandle.style.display = "block";
           lowerHandle.style.left = upperHandle.style.left;
           attributes[attrName].lower = attributes[attrName].upper;
@@ -254,7 +246,7 @@ function setupDualSlider(sliderId, attrName) {
       } else {
         attributes[attrName].upper = null;
         attributes[attrName].upperOp = "";
-        if(lowerHandle.style.display !== "none"){
+        if(lowerHandle.style.display !== "none") {
           attributes[attrName].lowerOp = "=";
           lowerHandle.className = "slider-handle lower-handle active";
         }
@@ -265,30 +257,30 @@ function setupDualSlider(sliderId, attrName) {
   addDoubleClickToHandle(lowerHandle, true);
   addDoubleClickToHandle(upperHandle, false);
   
-  // Draggable behavior.
+  // Draggable functionality (from 0.5.19-final version)
   function makeDraggable(handle, isLower) {
     handle.addEventListener("mousedown", function(e) {
+      e.preventDefault();
       e.stopPropagation();
       const rect = slider.getBoundingClientRect();
       function onMouseMove(e) {
         let newX = e.clientX - rect.left;
-        if(isLower && upperHandle.style.display !== "none"){
+        if(isLower && upperHandle.style.display !== "none") {
           newX = Math.min(newX, parseFloat(upperHandle.style.left));
         }
-        if(!isLower && lowerHandle.style.display !== "none"){
+        if(!isLower && lowerHandle.style.display !== "none") {
           newX = Math.max(newX, parseFloat(lowerHandle.style.left));
         }
         let snappedVal = posToValue(newX);
-        let snappedX = valueToPos(snappedVal);
-        handle.style.left = snappedX + "px";
-        if(isLower){
+        handle.style.left = valueToPos(snappedVal) + "px";
+        if(isLower) {
           attributes[attrName].lower = snappedVal;
         } else {
           attributes[attrName].upper = snappedVal;
         }
         updateFill();
       }
-      function onMouseUp(){
+      function onMouseUp() {
         document.removeEventListener("mousemove", onMouseMove);
         document.removeEventListener("mouseup", onMouseUp);
       }
@@ -297,8 +289,8 @@ function setupDualSlider(sliderId, attrName) {
     });
     handle.addEventListener("click", function(e) {
       e.stopPropagation();
-      if(isLower){
-        if(attributes[attrName].lowerOp === "="){
+      if(isLower) {
+        if(attributes[attrName].lowerOp === "=") {
           attributes[attrName].lowerOp = ">=";
           handle.classList.remove("outline");
           handle.classList.add("active");
@@ -308,7 +300,7 @@ function setupDualSlider(sliderId, attrName) {
           handle.classList.add("outline");
         }
       } else {
-        if(attributes[attrName].upperOp === "<="){
+        if(attributes[attrName].upperOp === "<=") {
           attributes[attrName].upperOp = "<";
           handle.classList.remove("active");
           handle.classList.add("outline");
@@ -323,8 +315,8 @@ function setupDualSlider(sliderId, attrName) {
   makeDraggable(lowerHandle, true);
   makeDraggable(upperHandle, false);
   
-  function updateFill(){
-    if(lowerHandle.style.display === "none" || upperHandle.style.display === "none"){
+  function updateFill() {
+    if(lowerHandle.style.display === "none" || upperHandle.style.display === "none") {
       fill.style.display = "none";
     } else {
       let lowerX = parseFloat(lowerHandle.style.left);
@@ -423,22 +415,18 @@ function getSearchSettings(){
     }
   });
   if(oracle){
-    // Use regex to capture quoted phrases and remaining words.
+    // Parse quoted phrases first.
     let exactMatches = [];
     let remainder = oracle;
-    // Match quoted phrases
     let quoteRegex = /"([^"]+)"/g;
     let match;
     while((match = quoteRegex.exec(oracle)) !== null){
       exactMatches.push(match[1]);
-      // Remove the matched phrase from remainder.
       remainder = remainder.replace(match[0], "").trim();
     }
-    // For exact matches, add oracle:"phrase" as is.
     exactMatches.forEach(phrase => {
       queryParts.push(`oracle:"${phrase}"`);
     });
-    // For remainder, split by whitespace and prefix each with oracle:
     if(remainder){
       let words = remainder.split(/\s+/);
       let wordQueries = words.map(w => "oracle:" + w).join(" ");
@@ -642,7 +630,7 @@ function importPresetsFromFile(event){
 }
 
 //////////////////////
-// Helper for Preset Loading
+// Helper for Preset Loading (slider helper)
 //////////////////////
 function valueToPos(val) {
   const slider = document.getElementById("cmcSlider");
@@ -701,7 +689,32 @@ function buildExpansionsToggles(){
       btn.addEventListener("click", function(){
         const oracle = document.getElementById("oracle");
         if(oracle.value && !oracle.value.endsWith(" ")) oracle.value += " ";
-        oracle.value += item.expansions.join(" ");
+        // If the button has multiple alternatives (toggle behavior), cycle them.
+        if(item.expansions && item.expansions.length > 1){
+          // Use the first alternative if not yet inserted.
+          if(!expansionsInserted.get(item.label)){
+            oracle.value += item.expansions[0] + " ";
+            expansionsInserted.set(item.label, 0);
+          } else {
+            // Cycle to next alternative.
+            let idx = expansionsInserted.get(item.label);
+            // Remove previous alternative.
+            removeLastOccurrence(oracle, item.expansions[idx]);
+            idx = (idx + 1) % item.expansions.length;
+            // Append new alternative.
+            oracle.value += item.expansions[idx] + " ";
+            expansionsInserted.set(item.label, idx);
+          }
+        } else {
+          // Single alternative: toggle its insertion.
+          if(!expansionsInserted.get(item.label)){
+            oracle.value += item.expansions.join(" ") + " ";
+            expansionsInserted.set(item.label, 0);
+          } else {
+            removeLastOccurrence(oracle, item.expansions.join(" "));
+            expansionsInserted.delete(item.label);
+          }
+        }
       });
       group.appendChild(btn);
     });
@@ -711,7 +724,6 @@ function buildExpansionsToggles(){
     container.appendChild(header);
     container.appendChild(group);
   }
-  // Use full original expansions.
   let common = [];
   EXPANSIONS_DATA.common.forEach(row => {
     row.forEach(item => { common.push(item); });
@@ -724,8 +736,20 @@ function buildExpansionsToggles(){
   clearBtn.textContent = "Clear Expansions";
   clearBtn.addEventListener("click", function(){
     document.getElementById("oracle").value = "";
+    expansionsInserted.clear();
   });
   container.appendChild(clearBtn);
+}
+
+//////////////////////
+// Utility: Remove last occurrence of a substring.
+//////////////////////
+function removeLastOccurrence(oracleEl, sub) {
+  let text = oracleEl.value;
+  let idx = text.lastIndexOf(sub);
+  if(idx !== -1){
+    oracleEl.value = text.substring(0, idx) + text.substring(idx + sub.length);
+  }
 }
 
 //////////////////////
