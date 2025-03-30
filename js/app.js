@@ -47,16 +47,45 @@ const EXPANSIONS_DATA = {
       { label: "Whev", expansions: ["whenever"] },
       { label: "each", expansions: ["each"] },
       { label: "all", expansions: ["all"] }
+    ],
+    [
+      { label: "opp", expansions: ["opponent"] },
+      { label: "plr", expansions: ["player"] },
+      { label: "BF", expansions: ["battlefield"] },
+      { label: "GrY", expansions: ["graveyard"] },
+      { label: "LB", expansions: ["library", "libraries"] },
+      { label: "hand", expansions: ["hand"] },
+      { label: "life", expansions: ["life"] },
+      { label: "perm", expansions: ["permanent"] }
     ]
-    // ... (other rows as needed)
   ],
   typesExpansions: [
-    { label: "Art", expansions: ["artifact"] }
-    // ... (other items)
+    { label: "Art", expansions: ["artifact"] },
+    { label: "Ench", expansions: ["enchantment"] },
+    { label: "Aura", expansions: ["aura"] },
+    { label: "Creat", expansions: ["creature"] },
+    { label: "Sorc", expansions: ["sorcery"] },
+    { label: "Inst", expansions: ["instant"] },
+    { label: "Eqp", expansions: ["equipment"] },
+    { label: "Land", expansions: ["land"] },
+    { label: "PW", expansions: ["planeswalker"] }
   ],
   abilitiesExpansions: [
-    { label: "Deathtouch", expansions: ["deathtouch"] }
-    // ... (other items)
+    { label: "Deathtouch", expansions: ["deathtouch"] },
+    { label: "Defender", expansions: ["defender"] },
+    { label: "DoubleStrike", expansions: ["double strike"] },
+    { label: "Equip", expansions: ["equip"] },
+    { label: "FirstStrike", expansions: ["first strike"] },
+    { label: "Flash", expansions: ["flash"] },
+    { label: "Flying", expansions: ["flying"] },
+    { label: "Haste", expansions: ["haste"] },
+    { label: "Hexproof", expansions: ["hexproof"] },
+    { label: "Indestructible", expansions: ["indestructible"] },
+    { label: "Lifelink", expansions: ["lifelink"] },
+    { label: "Protection", expansions: ["protection"] },
+    { label: "Reach", expansions: ["reach"] },
+    { label: "Trample", expansions: ["trample"] },
+    { label: "Vigilance", expansions: ["vigilance"] }
   ]
 };
 
@@ -103,21 +132,22 @@ function setupDualSlider(sliderId, attrName) {
   upperHandle.style.display = "none";
   fill.style.display = "none";
   
-  // Helpers.
+  // Helper: convert value to pixel position.
   function valueToPos(val) {
     return (val - min) / (max - min) * slider.offsetWidth;
   }
+  // Helper: convert pixel position to nearest integer.
   function posToValue(pos) {
     return Math.round(pos / slider.offsetWidth * (max - min) + min);
   }
   
-  // Click handler on slider track.
+  // Click handler on slider.
   slider.addEventListener("click", function(e) {
     if(e.target.classList.contains("slider-handle")) return;
     const rect = slider.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     if(lowerHandle.style.display === "none" && upperHandle.style.display === "none"){
-      // Add first handle (exact match "=") and show as active.
+      // Add first handle: set as exact "=".
       lowerHandle.style.display = "block";
       let snappedVal = posToValue(clickX);
       let snappedX = valueToPos(snappedVal);
@@ -129,7 +159,7 @@ function setupDualSlider(sliderId, attrName) {
     } else if(lowerHandle.style.display !== "none" && upperHandle.style.display === "none"){
       let currentX = parseFloat(lowerHandle.style.left);
       if(clickX > currentX){
-        // Add second handle: set lower to ">=" and upper to "<=".
+        // Add second handle: switch to range mode.
         upperHandle.style.display = "block";
         let snappedVal = posToValue(clickX);
         let snappedX = valueToPos(snappedVal);
@@ -137,10 +167,12 @@ function setupDualSlider(sliderId, attrName) {
         attributes[attrName].upper = snappedVal;
         attributes[attrName].upperOp = "<=";
         upperHandle.className = "slider-handle upper-handle active";
+        // Update lower handle operator to inclusive.
         attributes[attrName].lowerOp = ">=";
         lowerHandle.className = "slider-handle lower-handle active";
         updateFill();
       } else {
+        // Reposition lower handle.
         let snappedVal = posToValue(clickX);
         let snappedX = valueToPos(snappedVal);
         lowerHandle.style.left = snappedX + "px";
@@ -148,7 +180,7 @@ function setupDualSlider(sliderId, attrName) {
         updateFill();
       }
     } else {
-      // Both handles exist; reposition the nearer one.
+      // Both handles exist; reposition the closer one.
       let lowerX = parseFloat(lowerHandle.style.left);
       let upperX = parseFloat(upperHandle.style.left);
       if(Math.abs(clickX - lowerX) < Math.abs(clickX - upperX)){
@@ -166,15 +198,14 @@ function setupDualSlider(sliderId, attrName) {
     }
   });
   
-  // Double-click handler: remove handle.
-  function addDoubleClick(handle, isLower) {
+  // Double-click handler to remove handle.
+  function addDoubleClickToHandle(handle, isLower) {
     handle.addEventListener("dblclick", function(e) {
       e.stopPropagation();
       handle.style.display = "none";
       if(isLower){
         attributes[attrName].lower = null;
         attributes[attrName].lowerOp = "";
-        // If upper handle exists, promote it.
         if(upperHandle.style.display !== "none"){
           lowerHandle.style.display = "block";
           lowerHandle.style.left = upperHandle.style.left;
@@ -194,8 +225,8 @@ function setupDualSlider(sliderId, attrName) {
       updateFill();
     });
   }
-  addDoubleClick(lowerHandle, true);
-  addDoubleClick(upperHandle, false);
+  addDoubleClickToHandle(lowerHandle, true);
+  addDoubleClickToHandle(upperHandle, false);
   
   // Draggable behavior.
   function makeDraggable(handle, isLower) {
@@ -227,8 +258,7 @@ function setupDualSlider(sliderId, attrName) {
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mouseup", onMouseUp);
     });
-    
-    // Toggle operator on single click.
+    // Toggle operator on click.
     handle.addEventListener("click", function(e) {
       e.stopPropagation();
       if(isLower){
@@ -357,8 +387,10 @@ function getSearchSettings(){
     }
   });
   if(oracle){
-    // Wrap entire oracle input in quotes so all words are searched as oracle text.
-    queryParts.push("oracle:" + '"' + oracle + '"');
+    // Split oracle text into words and prepend each with oracle:
+    let words = oracle.split(/\s+/);
+    let oracleQuery = words.map(w => "oracle:" + w).join(" ");
+    queryParts.push(oracleQuery);
     queryParts.push("(game:paper)");
   } else {
     queryParts.push("(game:paper)");
@@ -381,7 +413,7 @@ function performSearch(){
 }
 
 //////////////////////
-// Preset Management Functions
+// Preset Management
 //////////////////////
 function savePreset(){
   let presetName = prompt("Enter a name for this preset (leave blank to use URL):");
@@ -453,15 +485,14 @@ function loadPreset(){
         if(attributes[attr].lower !== null){
           lowerHandle.style.display = "block";
           lowerHandle.style.left = valueToPos(attributes[attr].lower) + "px";
-          // Set operator appearance.
-          lowerHandle.className = (attributes[attr].lowerOp === "=") ? "slider-handle lower-handle active" : "slider-handle lower-handle active";
+          lowerHandle.className = "slider-handle lower-handle active";
         } else {
           lowerHandle.style.display = "none";
         }
         if(attributes[attr].upper !== null){
           upperHandle.style.display = "block";
           upperHandle.style.left = valueToPos(attributes[attr].upper) + "px";
-          upperHandle.className = (attributes[attr].upperOp === "<=") ? "slider-handle upper-handle active" : "slider-handle upper-handle active";
+          upperHandle.className = "slider-handle upper-handle active";
         } else {
           upperHandle.style.display = "none";
         }
@@ -701,7 +732,7 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Rarity Buttons (grouping with OR).
+  // Rarity Buttons.
   document.querySelectorAll(".rarity-btn").forEach(btn => {
     let rarity = btn.getAttribute("data-rarity");
     let rCfg = CONFIG.rarities.find(r => r.label === rarity);
