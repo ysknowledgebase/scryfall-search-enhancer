@@ -1,5 +1,7 @@
 /* Version 0.5.17 */
-// CONFIG and EXPANSIONS_DATA (unchanged from previous versions)
+//////////////////////
+// CONFIG & DATA
+//////////////////////
 const CONFIG = {
   formatData: {
     formats: [
@@ -38,7 +40,6 @@ const CONFIG = {
     { label: "M", full: "mythic", color: "#dc3545" }
   ]
 };
-// (EXPANSIONS_DATA defined as before)
 const EXPANSIONS_DATA = {
   common: [
     [
@@ -46,32 +47,34 @@ const EXPANSIONS_DATA = {
       { label: "Whev", expansions: ["whenever"] },
       { label: "each", expansions: ["each"] },
       { label: "all", expansions: ["all"] }
-    ],
-    // Additional rows…
+    ]
+    // ... (other rows)
   ],
   typesExpansions: [
-    { label: "Art", expansions: ["artifact"] },
-    // Additional items…
+    { label: "Art", expansions: ["artifact"] }
+    // ... (other items)
   ],
   abilitiesExpansions: [
-    { label: "Deathtouch", expansions: ["deathtouch"] },
-    // Additional items…
+    { label: "Deathtouch", expansions: ["deathtouch"] }
+    // ... (other items)
   ]
 };
 
-// Global variables for expansions.
+//////////////////////
+// GLOBAL VARIABLES
+//////////////////////
 let expansionsInserted = new Map();
 let expansionsCycleIdx = new Map();
 let quotesInserted = false;
-
-// Global attribute state.
 let attributes = {
   cmc: { lower: null, lowerOp: "", upper: null, upperOp: "" },
   pow: { lower: null, lowerOp: "", upper: null, upperOp: "" },
   tou: { lower: null, lowerOp: "", upper: null, upperOp: "" }
 };
 
-/* --- Dual Slider Setup --- */
+//////////////////////
+// DUAL SLIDER SETUP
+//////////////////////
 function setupDualSlider(sliderId, attrName) {
   const slider = document.getElementById(sliderId);
   const track = slider.querySelector(".slider-track");
@@ -79,7 +82,7 @@ function setupDualSlider(sliderId, attrName) {
   const scale = slider.querySelector(".slider-scale");
   const min = 0, max = 20;
   
-  // Build scale tick marks.
+  // Build tick marks.
   scale.innerHTML = "";
   for (let i = min; i <= max; i++) {
     const tick = document.createElement("div");
@@ -93,50 +96,53 @@ function setupDualSlider(sliderId, attrName) {
     scale.appendChild(tickLabel);
   }
   
-  // Get handles.
+  // Hide handles initially.
   const lowerHandle = slider.querySelector(".lower-handle");
   const upperHandle = slider.querySelector(".upper-handle");
   lowerHandle.style.display = "none";
   upperHandle.style.display = "none";
   fill.style.display = "none";
   
-  // Helper: convert value to pixel position.
+  // Helper functions.
   function valueToPos(val) {
     return (val - min) / (max - min) * slider.offsetWidth;
   }
-  // Helper: convert position to nearest integer.
   function posToValue(pos) {
     return Math.round(pos / slider.offsetWidth * (max - min) + min);
   }
   
-  // Click handler for slider.
+  // Click handler on slider track.
   slider.addEventListener("click", function(e) {
-    if(e.target.classList.contains("slider-handle")){
-      return;
-    }
+    if(e.target.classList.contains("slider-handle")) return;
     const rect = slider.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     if(lowerHandle.style.display === "none" && upperHandle.style.display === "none"){
+      // Add first handle: set as exact "=" and solid.
       lowerHandle.style.display = "block";
       let snappedVal = posToValue(clickX);
       let snappedX = valueToPos(snappedVal);
       lowerHandle.style.left = snappedX + "px";
       attributes[attrName].lower = snappedVal;
       attributes[attrName].lowerOp = "=";
-      lowerHandle.className = "slider-handle lower-handle outline";
+      lowerHandle.className = "slider-handle lower-handle active";
       updateFill();
     } else if(lowerHandle.style.display !== "none" && upperHandle.style.display === "none"){
       let currentX = parseFloat(lowerHandle.style.left);
       if(clickX > currentX){
+        // Add second handle: set as inclusive range.
         upperHandle.style.display = "block";
         let snappedVal = posToValue(clickX);
         let snappedX = valueToPos(snappedVal);
         upperHandle.style.left = snappedX + "px";
         attributes[attrName].upper = snappedVal;
-        attributes[attrName].upperOp = "<";
-        upperHandle.className = "slider-handle upper-handle outline";
+        attributes[attrName].upperOp = "<=";
+        upperHandle.className = "slider-handle upper-handle active";
+        // Update lower handle operator to inclusive.
+        attributes[attrName].lowerOp = ">=";
+        lowerHandle.className = "slider-handle lower-handle active";
         updateFill();
       } else {
+        // Reposition lower handle.
         let snappedVal = posToValue(clickX);
         let snappedX = valueToPos(snappedVal);
         lowerHandle.style.left = snappedX + "px";
@@ -144,6 +150,7 @@ function setupDualSlider(sliderId, attrName) {
         updateFill();
       }
     } else {
+      // Both handles exist; reposition the nearer one.
       let lowerX = parseFloat(lowerHandle.style.left);
       let upperX = parseFloat(upperHandle.style.left);
       if(Math.abs(clickX - lowerX) < Math.abs(clickX - upperX)){
@@ -160,6 +167,40 @@ function setupDualSlider(sliderId, attrName) {
       updateFill();
     }
   });
+  
+  // Double-click handler: delete the handle.
+  function addDoubleClickToHandle(handle, isLower) {
+    handle.addEventListener("dblclick", function(e) {
+      e.stopPropagation();
+      // Remove this handle.
+      handle.style.display = "none";
+      if(isLower){
+        attributes[attrName].lower = null;
+        attributes[attrName].lowerOp = "";
+        // If upper handle exists, make it the sole handle and switch to exact mode.
+        if(upperHandle.style.display !== "none"){
+          // Move upper handle to lower handle's role.
+          lowerHandle.style.display = "block";
+          lowerHandle.style.left = upperHandle.style.left;
+          attributes[attrName].lower = attributes[attrName].upper;
+          attributes[attrName].lowerOp = "=";
+          lowerHandle.className = "slider-handle lower-handle active";
+          upperHandle.style.display = "none";
+        }
+      } else {
+        attributes[attrName].upper = null;
+        attributes[attrName].upperOp = "";
+        if(lowerHandle.style.display !== "none"){
+          // Remaining handle becomes exact.
+          attributes[attrName].lowerOp = "=";
+          lowerHandle.className = "slider-handle lower-handle active";
+        }
+      }
+      updateFill();
+    });
+  }
+  addDoubleClickToHandle(lowerHandle, true);
+  addDoubleClickToHandle(upperHandle, false);
   
   // Draggable behavior.
   function makeDraggable(handle, isLower) {
@@ -191,6 +232,8 @@ function setupDualSlider(sliderId, attrName) {
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mouseup", onMouseUp);
     });
+    
+    // Toggle operator on click.
     handle.addEventListener("click", function(e) {
       e.stopPropagation();
       if(isLower){
@@ -204,19 +247,18 @@ function setupDualSlider(sliderId, attrName) {
           handle.classList.add("outline");
         }
       } else {
-        if(attributes[attrName].upperOp === "<"){
-          attributes[attrName].upperOp = "<=";
-          handle.classList.remove("outline");
-          handle.classList.add("active");
-        } else {
+        if(attributes[attrName].upperOp === "<="){
           attributes[attrName].upperOp = "<";
           handle.classList.remove("active");
           handle.classList.add("outline");
+        } else {
+          attributes[attrName].upperOp = "<=";
+          handle.classList.remove("outline");
+          handle.classList.add("active");
         }
       }
     });
   }
-  
   makeDraggable(lowerHandle, true);
   makeDraggable(upperHandle, false);
   
@@ -233,7 +275,9 @@ function setupDualSlider(sliderId, attrName) {
   }
 }
 
-/* --- Autosave, Preset, and Search Functions --- */
+//////////////////////
+// Autosave & Presets
+//////////////////////
 function autoSaveSearch(){
   const settings = getSearchSettings();
   const wrapper = { timestamp: Date.now(), ...settings };
@@ -303,7 +347,13 @@ function getSearchSettings(){
   }
   if(rarities.length > 0){
     const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
-    rarities.forEach(r => { if(rarityMap[r]) queryParts.push("r:" + rarityMap[r]); });
+    let rarityQueries = [];
+    rarities.forEach(r => {
+      if(rarityMap[r]) rarityQueries.push("r:" + rarityMap[r]);
+    });
+    if(rarityQueries.length > 0){
+      queryParts.push("(" + rarityQueries.join(" OR ") + ")");
+    }
   }
   ["cmc", "pow", "tou"].forEach(attr => {
     if(attributes[attr].lower !== null){
@@ -336,7 +386,9 @@ function performSearch(){
   window.location.href = settings.url;
 }
 
-/* --- Preset Management --- */
+//////////////////////
+// Preset Management
+//////////////////////
 function savePreset(){
   let presetName = prompt("Enter a name for this preset (leave blank to use URL):");
   let settings = getSearchSettings();
@@ -407,16 +459,27 @@ function loadPreset(){
         if(attributes[attr].lower !== null){
           lowerHandle.style.display = "block";
           lowerHandle.style.left = valueToPos(attributes[attr].lower) + "px";
-          lowerHandle.className = (attributes[attr].lowerOp === "=") ? "slider-handle lower-handle outline" : "slider-handle lower-handle active";
+          lowerHandle.className = (attributes[attr].lowerOp === "=") ? "slider-handle lower-handle active" : "slider-handle lower-handle active";
         } else {
           lowerHandle.style.display = "none";
         }
         if(attributes[attr].upper !== null){
           upperHandle.style.display = "block";
           upperHandle.style.left = valueToPos(attributes[attr].upper) + "px";
-          upperHandle.className = (attributes[attr].upperOp === "<") ? "slider-handle upper-handle outline" : "slider-handle upper-handle active";
+          upperHandle.className = (attributes[attr].upperOp === "<=") ? "slider-handle upper-handle active" : "slider-handle upper-handle active";
         } else {
           upperHandle.style.display = "none";
+        }
+        // Update fill.
+        const fill = slider.querySelector(".slider-fill");
+        if(lowerHandle.style.display !== "none" && upperHandle.style.display !== "none"){
+          let lowerX = parseFloat(lowerHandle.style.left);
+          let upperX = parseFloat(upperHandle.style.left);
+          fill.style.display = "block";
+          fill.style.left = lowerX + "px";
+          fill.style.width = (upperX - lowerX) + "px";
+        } else {
+          fill.style.display = "none";
         }
       }
     });
@@ -500,10 +563,9 @@ function importPresetsFromFile(event){
   reader.readAsText(file);
 }
 
-/* --- Helper for Preset Loading (used in loadPreset) --- */
+/* --- Helper for Preset Loading --- */
 function valueToPos(val) {
-  // This helper is needed for reloading preset slider positions.
-  const slider = document.getElementById("cmcSlider"); // any slider will do as width should be similar
+  const slider = document.getElementById("cmcSlider");
   const min = 0, max = 20;
   return (val - min) / (max - min) * slider.offsetWidth;
 }
@@ -536,9 +598,51 @@ function updateTypeButtonStyle(btn){
   }
 }
 
+/* --- Expansions Section --- */
+function buildExpansionsToggles(){
+  const container = document.getElementById("expansionsContainer");
+  container.innerHTML = "";
+  function createGroup(headerText, items){
+    const header = document.createElement("div");
+    header.className = "expansion-header";
+    header.textContent = headerText;
+    const group = document.createElement("div");
+    group.className = "expansion-group";
+    items.forEach(item => {
+      const btn = document.createElement("button");
+      btn.className = "expansion-btn";
+      btn.textContent = item.label;
+      btn.addEventListener("click", function(){
+        const oracle = document.getElementById("oracle");
+        if(oracle.value && !oracle.value.endsWith(" ")) oracle.value += " ";
+        oracle.value += item.expansions.join(" ");
+      });
+      group.appendChild(btn);
+    });
+    header.addEventListener("click", function(){
+      group.style.display = (group.style.display === "none") ? "flex" : "none";
+    });
+    container.appendChild(header);
+    container.appendChild(group);
+  }
+  let common = [];
+  EXPANSIONS_DATA.common.forEach(row => {
+    row.forEach(item => { common.push(item); });
+  });
+  createGroup("Common", common);
+  createGroup("Types", EXPANSIONS_DATA.typesExpansions);
+  createGroup("Abilities", EXPANSIONS_DATA.abilitiesExpansions);
+  const clearBtn = document.createElement("button");
+  clearBtn.className = "expansion-clear-btn";
+  clearBtn.textContent = "Clear Expansions";
+  clearBtn.addEventListener("click", function(){
+    document.getElementById("oracle").value = "";
+  });
+  container.appendChild(clearBtn);
+}
+
 /* --- Initialization --- */
 document.addEventListener("DOMContentLoaded", function(){
-  // Set up dual sliders.
   setupDualSlider("cmcSlider", "cmc");
   setupDualSlider("powSlider", "pow");
   setupDualSlider("touSlider", "tou");
@@ -693,50 +797,3 @@ document.addEventListener("DOMContentLoaded", function(){
   
   updatePresetDropdown();
 });
-  
-/* --- Expansions Section --- */
-function buildExpansionsToggles(){
-  const container = document.getElementById("expansionsContainer");
-  container.innerHTML = "";
-  // Create a group for each category.
-  function createGroup(headerText, items){
-    const header = document.createElement("div");
-    header.className = "expansion-header";
-    header.textContent = headerText;
-    const group = document.createElement("div");
-    group.className = "expansion-group";
-    items.forEach(item => {
-      const btn = document.createElement("button");
-      btn.className = "expansion-btn";
-      btn.textContent = item.label;
-      btn.addEventListener("click", function(){
-        // When clicked, append the expansion text to the oracle field.
-        const oracle = document.getElementById("oracle");
-        if(oracle.value && !oracle.value.endsWith(" ")) oracle.value += " ";
-        oracle.value += item.expansions.join(" ");
-      });
-      group.appendChild(btn);
-    });
-    header.addEventListener("click", function(){
-      group.style.display = (group.style.display === "none") ? "flex" : "none";
-    });
-    container.appendChild(header);
-    container.appendChild(group);
-  }
-  // For simplicity, we combine all expansions from common.
-  let common = [];
-  EXPANSIONS_DATA.common.forEach(row => {
-    row.forEach(item => { common.push(item); });
-  });
-  createGroup("Common", common);
-  createGroup("Types", EXPANSIONS_DATA.typesExpansions);
-  createGroup("Abilities", EXPANSIONS_DATA.abilitiesExpansions);
-  // Clear Expansions button.
-  const clearBtn = document.createElement("button");
-  clearBtn.className = "expansion-clear-btn";
-  clearBtn.textContent = "Clear Expansions";
-  clearBtn.addEventListener("click", function(){
-    document.getElementById("oracle").value = "";
-  });
-  container.appendChild(clearBtn);
-}
