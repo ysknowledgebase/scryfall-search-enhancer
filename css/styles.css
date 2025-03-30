@@ -1,4 +1,4 @@
-/* Version 0.5.16 */
+/* Version 0.5.21 */
 /* styles.css */
 body {
   font-family: Arial, sans-serif;
@@ -72,10 +72,9 @@ button:hover {
   height: 20px;
 }
 
-/* Dual Slider (Attributes) */
+/* Dual Slider Styles */
 .attribute-slider {
   margin-bottom: 15px;
-  /* Reduce slider width a bit to leave space for clear button */
   display: flex;
   align-items: center;
 }
@@ -156,7 +155,7 @@ button:hover {
 #powSlider .slider-fill { background-color: rgba(255,0,0,0.3); }
 #touSlider .slider-fill { background-color: rgba(0,0,255,0.3); }
 
-/* Clear button for sliders: positioned to the right of the slider */
+/* Clear button for sliders */
 .slider-clear-btn {
   flex-shrink: 0;
 }

@@ -1,4 +1,4 @@
-/* Version 0.5.17 */
+/* Version 0.5.21 */
 //////////////////////
 // CONFIG & DATA
 //////////////////////
@@ -48,7 +48,7 @@ const EXPANSIONS_DATA = {
       { label: "each", expansions: ["each"] },
       { label: "all", expansions: ["all"] }
     ]
-    // ... (other rows)
+    // ... (other rows as needed)
   ],
   typesExpansions: [
     { label: "Art", expansions: ["artifact"] }
@@ -96,14 +96,14 @@ function setupDualSlider(sliderId, attrName) {
     scale.appendChild(tickLabel);
   }
   
-  // Hide handles initially.
+  // Initially hide handles and fill.
   const lowerHandle = slider.querySelector(".lower-handle");
   const upperHandle = slider.querySelector(".upper-handle");
   lowerHandle.style.display = "none";
   upperHandle.style.display = "none";
   fill.style.display = "none";
   
-  // Helper functions.
+  // Helpers.
   function valueToPos(val) {
     return (val - min) / (max - min) * slider.offsetWidth;
   }
@@ -117,7 +117,7 @@ function setupDualSlider(sliderId, attrName) {
     const rect = slider.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     if(lowerHandle.style.display === "none" && upperHandle.style.display === "none"){
-      // Add first handle: set as exact "=" and solid.
+      // Add first handle (exact match "=") and show as active.
       lowerHandle.style.display = "block";
       let snappedVal = posToValue(clickX);
       let snappedX = valueToPos(snappedVal);
@@ -129,7 +129,7 @@ function setupDualSlider(sliderId, attrName) {
     } else if(lowerHandle.style.display !== "none" && upperHandle.style.display === "none"){
       let currentX = parseFloat(lowerHandle.style.left);
       if(clickX > currentX){
-        // Add second handle: set as inclusive range.
+        // Add second handle: set lower to ">=" and upper to "<=".
         upperHandle.style.display = "block";
         let snappedVal = posToValue(clickX);
         let snappedX = valueToPos(snappedVal);
@@ -137,12 +137,10 @@ function setupDualSlider(sliderId, attrName) {
         attributes[attrName].upper = snappedVal;
         attributes[attrName].upperOp = "<=";
         upperHandle.className = "slider-handle upper-handle active";
-        // Update lower handle operator to inclusive.
         attributes[attrName].lowerOp = ">=";
         lowerHandle.className = "slider-handle lower-handle active";
         updateFill();
       } else {
-        // Reposition lower handle.
         let snappedVal = posToValue(clickX);
         let snappedX = valueToPos(snappedVal);
         lowerHandle.style.left = snappedX + "px";
@@ -168,18 +166,16 @@ function setupDualSlider(sliderId, attrName) {
     }
   });
   
-  // Double-click handler: delete the handle.
-  function addDoubleClickToHandle(handle, isLower) {
+  // Double-click handler: remove handle.
+  function addDoubleClick(handle, isLower) {
     handle.addEventListener("dblclick", function(e) {
       e.stopPropagation();
-      // Remove this handle.
       handle.style.display = "none";
       if(isLower){
         attributes[attrName].lower = null;
         attributes[attrName].lowerOp = "";
-        // If upper handle exists, make it the sole handle and switch to exact mode.
+        // If upper handle exists, promote it.
         if(upperHandle.style.display !== "none"){
-          // Move upper handle to lower handle's role.
           lowerHandle.style.display = "block";
           lowerHandle.style.left = upperHandle.style.left;
           attributes[attrName].lower = attributes[attrName].upper;
@@ -191,7 +187,6 @@ function setupDualSlider(sliderId, attrName) {
         attributes[attrName].upper = null;
         attributes[attrName].upperOp = "";
         if(lowerHandle.style.display !== "none"){
-          // Remaining handle becomes exact.
           attributes[attrName].lowerOp = "=";
           lowerHandle.className = "slider-handle lower-handle active";
         }
@@ -199,8 +194,8 @@ function setupDualSlider(sliderId, attrName) {
       updateFill();
     });
   }
-  addDoubleClickToHandle(lowerHandle, true);
-  addDoubleClickToHandle(upperHandle, false);
+  addDoubleClick(lowerHandle, true);
+  addDoubleClick(upperHandle, false);
   
   // Draggable behavior.
   function makeDraggable(handle, isLower) {
@@ -233,7 +228,7 @@ function setupDualSlider(sliderId, attrName) {
       document.addEventListener("mouseup", onMouseUp);
     });
     
-    // Toggle operator on click.
+    // Toggle operator on single click.
     handle.addEventListener("click", function(e) {
       e.stopPropagation();
       if(isLower){
@@ -276,7 +271,7 @@ function setupDualSlider(sliderId, attrName) {
 }
 
 //////////////////////
-// Autosave & Presets
+// Autosave & Preset Functions
 //////////////////////
 function autoSaveSearch(){
   const settings = getSearchSettings();
@@ -348,9 +343,7 @@ function getSearchSettings(){
   if(rarities.length > 0){
     const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
     let rarityQueries = [];
-    rarities.forEach(r => {
-      if(rarityMap[r]) rarityQueries.push("r:" + rarityMap[r]);
-    });
+    rarities.forEach(r => { if(rarityMap[r]) rarityQueries.push("r:" + rarityMap[r]); });
     if(rarityQueries.length > 0){
       queryParts.push("(" + rarityQueries.join(" OR ") + ")");
     }
@@ -364,7 +357,8 @@ function getSearchSettings(){
     }
   });
   if(oracle){
-    queryParts.push("oracle:" + oracle);
+    // Wrap entire oracle input in quotes so all words are searched as oracle text.
+    queryParts.push("oracle:" + '"' + oracle + '"');
     queryParts.push("(game:paper)");
   } else {
     queryParts.push("(game:paper)");
@@ -387,7 +381,7 @@ function performSearch(){
 }
 
 //////////////////////
-// Preset Management
+// Preset Management Functions
 //////////////////////
 function savePreset(){
   let presetName = prompt("Enter a name for this preset (leave blank to use URL):");
@@ -459,6 +453,7 @@ function loadPreset(){
         if(attributes[attr].lower !== null){
           lowerHandle.style.display = "block";
           lowerHandle.style.left = valueToPos(attributes[attr].lower) + "px";
+          // Set operator appearance.
           lowerHandle.className = (attributes[attr].lowerOp === "=") ? "slider-handle lower-handle active" : "slider-handle lower-handle active";
         } else {
           lowerHandle.style.display = "none";
@@ -470,7 +465,6 @@ function loadPreset(){
         } else {
           upperHandle.style.display = "none";
         }
-        // Update fill.
         const fill = slider.querySelector(".slider-fill");
         if(lowerHandle.style.display !== "none" && upperHandle.style.display !== "none"){
           let lowerX = parseFloat(lowerHandle.style.left);
@@ -641,7 +635,9 @@ function buildExpansionsToggles(){
   container.appendChild(clearBtn);
 }
 
-/* --- Initialization --- */
+//////////////////////
+// Initialization
+//////////////////////
 document.addEventListener("DOMContentLoaded", function(){
   setupDualSlider("cmcSlider", "cmc");
   setupDualSlider("powSlider", "pow");
@@ -705,7 +701,7 @@ document.addEventListener("DOMContentLoaded", function(){
     });
   });
   
-  // Rarity Buttons.
+  // Rarity Buttons (grouping with OR).
   document.querySelectorAll(".rarity-btn").forEach(btn => {
     let rarity = btn.getAttribute("data-rarity");
     let rCfg = CONFIG.rarities.find(r => r.label === rarity);
