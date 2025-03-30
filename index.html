@@ -1,4 +1,4 @@
-<!-- Version 0.5.12 -->
+<!-- Version 0.5.17 -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,10 +9,8 @@
 </head>
 <body>
   <div id="enhancer-container">
-    <!-- Version Indicator in UI -->
-    <div id="versionIndicator">Version 0.5.12</div>
-    
-    <!-- Search Options (ordered top-to-bottom) -->
+    <!-- Version Indicator -->
+    <div id="versionIndicator">Version 0.5.17</div>
     
     <!-- 1. Format Selector -->
     <div class="option-group" id="formatGroup">
@@ -31,7 +29,50 @@
       </div>
     </div>
     
-    <!-- 2. Color Selector -->
+    <!-- 2. Attribute Sliders: Mana Value, Power, and Toughness -->
+    <div class="option-group" id="attributeGroup">
+      <!-- Mana Value Slider -->
+      <div class="attribute-slider" id="cmcSlider">
+        <span class="attr-label">Mana Value (cmc):</span>
+        <div class="dual-slider">
+          <div class="slider-track"></div>
+          <!-- Handles will be created dynamically -->
+          <div class="slider-handle lower-handle" id="cmcLowerHandle"></div>
+          <div class="slider-handle upper-handle" id="cmcUpperHandle"></div>
+          <div class="slider-fill" id="cmcFill"></div>
+          <div class="slider-scale" id="cmcScale"></div>
+        </div>
+        <button class="clear-btn" id="clearCmc">Clear</button>
+      </div>
+      
+      <!-- Power Slider -->
+      <div class="attribute-slider" id="powSlider">
+        <span class="attr-label">Power (pow):</span>
+        <div class="dual-slider">
+          <div class="slider-track"></div>
+          <div class="slider-handle lower-handle" id="powLowerHandle"></div>
+          <div class="slider-handle upper-handle" id="powUpperHandle"></div>
+          <div class="slider-fill" id="powFill"></div>
+          <div class="slider-scale" id="powScale"></div>
+        </div>
+        <button class="clear-btn" id="clearPow">Clear</button>
+      </div>
+      
+      <!-- Toughness Slider -->
+      <div class="attribute-slider" id="touSlider">
+        <span class="attr-label">Toughness (tou):</span>
+        <div class="dual-slider">
+          <div class="slider-track"></div>
+          <div class="slider-handle lower-handle" id="touLowerHandle"></div>
+          <div class="slider-handle upper-handle" id="touUpperHandle"></div>
+          <div class="slider-fill" id="touFill"></div>
+          <div class="slider-scale" id="touScale"></div>
+        </div>
+        <button class="clear-btn" id="clearTou">Clear</button>
+      </div>
+    </div>
+    
+    <!-- 3. Color Selector -->
     <div class="option-group" id="colorGroup">
       <label>Colors:</label>
       <div class="selector-row" id="colorButtons">
@@ -54,7 +95,7 @@
       </div>
     </div>
     
-    <!-- 3. Type Selector -->
+    <!-- 4. Type Selector -->
     <div class="option-group" id="typeGroup">
       <label>Types:</label>
       <div class="selector-row" id="typeButtons">
@@ -83,7 +124,7 @@
       </div>
     </div>
     
-    <!-- 4. Rarity Selector -->
+    <!-- 5. Rarity Selector -->
     <div class="option-group" id="rarityGroup">
       <label>Rarities:</label>
       <div class="selector-row" id="rarityButtons">
@@ -101,26 +142,26 @@
       </div>
     </div>
     
-    <!-- 5. Oracle Text Field -->
+    <!-- 6. Oracle Text Field -->
     <div class="option-group" id="oracleGroup">
       <label for="oracle">Oracle Text:</label>
       <textarea id="oracle" rows="3" placeholder="Enter oracle text..."></textarea>
       <button class="clear-btn" id="clearOracle">Clear</button>
     </div>
     
-    <!-- 6. Expansions Section (Collapsed by Default) -->
+    <!-- 7. Expansions Section (Collapsed by Default) -->
     <div class="option-group" id="expansionGroup">
       <label>Expansions:</label>
       <div id="expansionsContainer"></div>
     </div>
     
-    <!-- 7. Search Buttons -->
+    <!-- 8. Search Buttons -->
     <div id="searchButtons">
       <button id="searchActionButton" class="action-btn">Search</button>
       <button id="searchFrontierActionButton" class="action-btn">Search Frontier</button>
     </div>
     
-    <!-- 8. Preset Management Section -->
+    <!-- 9. Preset Management Section -->
     <div id="preset-section">
       <h3>Search Presets</h3>
       <button id="savePresetButton">💾 Save Preset</button>
