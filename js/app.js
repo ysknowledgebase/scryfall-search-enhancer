@@ -141,25 +141,25 @@ let attributes = {
 };
 
 //////////////////////
-// DUAL SLIDER SETUP (Reverted to 0.5.19-final behavior with improved positioning)
+// DUAL SLIDER SETUP (Revised: range 0–11, improved positioning, note updating)
 //////////////////////
 function setupDualSlider(sliderId, attrName) {
   const slider = document.getElementById(sliderId);
-  // Ensure slider width fits within container
   slider.style.width = "100%";
   const track = slider.querySelector(".slider-track");
   const fill = slider.querySelector(".slider-fill");
   const scale = slider.querySelector(".slider-scale");
-  const min = 0, max = 20;
+  // Change slider range to 0–11.
+  const min = 0, max = 11;
   
   // Build tick marks.
   scale.innerHTML = "";
   for (let i = min; i <= max; i++) {
-    let tick = document.createElement("div");
+    const tick = document.createElement("div");
     tick.className = "tick";
     tick.style.left = ((i - min) / (max - min) * 100) + "%";
     scale.appendChild(tick);
-    let tickLabel = document.createElement("div");
+    const tickLabel = document.createElement("div");
     tickLabel.className = "tick-label";
     tickLabel.style.left = ((i - min) / (max - min) * 100) + "%";
     tickLabel.textContent = i;
@@ -181,12 +181,24 @@ function setupDualSlider(sliderId, attrName) {
     return Math.round(pos / slider.offsetWidth * (max - min) + min);
   }
   
+  // Update the slider note below.
+  function updateSliderNote() {
+    const noteEl = document.getElementById(attrName + "Note");
+    let noteText = "";
+    if (attributes[attrName].lower !== null && attributes[attrName].upper !== null) {
+      noteText = `${attributes[attrName].lowerOp}${attributes[attrName].lower} ≤ ${attrName.toUpperCase()} ≤ ${attributes[attrName].upperOp}${attributes[attrName].upper}`;
+    } else if (attributes[attrName].lower !== null) {
+      noteText = `${attributes[attrName].lowerOp}${attributes[attrName].lower}`;
+    }
+    noteEl.textContent = noteText;
+  }
+  
   // Click handler.
   slider.addEventListener("click", function(e) {
     if(e.target.classList.contains("slider-handle")) return;
     const rect = slider.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    if(lowerHandle.style.display === "none" && upperHandle.style.display === "none") {
+    if(lowerHandle.style.display === "none" && upperHandle.style.display === "none"){
       lowerHandle.style.display = "block";
       let snappedVal = posToValue(clickX);
       lowerHandle.style.left = valueToPos(snappedVal) + "px";
@@ -194,9 +206,10 @@ function setupDualSlider(sliderId, attrName) {
       attributes[attrName].lowerOp = "=";
       lowerHandle.className = "slider-handle lower-handle active";
       updateFill();
-    } else if(lowerHandle.style.display !== "none" && upperHandle.style.display === "none") {
+      updateSliderNote();
+    } else if(lowerHandle.style.display !== "none" && upperHandle.style.display === "none"){
       let curX = parseFloat(lowerHandle.style.left);
-      if(clickX > curX) {
+      if(clickX > curX){
         upperHandle.style.display = "block";
         let snappedVal = posToValue(clickX);
         upperHandle.style.left = valueToPos(snappedVal) + "px";
@@ -206,16 +219,18 @@ function setupDualSlider(sliderId, attrName) {
         attributes[attrName].lowerOp = ">=";
         lowerHandle.className = "slider-handle lower-handle active";
         updateFill();
+        updateSliderNote();
       } else {
         let snappedVal = posToValue(clickX);
         lowerHandle.style.left = valueToPos(snappedVal) + "px";
         attributes[attrName].lower = snappedVal;
         updateFill();
+        updateSliderNote();
       }
     } else {
       let lowerX = parseFloat(lowerHandle.style.left);
       let upperX = parseFloat(upperHandle.style.left);
-      if(Math.abs(clickX - lowerX) < Math.abs(clickX - upperX)) {
+      if(Math.abs(clickX - lowerX) < Math.abs(clickX - upperX)){
         let snappedVal = posToValue(clickX);
         lowerHandle.style.left = valueToPos(snappedVal) + "px";
         attributes[attrName].lower = snappedVal;
@@ -225,10 +240,11 @@ function setupDualSlider(sliderId, attrName) {
         attributes[attrName].upper = snappedVal;
       }
       updateFill();
+      updateSliderNote();
     }
   });
   
-  // Double-click handler.
+  // Double-click to remove handle.
   function addDoubleClickToHandle(handle, isLower) {
     handle.addEventListener("dblclick", function(e) {
       e.stopPropagation();
@@ -253,12 +269,13 @@ function setupDualSlider(sliderId, attrName) {
         }
       }
       updateFill();
+      updateSliderNote();
     });
   }
   addDoubleClickToHandle(lowerHandle, true);
   addDoubleClickToHandle(upperHandle, false);
   
-  // Draggable.
+  // Draggable functionality.
   function makeDraggable(handle, isLower) {
     handle.addEventListener("mousedown", function(e) {
       e.preventDefault();
@@ -280,6 +297,7 @@ function setupDualSlider(sliderId, attrName) {
           attributes[attrName].upper = snappedVal;
         }
         updateFill();
+        updateSliderNote();
       }
       function onMouseUp() {
         document.removeEventListener("mousemove", onMouseMove);
@@ -311,6 +329,7 @@ function setupDualSlider(sliderId, attrName) {
           handle.classList.add("active");
         }
       }
+      updateSliderNote();
     });
   }
   makeDraggable(lowerHandle, true);
@@ -326,6 +345,21 @@ function setupDualSlider(sliderId, attrName) {
       fill.style.left = lowerX + "px";
       fill.style.width = (upperX - lowerX) + "px";
     }
+  }
+}
+
+//////////////////////
+// Oracle Quotes Toggle
+//////////////////////
+function toggleQuotes() {
+  const oracleEl = document.getElementById("oracle");
+  let text = oracleEl.value;
+  if(text.startsWith('"') && text.endsWith('"')) {
+    // Remove quotes.
+    oracleEl.value = text.slice(1, -1);
+  } else {
+    // Wrap in quotes.
+    oracleEl.value = `"${text}"`;
   }
 }
 
@@ -416,7 +450,7 @@ function getSearchSettings(){
     }
   });
   if(oracle){
-    // Handle quoted phrases for exact matches.
+    // Parse quoted phrases for exact match.
     let exactMatches = [];
     let remainder = oracle;
     let quoteRegex = /"([^"]+)"/g;
@@ -635,7 +669,7 @@ function importPresetsFromFile(event){
 //////////////////////
 function valueToPos(val) {
   const slider = document.getElementById("cmcSlider");
-  const min = 0, max = 20;
+  const min = 0, max = 11;
   return (val - min) / (max - min) * slider.offsetWidth;
 }
 
@@ -689,27 +723,38 @@ function buildExpansionsToggles(){
       btn.textContent = item.label;
       btn.addEventListener("click", function(){
         const oracle = document.getElementById("oracle");
-        if(oracle.value && !oracle.value.endsWith(" ")) oracle.value += " ";
-        // If the button has multiple alternatives, cycle them.
+        // Remove extra trailing spaces.
+        if(oracle.value && !oracle.value.endsWith(" ")) oracle.value = oracle.value.trim() + " ";
+        // Special case: if label is '""', then toggle wrapping entire text.
+        if(item.label === '""') {
+          toggleQuotes();
+          return;
+        }
+        // If multiple alternatives exist, cycle them.
         if(item.expansions && item.expansions.length > 1){
           if(expansionsInserted.has(item.label)){
             let idx = expansionsInserted.get(item.label);
-            // Remove previous alternative.
-            removeLastOccurrence(oracle, item.expansions[idx]);
+            // Remove previous alternative without extra space.
+            removeLastOccurrence(oracle, item.expansions[idx].trim());
             idx = (idx + 1) % item.expansions.length;
-            oracle.value += item.expansions[idx] + " ";
-            expansionsInserted.set(item.label, idx);
+            // If idx is 0 (cycle complete), remove all.
+            if(idx === 0) {
+              expansionsInserted.delete(item.label);
+            } else {
+              oracle.value = oracle.value.trim() + " " + item.expansions[idx].trim() + " ";
+              expansionsInserted.set(item.label, idx);
+            }
           } else {
-            oracle.value += item.expansions[0] + " ";
+            oracle.value = oracle.value.trim() + " " + item.expansions[0].trim() + " ";
             expansionsInserted.set(item.label, 0);
           }
         } else {
-          // Single alternative.
+          // Single alternative toggle.
           if(!expansionsInserted.has(item.label)){
-            oracle.value += item.expansions.join(" ") + " ";
+            oracle.value = oracle.value.trim() + " " + item.expansions.join(" ").trim() + " ";
             expansionsInserted.set(item.label, 0);
           } else {
-            removeLastOccurrence(oracle, item.expansions.join(" "));
+            removeLastOccurrence(oracle, item.expansions.join(" ").trim());
             expansionsInserted.delete(item.label);
           }
         }

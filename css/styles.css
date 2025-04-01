@@ -35,6 +35,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 select, textarea {
   width: 100%;
@@ -48,6 +49,7 @@ select, textarea {
 #colorButtons, #typeButtons, #rarityButtons {
   display: flex;
   gap: 5px;
+  flex-wrap: wrap;
 }
 button {
   padding: 8px 16px;
@@ -72,7 +74,7 @@ button:hover {
   height: 20px;
 }
 
-/* Dual Slider Styles (Revised Positioning) */
+/* Dual Slider Styles (Revised for 0–11 range) */
 .attribute-slider {
   margin-bottom: 15px;
   display: flex;
@@ -86,7 +88,7 @@ button:hover {
   position: relative;
   height: 40px;
   margin-bottom: 5px;
-  /* Ensure slider fits within container */
+  width: 100%;
   max-width: 100%;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -129,11 +131,9 @@ button:hover {
   border: 2px solid currentColor;
 }
 .slider-scale {
-  position: absolute;
-  bottom: -20px;
-  left: 0;
-  right: 0;
+  position: relative;
   height: 20px;
+  margin-top: 5px;
 }
 .slider-scale .tick {
   position: absolute;
@@ -147,6 +147,13 @@ button:hover {
   top: 6px;
   font-size: 10px;
   transform: translateX(-50%);
+}
+
+/* Update slider note style */
+.slider-note {
+  font-size: 0.9em;
+  margin-bottom: 5px;
+  color: #333;
 }
 
 /* Attribute Colors */
@@ -199,6 +206,7 @@ button:hover {
   justify-content: center;
   gap: 20px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 .action-btn {
   background-color: #28a745;
