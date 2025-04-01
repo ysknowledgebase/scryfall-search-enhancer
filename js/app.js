@@ -1,4 +1,4 @@
-/* Version 0.5.26 */
+/* Version 0.5.28 */
 //////////////////////
 // CONFIG & DATA
 //////////////////////
@@ -141,7 +141,7 @@ let attributes = {
 };
 
 //////////////////////
-// DUAL SLIDER SETUP (Revised: range 0–11, improved positioning, note updating)
+// DUAL SLIDER SETUP (Range: 0 to 10 with final tick as "+")
 //////////////////////
 function setupDualSlider(sliderId, attrName) {
   const slider = document.getElementById(sliderId);
@@ -149,8 +149,7 @@ function setupDualSlider(sliderId, attrName) {
   const track = slider.querySelector(".slider-track");
   const fill = slider.querySelector(".slider-fill");
   const scale = slider.querySelector(".slider-scale");
-  // Change slider range to 0–11.
-  const min = 0, max = 11;
+  const min = 0, max = 10; // last tick represents "+"
   
   // Build tick marks.
   scale.innerHTML = "";
@@ -162,7 +161,8 @@ function setupDualSlider(sliderId, attrName) {
     const tickLabel = document.createElement("div");
     tickLabel.className = "tick-label";
     tickLabel.style.left = ((i - min) / (max - min) * 100) + "%";
-    tickLabel.textContent = i;
+    // For the last tick, show "+"
+    tickLabel.textContent = (i === max) ? "+" : i;
     scale.appendChild(tickLabel);
   }
   
@@ -181,14 +181,14 @@ function setupDualSlider(sliderId, attrName) {
     return Math.round(pos / slider.offsetWidth * (max - min) + min);
   }
   
-  // Update the slider note below.
+  // Update slider note below.
   function updateSliderNote() {
     const noteEl = document.getElementById(attrName + "Note");
     let noteText = "";
     if (attributes[attrName].lower !== null && attributes[attrName].upper !== null) {
-      noteText = `${attributes[attrName].lowerOp}${attributes[attrName].lower} ≤ ${attrName.toUpperCase()} ≤ ${attributes[attrName].upperOp}${attributes[attrName].upper}`;
+      noteText = `${attributes[attrName].lower} ≤ ${attrName.toUpperCase()} ≤ ${attributes[attrName].upper === max ? "+" : attributes[attrName].upper}`;
     } else if (attributes[attrName].lower !== null) {
-      noteText = `${attributes[attrName].lowerOp}${attributes[attrName].lower}`;
+      noteText = `${attributes[attrName].lower} ≤ ${attrName.toUpperCase()}`;
     }
     noteEl.textContent = noteText;
   }
@@ -198,7 +198,7 @@ function setupDualSlider(sliderId, attrName) {
     if(e.target.classList.contains("slider-handle")) return;
     const rect = slider.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    if(lowerHandle.style.display === "none" && upperHandle.style.display === "none"){
+    if(lowerHandle.style.display === "none" && upperHandle.style.display === "none") {
       lowerHandle.style.display = "block";
       let snappedVal = posToValue(clickX);
       lowerHandle.style.left = valueToPos(snappedVal) + "px";
@@ -207,14 +207,15 @@ function setupDualSlider(sliderId, attrName) {
       lowerHandle.className = "slider-handle lower-handle active";
       updateFill();
       updateSliderNote();
-    } else if(lowerHandle.style.display !== "none" && upperHandle.style.display === "none"){
+    } else if(lowerHandle.style.display !== "none" && upperHandle.style.display === "none") {
       let curX = parseFloat(lowerHandle.style.left);
-      if(clickX > curX){
+      if(clickX > curX) {
         upperHandle.style.display = "block";
         let snappedVal = posToValue(clickX);
         upperHandle.style.left = valueToPos(snappedVal) + "px";
         attributes[attrName].upper = snappedVal;
-        attributes[attrName].upperOp = "<=";
+        // If snappedVal equals max, we treat it as "+"
+        attributes[attrName].upperOp = (snappedVal === max) ? "" : "<=";
         upperHandle.className = "slider-handle upper-handle active";
         attributes[attrName].lowerOp = ">=";
         lowerHandle.className = "slider-handle lower-handle active";
@@ -230,7 +231,7 @@ function setupDualSlider(sliderId, attrName) {
     } else {
       let lowerX = parseFloat(lowerHandle.style.left);
       let upperX = parseFloat(upperHandle.style.left);
-      if(Math.abs(clickX - lowerX) < Math.abs(clickX - upperX)){
+      if(Math.abs(clickX - lowerX) < Math.abs(clickX - upperX)) {
         let snappedVal = posToValue(clickX);
         lowerHandle.style.left = valueToPos(snappedVal) + "px";
         attributes[attrName].lower = snappedVal;
@@ -244,7 +245,7 @@ function setupDualSlider(sliderId, attrName) {
     }
   });
   
-  // Double-click to remove handle.
+  // Double-click handler.
   function addDoubleClickToHandle(handle, isLower) {
     handle.addEventListener("dblclick", function(e) {
       e.stopPropagation();
@@ -309,16 +310,19 @@ function setupDualSlider(sliderId, attrName) {
     handle.addEventListener("click", function(e) {
       e.stopPropagation();
       if(isLower) {
+        // Toggle lower handle mode (cycle between "=" and active exclusive and then deletion)
         if(attributes[attrName].lowerOp === "=") {
           attributes[attrName].lowerOp = ">=";
           handle.classList.remove("outline");
           handle.classList.add("active");
         } else {
-          attributes[attrName].lowerOp = "=";
-          handle.classList.remove("active");
-          handle.classList.add("outline");
+          // Remove lower bound on second toggle
+          handle.style.display = "none";
+          attributes[attrName].lower = null;
+          attributes[attrName].lowerOp = "";
         }
       } else {
+        // For upper handle, toggle between active and outline.
         if(attributes[attrName].upperOp === "<=") {
           attributes[attrName].upperOp = "<";
           handle.classList.remove("active");
@@ -355,10 +359,8 @@ function toggleQuotes() {
   const oracleEl = document.getElementById("oracle");
   let text = oracleEl.value;
   if(text.startsWith('"') && text.endsWith('"')) {
-    // Remove quotes.
     oracleEl.value = text.slice(1, -1);
   } else {
-    // Wrap in quotes.
     oracleEl.value = `"${text}"`;
   }
 }
@@ -446,11 +448,15 @@ function getSearchSettings(){
       queryParts.push(attr + attributes[attr].lowerOp + attributes[attr].lower);
     }
     if(attributes[attr].upper !== null){
-      queryParts.push(attr + attributes[attr].upperOp + attributes[attr].upper);
+      // If upper equals max (10), treat as no upper bound.
+      if(attributes[attr].upper === 10) {
+        // do not add an upper clause.
+      } else {
+        queryParts.push(attr + attributes[attr].upperOp + attributes[attr].upper);
+      }
     }
   });
   if(oracle){
-    // Parse quoted phrases for exact match.
     let exactMatches = [];
     let remainder = oracle;
     let quoteRegex = /"([^"]+)"/g;
@@ -669,7 +675,7 @@ function importPresetsFromFile(event){
 //////////////////////
 function valueToPos(val) {
   const slider = document.getElementById("cmcSlider");
-  const min = 0, max = 11;
+  const min = 0, max = 10;
   return (val - min) / (max - min) * slider.offsetWidth;
 }
 
@@ -723,21 +729,19 @@ function buildExpansionsToggles(){
       btn.textContent = item.label;
       btn.addEventListener("click", function(){
         const oracle = document.getElementById("oracle");
-        // Remove extra trailing spaces.
-        if(oracle.value && !oracle.value.endsWith(" ")) oracle.value = oracle.value.trim() + " ";
-        // Special case: if label is '""', then toggle wrapping entire text.
+        // Trim extra spaces.
+        oracle.value = oracle.value.trim() + " ";
+        // Special case: if label is '""', wrap entire text.
         if(item.label === '""') {
           toggleQuotes();
           return;
         }
-        // If multiple alternatives exist, cycle them.
-        if(item.expansions && item.expansions.length > 1){
-          if(expansionsInserted.has(item.label)){
+        // Cycle multiple alternatives.
+        if(item.expansions && item.expansions.length > 1) {
+          if(expansionsInserted.has(item.label)) {
             let idx = expansionsInserted.get(item.label);
-            // Remove previous alternative without extra space.
             removeLastOccurrence(oracle, item.expansions[idx].trim());
             idx = (idx + 1) % item.expansions.length;
-            // If idx is 0 (cycle complete), remove all.
             if(idx === 0) {
               expansionsInserted.delete(item.label);
             } else {
@@ -750,7 +754,7 @@ function buildExpansionsToggles(){
           }
         } else {
           // Single alternative toggle.
-          if(!expansionsInserted.has(item.label)){
+          if(!expansionsInserted.has(item.label)) {
             oracle.value = oracle.value.trim() + " " + item.expansions.join(" ").trim() + " ";
             expansionsInserted.set(item.label, 0);
           } else {

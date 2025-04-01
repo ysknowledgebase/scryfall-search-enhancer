@@ -74,7 +74,7 @@ button:hover {
   height: 20px;
 }
 
-/* Dual Slider Styles (Revised for 0–11 range) */
+/* Dual Slider Styles (0 to 10 with last tick as "+") */
 .attribute-slider {
   margin-bottom: 15px;
   display: flex;
@@ -94,6 +94,7 @@ button:hover {
   border-radius: 4px;
   background-color: #f1f1f1;
   overflow: hidden;
+  margin-right: 0; /* So clear button is separate */
 }
 .slider-track {
   position: absolute;
@@ -133,7 +134,7 @@ button:hover {
 .slider-scale {
   position: relative;
   height: 20px;
-  margin-top: 5px;
+  margin-top: 8px; /* Extra margin so scale is below slider */
 }
 .slider-scale .tick {
   position: absolute;
@@ -149,10 +150,20 @@ button:hover {
   transform: translateX(-50%);
 }
 
-/* Update slider note style */
+/* Show plus for the last tick */
+.slider-scale .tick.plus {
+  background-color: #333;
+}
+.slider-scale .tick-label.plus {
+  color: #333;
+  font-weight: bold;
+  content: "+";
+}
+
+/* Slider Note */
 .slider-note {
   font-size: 0.9em;
-  margin-bottom: 5px;
+  margin-top: 5px;
   color: #333;
 }
 
@@ -167,6 +178,7 @@ button:hover {
 /* Clear button for sliders */
 .slider-clear-btn {
   align-self: flex-end;
+  margin-top: 5px;
 }
 
 /* Expansions */
