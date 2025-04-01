@@ -1,4 +1,4 @@
-/* Version 0.5.23 */
+/* Version 0.5.26 */
 //////////////////////
 // CONFIG & DATA
 //////////////////////
@@ -133,7 +133,6 @@ const EXPANSIONS_DATA = {
 // GLOBAL VARIABLES
 //////////////////////
 let expansionsInserted = new Map();
-let expansionsCycleIdx = new Map();
 let quotesInserted = false;
 let attributes = {
   cmc: { lower: null, lowerOp: "", upper: null, upperOp: "" },
@@ -142,16 +141,18 @@ let attributes = {
 };
 
 //////////////////////
-// DUAL SLIDER SETUP (Reverted to 0.5.19-final behavior)
+// DUAL SLIDER SETUP (Reverted to 0.5.19-final behavior with improved positioning)
 //////////////////////
 function setupDualSlider(sliderId, attrName) {
   const slider = document.getElementById(sliderId);
+  // Ensure slider width fits within container
+  slider.style.width = "100%";
   const track = slider.querySelector(".slider-track");
   const fill = slider.querySelector(".slider-fill");
   const scale = slider.querySelector(".slider-scale");
   const min = 0, max = 20;
   
-  // Build tick marks (as in older version).
+  // Build tick marks.
   scale.innerHTML = "";
   for (let i = min; i <= max; i++) {
     let tick = document.createElement("div");
@@ -172,7 +173,7 @@ function setupDualSlider(sliderId, attrName) {
   upperHandle.style.display = "none";
   fill.style.display = "none";
   
-  // Helpers: (use original conversion functions)
+  // Helper functions.
   function valueToPos(val) {
     return (val - min) / (max - min) * slider.offsetWidth;
   }
@@ -180,9 +181,9 @@ function setupDualSlider(sliderId, attrName) {
     return Math.round(pos / slider.offsetWidth * (max - min) + min);
   }
   
-  // Click handler on track.
+  // Click handler.
   slider.addEventListener("click", function(e) {
-    if (e.target.classList.contains("slider-handle")) return;
+    if(e.target.classList.contains("slider-handle")) return;
     const rect = slider.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     if(lowerHandle.style.display === "none" && upperHandle.style.display === "none") {
@@ -227,7 +228,7 @@ function setupDualSlider(sliderId, attrName) {
     }
   });
   
-  // Double-click to remove a handle.
+  // Double-click handler.
   function addDoubleClickToHandle(handle, isLower) {
     handle.addEventListener("dblclick", function(e) {
       e.stopPropagation();
@@ -257,7 +258,7 @@ function setupDualSlider(sliderId, attrName) {
   addDoubleClickToHandle(lowerHandle, true);
   addDoubleClickToHandle(upperHandle, false);
   
-  // Draggable functionality (from 0.5.19-final version)
+  // Draggable.
   function makeDraggable(handle, isLower) {
     handle.addEventListener("mousedown", function(e) {
       e.preventDefault();
@@ -415,7 +416,7 @@ function getSearchSettings(){
     }
   });
   if(oracle){
-    // Parse quoted phrases first.
+    // Handle quoted phrases for exact matches.
     let exactMatches = [];
     let remainder = oracle;
     let quoteRegex = /"([^"]+)"/g;
@@ -689,25 +690,22 @@ function buildExpansionsToggles(){
       btn.addEventListener("click", function(){
         const oracle = document.getElementById("oracle");
         if(oracle.value && !oracle.value.endsWith(" ")) oracle.value += " ";
-        // If the button has multiple alternatives (toggle behavior), cycle them.
+        // If the button has multiple alternatives, cycle them.
         if(item.expansions && item.expansions.length > 1){
-          // Use the first alternative if not yet inserted.
-          if(!expansionsInserted.get(item.label)){
-            oracle.value += item.expansions[0] + " ";
-            expansionsInserted.set(item.label, 0);
-          } else {
-            // Cycle to next alternative.
+          if(expansionsInserted.has(item.label)){
             let idx = expansionsInserted.get(item.label);
             // Remove previous alternative.
             removeLastOccurrence(oracle, item.expansions[idx]);
             idx = (idx + 1) % item.expansions.length;
-            // Append new alternative.
             oracle.value += item.expansions[idx] + " ";
             expansionsInserted.set(item.label, idx);
+          } else {
+            oracle.value += item.expansions[0] + " ";
+            expansionsInserted.set(item.label, 0);
           }
         } else {
-          // Single alternative: toggle its insertion.
-          if(!expansionsInserted.get(item.label)){
+          // Single alternative.
+          if(!expansionsInserted.has(item.label)){
             oracle.value += item.expansions.join(" ") + " ";
             expansionsInserted.set(item.label, 0);
           } else {
