@@ -1,4 +1,4 @@
-/* Version 0.5.28 */
+/* Version 0.5.29 */
 //////////////////////
 // CONFIG & DATA
 //////////////////////
@@ -141,7 +141,7 @@ let attributes = {
 };
 
 //////////////////////
-// DUAL SLIDER SETUP (Range: 0 to 10 with final tick as "+")
+// DUAL SLIDER SETUP (Range: 0 to 11; tick 11 shown as "+")
 //////////////////////
 function setupDualSlider(sliderId, attrName) {
   const slider = document.getElementById(sliderId);
@@ -149,7 +149,7 @@ function setupDualSlider(sliderId, attrName) {
   const track = slider.querySelector(".slider-track");
   const fill = slider.querySelector(".slider-fill");
   const scale = slider.querySelector(".slider-scale");
-  const min = 0, max = 10; // last tick represents "+"
+  const min = 0, max = 11; // 11 is represented as "+"
   
   // Build tick marks.
   scale.innerHTML = "";
@@ -161,7 +161,6 @@ function setupDualSlider(sliderId, attrName) {
     const tickLabel = document.createElement("div");
     tickLabel.className = "tick-label";
     tickLabel.style.left = ((i - min) / (max - min) * 100) + "%";
-    // For the last tick, show "+"
     tickLabel.textContent = (i === max) ? "+" : i;
     scale.appendChild(tickLabel);
   }
@@ -181,12 +180,17 @@ function setupDualSlider(sliderId, attrName) {
     return Math.round(pos / slider.offsetWidth * (max - min) + min);
   }
   
-  // Update slider note below.
+  // Update slider note.
   function updateSliderNote() {
     const noteEl = document.getElementById(attrName + "Note");
     let noteText = "";
     if (attributes[attrName].lower !== null && attributes[attrName].upper !== null) {
-      noteText = `${attributes[attrName].lower} ≤ ${attrName.toUpperCase()} ≤ ${attributes[attrName].upper === max ? "+" : attributes[attrName].upper}`;
+      // If upper equals max, treat it as no upper bound.
+      if (attributes[attrName].upper === max) {
+        noteText = `${attributes[attrName].lower} ≤ ${attrName.toUpperCase()}`;
+      } else {
+        noteText = `${attributes[attrName].lower} ≤ ${attrName.toUpperCase()} ≤ ${attributes[attrName].upper}`;
+      }
     } else if (attributes[attrName].lower !== null) {
       noteText = `${attributes[attrName].lower} ≤ ${attrName.toUpperCase()}`;
     }
@@ -201,6 +205,8 @@ function setupDualSlider(sliderId, attrName) {
     if(lowerHandle.style.display === "none" && upperHandle.style.display === "none") {
       lowerHandle.style.display = "block";
       let snappedVal = posToValue(clickX);
+      // First handle cannot be set to max.
+      if(snappedVal === max) snappedVal = max - 1;
       lowerHandle.style.left = valueToPos(snappedVal) + "px";
       attributes[attrName].lower = snappedVal;
       attributes[attrName].lowerOp = "=";
@@ -212,9 +218,9 @@ function setupDualSlider(sliderId, attrName) {
       if(clickX > curX) {
         upperHandle.style.display = "block";
         let snappedVal = posToValue(clickX);
+        // Allow upper handle to be max (i.e. "+")
         upperHandle.style.left = valueToPos(snappedVal) + "px";
         attributes[attrName].upper = snappedVal;
-        // If snappedVal equals max, we treat it as "+"
         attributes[attrName].upperOp = (snappedVal === max) ? "" : "<=";
         upperHandle.className = "slider-handle upper-handle active";
         attributes[attrName].lowerOp = ">=";
@@ -245,7 +251,7 @@ function setupDualSlider(sliderId, attrName) {
     }
   });
   
-  // Double-click handler.
+  // Double-click handler to remove handle.
   function addDoubleClickToHandle(handle, isLower) {
     handle.addEventListener("dblclick", function(e) {
       e.stopPropagation();
@@ -291,6 +297,8 @@ function setupDualSlider(sliderId, attrName) {
           newX = Math.max(newX, parseFloat(lowerHandle.style.left));
         }
         let snappedVal = posToValue(newX);
+        // Prevent lower handle from reaching max.
+        if(isLower && snappedVal === max) snappedVal = max - 1;
         handle.style.left = valueToPos(snappedVal) + "px";
         if(isLower) {
           attributes[attrName].lower = snappedVal;
@@ -310,19 +318,17 @@ function setupDualSlider(sliderId, attrName) {
     handle.addEventListener("click", function(e) {
       e.stopPropagation();
       if(isLower) {
-        // Toggle lower handle mode (cycle between "=" and active exclusive and then deletion)
         if(attributes[attrName].lowerOp === "=") {
           attributes[attrName].lowerOp = ">=";
           handle.classList.remove("outline");
           handle.classList.add("active");
         } else {
-          // Remove lower bound on second toggle
+          // Second click on lower handle removes it.
           handle.style.display = "none";
           attributes[attrName].lower = null;
           attributes[attrName].lowerOp = "";
         }
       } else {
-        // For upper handle, toggle between active and outline.
         if(attributes[attrName].upperOp === "<=") {
           attributes[attrName].upperOp = "<";
           handle.classList.remove("active");
@@ -448,10 +454,8 @@ function getSearchSettings(){
       queryParts.push(attr + attributes[attr].lowerOp + attributes[attr].lower);
     }
     if(attributes[attr].upper !== null){
-      // If upper equals max (10), treat as no upper bound.
-      if(attributes[attr].upper === 10) {
-        // do not add an upper clause.
-      } else {
+      // Do not add an upper clause if upper equals max (i.e. "+").
+      if(attributes[attr].upper !== 11) {
         queryParts.push(attr + attributes[attr].upperOp + attributes[attr].upper);
       }
     }
@@ -675,7 +679,7 @@ function importPresetsFromFile(event){
 //////////////////////
 function valueToPos(val) {
   const slider = document.getElementById("cmcSlider");
-  const min = 0, max = 10;
+  const min = 0, max = 11;
   return (val - min) / (max - min) * slider.offsetWidth;
 }
 
@@ -729,14 +733,13 @@ function buildExpansionsToggles(){
       btn.textContent = item.label;
       btn.addEventListener("click", function(){
         const oracle = document.getElementById("oracle");
-        // Trim extra spaces.
         oracle.value = oracle.value.trim() + " ";
-        // Special case: if label is '""', wrap entire text.
+        // Special case: if label is '""', then toggle wrapping.
         if(item.label === '""') {
           toggleQuotes();
           return;
         }
-        // Cycle multiple alternatives.
+        // For multiple alternatives, cycle them.
         if(item.expansions && item.expansions.length > 1) {
           if(expansionsInserted.has(item.label)) {
             let idx = expansionsInserted.get(item.label);
@@ -753,7 +756,7 @@ function buildExpansionsToggles(){
             expansionsInserted.set(item.label, 0);
           }
         } else {
-          // Single alternative toggle.
+          // For single alternative.
           if(!expansionsInserted.has(item.label)) {
             oracle.value = oracle.value.trim() + " " + item.expansions.join(" ").trim() + " ";
             expansionsInserted.set(item.label, 0);

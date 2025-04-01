@@ -1,4 +1,4 @@
-/* Version 0.5.26 */
+/* Version 0.5.29 */
 /* styles.css */
 body {
   font-family: Arial, sans-serif;
@@ -74,7 +74,7 @@ button:hover {
   height: 20px;
 }
 
-/* Dual Slider Styles (0 to 10 with last tick as "+") */
+/* Dual Slider Styles (Range: 0 to 11; 11 shows as "+") */
 .attribute-slider {
   margin-bottom: 15px;
   display: flex;
@@ -88,13 +88,12 @@ button:hover {
   position: relative;
   height: 40px;
   margin-bottom: 5px;
-  width: 100%;
-  max-width: 100%;
+  width: 90%; /* slightly less than full width to avoid edge issues */
+  max-width: 600px;
   border: 1px solid #ddd;
   border-radius: 4px;
   background-color: #f1f1f1;
   overflow: hidden;
-  margin-right: 0; /* So clear button is separate */
 }
 .slider-track {
   position: absolute;
@@ -134,7 +133,7 @@ button:hover {
 .slider-scale {
   position: relative;
   height: 20px;
-  margin-top: 8px; /* Extra margin so scale is below slider */
+  margin-top: 8px;  /* gap below slider */
 }
 .slider-scale .tick {
   position: absolute;
@@ -148,16 +147,6 @@ button:hover {
   top: 6px;
   font-size: 10px;
   transform: translateX(-50%);
-}
-
-/* Show plus for the last tick */
-.slider-scale .tick.plus {
-  background-color: #333;
-}
-.slider-scale .tick-label.plus {
-  color: #333;
-  font-weight: bold;
-  content: "+";
 }
 
 /* Slider Note */
