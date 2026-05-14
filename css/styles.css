@@ -1,5 +1,4 @@
-/* Version 0.6.00 */
-/* styles.css */
+/* Version 0.6.01 */
 
 body {
   font-family: Arial, sans-serif;
@@ -33,15 +32,14 @@ body {
 
 .option-group label {
   font-weight: bold;
-  margin-bottom: 6px;
   display: block;
+  margin-bottom: 8px;
 }
 
 .selector-row {
   display: flex;
-  align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
 select,
@@ -52,30 +50,30 @@ input[type="number"] {
   border: 1px solid #007bff;
   border-radius: 4px;
   background-color: #f8f9fa;
-  color: #000;
   font-size: 14px;
+}
+
+select {
+  flex: 1;
 }
 
 textarea {
   width: 100%;
-  min-height: 80px;
+  min-height: 90px;
+  resize: vertical;
 }
 
 button {
-  padding: 8px 14px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  padding: 8px 14px;
   background-color: #007bff;
-  color: #fff;
+  color: white;
 }
 
 button:hover {
   opacity: 0.92;
-}
-
-.clear-btn {
-  background-color: #6c757d;
 }
 
 .toggle-btn {
@@ -83,17 +81,12 @@ button:hover {
   color: #000;
 }
 
-.mana-icon {
-  width: 20px;
-  height: 20px;
-}
-
 #colorButtons,
 #typeButtons,
 #rarityButtons {
   display: flex;
-  gap: 6px;
   flex-wrap: wrap;
+  gap: 6px;
 }
 
 .color-btn,
@@ -101,6 +94,11 @@ button:hover {
 .rarity-btn {
   min-width: 42px;
   min-height: 42px;
+}
+
+.mana-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .rarity-btn {
@@ -114,46 +112,33 @@ button:hover {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
-.attribute-label {
-  min-width: 55px;
-  font-weight: bold;
 }
 
 .attribute-input {
-  width: 70px;
+  width: 72px;
   text-align: center;
 }
 
 .operator-btn {
   min-width: 52px;
   font-family: monospace;
-  font-size: 14px;
   background-color: #495057;
 }
 
 .attribute-center {
-  font-weight: bold;
-  min-width: 50px;
+  min-width: 55px;
   text-align: center;
+  font-weight: bold;
 }
 
 #searchButtons {
   display: flex;
   justify-content: center;
-  gap: 15px;
-  flex-wrap: wrap;
-  margin-top: 25px;
+  margin-top: 20px;
 }
 
 .action-btn {
   background-color: #28a745;
-}
-
-.action-btn:hover {
-  background-color: #218838;
 }
 
 .modal {
@@ -161,15 +146,15 @@ button:hover {
   inset: 0;
   background: rgba(0,0,0,0.45);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 9999;
 }
 
 .modal-box {
+  background: white;
   width: 90%;
   max-width: 420px;
-  background: white;
   border-radius: 10px;
   padding: 15px;
   display: flex;
@@ -188,11 +173,11 @@ button:hover {
 
 .set-row {
   padding: 6px;
-  border-radius: 5px;
-  cursor: pointer;
+  border-radius: 4px;
   display: flex;
   gap: 8px;
   align-items: center;
+  cursor: pointer;
 }
 
 .set-row:hover {
@@ -217,22 +202,13 @@ button:hover {
     padding: 10px;
   }
 
-  .selector-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .attribute-box {
-    flex-wrap: nowrap;
     overflow-x: auto;
+    flex-wrap: nowrap;
   }
 
   .attribute-input {
     width: 64px;
-  }
-
-  .operator-btn {
-    min-width: 48px;
   }
 
 }
