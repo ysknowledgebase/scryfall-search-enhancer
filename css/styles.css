@@ -433,3 +433,618 @@ button:hover {
 .favorite-title {
   font-weight: bold;
 }
+
+
+
+
+
+/* Version 0.5.63 */
+/* =========================
+   MOBILE OPTIMIZATION
+========================= */
+
+@media (max-width: 768px) {
+
+  /* =========================
+     GENERAL
+  ========================= */
+
+  body {
+
+    font-size: 14px;
+  }
+
+  .container {
+
+    padding: 10px;
+  }
+
+  h2,
+  h3,
+  h4 {
+
+    font-size: 20px;
+  }
+
+  /* =========================
+     FORMAT ROW
+  ========================= */
+
+  #formatGroup .selector-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    gap: 8px;
+  }
+
+  #format_selector {
+
+    flex: 1;
+
+    min-width: 0;
+  }
+
+  #formatGroup .selector-row button {
+
+    width: 42px !important;
+
+    height: 42px !important;
+
+    padding: 0 !important;
+
+    font-size: 16px !important;
+
+    flex-shrink: 0;
+  }
+
+  /* =========================
+     ORACLE
+  ========================= */
+
+  #oracle {
+
+    min-height: 80px;
+
+    font-size: 16px;
+  }
+
+  /* =========================
+     FAVORITES ROW
+  ========================= */
+
+  .favorite-expansion-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    gap: 6px;
+  }
+
+  .favorite-title {
+
+    width: 100%;
+  }
+
+  .favorite-expansion-buttons {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    width: 100%;
+  }
+
+  /* =========================
+     ATTRIBUTE FILTERS
+  ========================= */
+
+  .attribute-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-bottom: 10px;
+  }
+
+  .attribute-row input {
+
+    width: 80px !important;
+
+    height: 38px !important;
+
+    font-size: 15px;
+  }
+
+  .attribute-row button {
+
+    min-width: 44px;
+
+    height: 38px;
+
+    font-size: 16px;
+  }
+
+  /* =========================
+     COLOR BUTTONS
+  ========================= */
+
+  .color-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+  }
+
+  .color-btn {
+
+    width: 52px !important;
+
+    height: 52px !important;
+
+    padding: 0 !important;
+  }
+
+  .color-btn img {
+
+    width: 24px;
+
+    height: 24px;
+  }
+
+  /* =========================
+     TYPE BUTTONS
+  ========================= */
+
+  .type-row,
+  #addedTypesContainer {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+  }
+
+  .type-btn {
+
+    min-width: 58px;
+
+    height: 40px;
+
+    padding: 4px 8px;
+
+    font-size: 14px;
+  }
+
+  /* =========================
+     RARITY BUTTONS
+  ========================= */
+
+  .rarity-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+  }
+
+  .rarity-btn {
+
+    width: 54px;
+
+    height: 40px;
+
+    font-size: 16px;
+  }
+
+  /* =========================
+     EXPANSIONS
+  ========================= */
+
+  .expansion-btn {
+
+    min-width: auto;
+
+    height: 36px;
+
+    padding: 4px 10px;
+
+    font-size: 13px;
+  }
+
+  .expansion-header {
+
+    font-size: 16px;
+
+    padding: 10px;
+  }
+
+  /* =========================
+     SEARCH BUTTONS
+  ========================= */
+
+  .search-btn {
+
+    height: 48px;
+
+    font-size: 18px;
+  }
+
+  /* =========================
+     PRESETS
+  ========================= */
+
+  .preset-controls {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+  }
+
+  .preset-controls button {
+
+    flex: 1;
+
+    min-width: 120px;
+
+    height: 44px;
+
+    font-size: 14px;
+  }
+
+  /* =========================
+     MODALS
+  ========================= */
+
+  .modal,
+  .custom-modal {
+
+    width: calc(100vw - 20px) !important;
+
+    max-width: 95vw !important;
+
+    max-height: 90vh !important;
+
+    overflow-y: auto !important;
+  }
+
+  /* =========================
+     ADD / DELETE SMALL BUTTONS
+  ========================= */
+
+  .toggle-btn {
+
+    width: 42px;
+
+    height: 42px;
+
+    padding: 0;
+
+    font-size: 18px;
+  }
+}
+
+
+/* Version 0.5.63 */
+/* =========================
+   MOBILE OPTIMIZATION
+========================= */
+
+@media (max-width: 768px) {
+
+  /* =========================
+     GENERAL
+  ========================= */
+
+  body {
+
+    font-size: 14px;
+  }
+
+  .container {
+
+    padding: 10px;
+  }
+
+  h2,
+  h3,
+  h4 {
+
+    font-size: 20px;
+  }
+
+  /* =========================
+     FORMAT ROW
+  ========================= */
+
+  #formatGroup .selector-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    gap: 8px;
+  }
+
+  #format_selector {
+
+    flex: 1;
+
+    min-width: 0;
+  }
+
+  #formatGroup .selector-row button {
+
+    width: 42px !important;
+
+    height: 42px !important;
+
+    padding: 0 !important;
+
+    font-size: 16px !important;
+
+    flex-shrink: 0;
+  }
+
+  /* =========================
+     ORACLE
+  ========================= */
+
+  #oracle {
+
+    min-height: 80px;
+
+    font-size: 16px;
+  }
+
+  /* =========================
+     FAVORITES ROW
+  ========================= */
+
+  .favorite-expansion-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    gap: 6px;
+  }
+
+  .favorite-title {
+
+    width: 100%;
+  }
+
+  .favorite-expansion-buttons {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    width: 100%;
+  }
+
+  /* =========================
+     ATTRIBUTE FILTERS
+  ========================= */
+
+  .attribute-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-bottom: 10px;
+  }
+
+  .attribute-row input {
+
+    width: 80px !important;
+
+    height: 38px !important;
+
+    font-size: 15px;
+  }
+
+  .attribute-row button {
+
+    min-width: 44px;
+
+    height: 38px;
+
+    font-size: 16px;
+  }
+
+  /* =========================
+     COLOR BUTTONS
+  ========================= */
+
+  .color-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+  }
+
+  .color-btn {
+
+    width: 52px !important;
+
+    height: 52px !important;
+
+    padding: 0 !important;
+  }
+
+  .color-btn img {
+
+    width: 24px;
+
+    height: 24px;
+  }
+
+  /* =========================
+     TYPE BUTTONS
+  ========================= */
+
+  .type-row,
+  #addedTypesContainer {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+  }
+
+  .type-btn {
+
+    min-width: 58px;
+
+    height: 40px;
+
+    padding: 4px 8px;
+
+    font-size: 14px;
+  }
+
+  /* =========================
+     RARITY BUTTONS
+  ========================= */
+
+  .rarity-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+  }
+
+  .rarity-btn {
+
+    width: 54px;
+
+    height: 40px;
+
+    font-size: 16px;
+  }
+
+  /* =========================
+     EXPANSIONS
+  ========================= */
+
+  .expansion-btn {
+
+    min-width: auto;
+
+    height: 36px;
+
+    padding: 4px 10px;
+
+    font-size: 13px;
+  }
+
+  .expansion-header {
+
+    font-size: 16px;
+
+    padding: 10px;
+  }
+
+  /* =========================
+     SEARCH BUTTONS
+  ========================= */
+
+  .search-btn {
+
+    height: 48px;
+
+    font-size: 18px;
+  }
+
+  /* =========================
+     PRESETS
+  ========================= */
+
+  .preset-controls {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+  }
+
+  .preset-controls button {
+
+    flex: 1;
+
+    min-width: 120px;
+
+    height: 44px;
+
+    font-size: 14px;
+  }
+
+  /* =========================
+     MODALS
+  ========================= */
+
+  .modal,
+  .custom-modal {
+
+    width: calc(100vw - 20px) !important;
+
+    max-width: 95vw !important;
+
+    max-height: 90vh !important;
+
+    overflow-y: auto !important;
+  }
+
+  /* =========================
+     ADD / DELETE SMALL BUTTONS
+  ========================= */
+
+  .toggle-btn {
+
+    width: 42px;
+
+    height: 42px;
+
+    padding: 0;
+
+    font-size: 18px;
+  }
+}
