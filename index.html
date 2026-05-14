@@ -1,26 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Scryfall Enhancer</title>
 
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css">
+
 </head>
 
 <body>
 
   <div id="enhancer-container">
 
-    <div id="versionIndicator">v0.6.01</div>
+    <div id="versionIndicator">
+      v0.6.02
+    </div>
 
     <!-- FORMAT -->
+
     <div class="option-group">
 
-      <label>Format</label>
+      <label class="section-label">
+        Format
+      </label>
 
-      <div class="selector-row">
+      <div class="format-row">
 
         <select id="format_selector"></select>
 
@@ -36,20 +48,52 @@
     </div>
 
     <!-- COLORS -->
+
     <div class="option-group">
 
-      <label>Colors</label>
+      <label class="section-label">
+        Colors
+      </label>
 
-      <div class="selector-row">
+      <div class="color-section">
 
         <div id="colorButtons">
 
-          <button class="color-btn" data-color="W"></button>
-          <button class="color-btn" data-color="U"></button>
-          <button class="color-btn" data-color="B"></button>
-          <button class="color-btn" data-color="R"></button>
-          <button class="color-btn" data-color="G"></button>
-          <button class="color-btn" data-color="C"></button>
+          <button
+            class="color-btn"
+            data-color="W"
+            type="button"
+          ></button>
+
+          <button
+            class="color-btn"
+            data-color="U"
+            type="button"
+          ></button>
+
+          <button
+            class="color-btn"
+            data-color="B"
+            type="button"
+          ></button>
+
+          <button
+            class="color-btn"
+            data-color="R"
+            type="button"
+          ></button>
+
+          <button
+            class="color-btn"
+            data-color="G"
+            type="button"
+          ></button>
+
+          <button
+            class="color-btn"
+            data-color="C"
+            type="button"
+          ></button>
 
         </div>
 
@@ -77,9 +121,12 @@
     </div>
 
     <!-- TYPES -->
+
     <div class="option-group">
 
-      <label>Types</label>
+      <label class="section-label">
+        Types
+      </label>
 
       <div id="typeButtons">
 
@@ -97,10 +144,13 @@
 
     </div>
 
-    <!-- RARITIES -->
+    <!-- RARITY -->
+
     <div class="option-group">
 
-      <label>Rarity</label>
+      <label class="section-label">
+        Rarity
+      </label>
 
       <div id="rarityButtons">
 
@@ -123,11 +173,14 @@
     </div>
 
     <!-- CMC -->
+
     <div class="option-group">
 
-      <label>Mana Value (CMC)</label>
+      <label class="section-label">
+        Mana Value (CMC)
+      </label>
 
-      <div class="attribute-box">
+      <div class="attribute-row">
 
         <input
           type="number"
@@ -167,12 +220,15 @@
 
     </div>
 
-    <!-- POWER -->
+    <!-- POW -->
+
     <div class="option-group">
 
-      <label>Power (POW)</label>
+      <label class="section-label">
+        Power (POW)
+      </label>
 
-      <div class="attribute-box">
+      <div class="attribute-row">
 
         <input
           type="number"
@@ -212,12 +268,15 @@
 
     </div>
 
-    <!-- TOUGHNESS -->
+    <!-- TOU -->
+
     <div class="option-group">
 
-      <label>Toughness (TOU)</label>
+      <label class="section-label">
+        Toughness (TOU)
+      </label>
 
-      <div class="attribute-box">
+      <div class="attribute-row">
 
         <input
           type="number"
@@ -258,15 +317,19 @@
     </div>
 
     <!-- ORACLE -->
+
     <div class="option-group">
 
-      <label>Oracle Text</label>
+      <label class="section-label">
+        Oracle Text
+      </label>
 
       <textarea id="oracle"></textarea>
 
     </div>
 
     <!-- SEARCH -->
+
     <div id="searchButtons">
 
       <button
