@@ -1,30 +1,17 @@
-/* Version 0.6.00 */
-/* app.js */
-
-//////////////////////
-// CONFIG & DATA
-//////////////////////
+/* Version 0.6.01 */
 
 const CONFIG = {
+
   formatData: {
     formats: [
       { value: "", text: "Select Format", color: "#007bff", sets: null },
       { value: "standard", text: "Standard", color: "blue", sets: null },
       {
-        value: "futureStandard",
-        text: "Future Standard",
-        color: "green",
-        sets: ["dsk", "blb", "otj", "big", "mkm", "lci", "woe", "fdn", "dft", "tdm"]
-      },
-      {
         value: "frontier",
         text: "Frontier",
         color: "purple",
         sets: ["dsk", "blb", "otj", "big", "mkm", "fdn", "dft", "tdm"]
-      },
-      { value: "fdn", text: "FDN", color: "orange", sets: ["fdn"] },
-      { value: "dft", text: "DFT", color: "brown", sets: ["dft"] },
-      { value: "tdm", text: "TDM", color: "#8a2be2", sets: ["tdm"] }
+      }
     ]
   },
 
@@ -59,34 +46,30 @@ const CONFIG = {
 
 const CUSTOM_FORMAT_KEY = "customFormats_v1";
 
-//////////////////////
-// ATTRIBUTE STATE
-//////////////////////
-
 const attributes = {
+
   cmc: {
     min: "",
     minOp: "<=",
     max: "",
     maxOp: "<="
   },
+
   pow: {
     min: "",
     minOp: "<=",
     max: "",
     maxOp: "<="
   },
+
   tou: {
     min: "",
     minOp: "<=",
     max: "",
     maxOp: "<="
   }
-};
 
-//////////////////////
-// FORMAT STORAGE
-//////////////////////
+};
 
 function loadCustomFormats() {
   try {
@@ -101,6 +84,7 @@ function saveCustomFormats(data) {
 }
 
 function getAllFormats() {
+
   const base = CONFIG.formatData.formats;
   const custom = loadCustomFormats();
 
@@ -113,8 +97,12 @@ function getAllFormats() {
 }
 
 async function fetchScryfallSets() {
+
   try {
-    const res = await fetch("https://api.scryfall.com/sets");
+
+    const res =
+      await fetch("https://api.scryfall.com/sets");
+
     const data = await res.json();
 
     return data.data
@@ -123,65 +111,70 @@ async function fetchScryfallSets() {
         code: s.code,
         name: s.name
       }));
+
   } catch {
+
     alert("Failed to fetch sets.");
     return [];
   }
 }
 
-//////////////////////
-// ATTRIBUTE HELPERS
-//////////////////////
+function populateFormatDropdown() {
 
-function cycleOperator(current) {
-  if (current === "<=") return "<";
-  if (current === "<") return "=";
-  return "<=";
+  const selector =
+    document.getElementById("format_selector");
+
+  selector.innerHTML = "";
+
+  getAllFormats().forEach(fmt => {
+
+    const opt =
+      document.createElement("option");
+
+    opt.value = fmt.value;
+    opt.textContent = fmt.text;
+    opt.style.color = fmt.color || "#007bff";
+
+    selector.appendChild(opt);
+  });
 }
-
-function flipOperator(op) {
-  if (op === "<=") return ">=";
-  if (op === "<") return ">";
-  return "=";
-}
-
-function updateAttributeState(attr, side, value) {
-  attributes[attr][side] = value;
-}
-
-function updateOperator(attr, side, buttonEl) {
-  const key = side + "Op";
-
-  attributes[attr][key] = cycleOperator(attributes[attr][key]);
-
-  buttonEl.textContent = attributes[attr][key];
-}
-
-//////////////////////
-// FORMAT UI
-//////////////////////
 
 async function addFormatModal() {
-  const modal = document.createElement("div");
+
+  const modal =
+    document.createElement("div");
+
   modal.className = "modal";
 
-  const box = document.createElement("div");
+  const box =
+    document.createElement("div");
+
   box.className = "modal-box";
 
-  const title = document.createElement("h3");
+  const title =
+    document.createElement("h3");
+
   title.textContent = "Create Format";
 
-  const nameInput = document.createElement("input");
+  const nameInput =
+    document.createElement("input");
+
   nameInput.placeholder = "Format Name";
 
-  const colorInput = document.createElement("input");
+  const colorInput =
+    document.createElement("input");
+
   colorInput.type = "color";
   colorInput.value = "#007bff";
 
-  const searchInput = document.createElement("input");
+  const searchInput =
+    document.createElement("input");
+
   searchInput.placeholder = "Search sets...";
 
-  const setsContainer = document.createElement("div");
+  const setsContainer =
+    document.createElement("div");
+
   setsContainer.className = "sets-container";
 
   const sets = await fetchScryfallSets();
@@ -189,6 +182,7 @@ async function addFormatModal() {
   const selectedSets = new Set();
 
   function renderSets(filter = "") {
+
     setsContainer.innerHTML = "";
 
     sets
@@ -197,20 +191,29 @@ async function addFormatModal() {
         s.code.toLowerCase().includes(filter.toLowerCase())
       )
       .forEach(s => {
-        const row = document.createElement("div");
+
+        const row =
+          document.createElement("div");
+
         row.className = "set-row";
 
-        const checkbox = document.createElement("input");
+        const checkbox =
+          document.createElement("input");
+
         checkbox.type = "checkbox";
         checkbox.checked = selectedSets.has(s.code);
 
-        const label = document.createElement("span");
-        label.textContent = `${s.code.toUpperCase()} - ${s.name}`;
+        const label =
+          document.createElement("span");
+
+        label.textContent =
+          `${s.code.toUpperCase()} - ${s.name}`;
 
         row.appendChild(checkbox);
         row.appendChild(label);
 
         row.onclick = () => {
+
           checkbox.checked = !checkbox.checked;
 
           if (checkbox.checked) {
@@ -219,7 +222,10 @@ async function addFormatModal() {
             selectedSets.delete(s.code);
           }
 
-          row.classList.toggle("selected", checkbox.checked);
+          row.classList.toggle(
+            "selected",
+            checkbox.checked
+          );
         };
 
         if (checkbox.checked) {
@@ -236,14 +242,18 @@ async function addFormatModal() {
     renderSets(searchInput.value);
   });
 
-  const saveBtn = document.createElement("button");
+  const saveBtn =
+    document.createElement("button");
+
   saveBtn.textContent = "Save";
 
   saveBtn.onclick = () => {
-    const name = nameInput.value.trim();
+
+    const name =
+      nameInput.value.trim();
 
     if (!name) {
-      alert("Enter a format name.");
+      alert("Enter format name.");
       return;
     }
 
@@ -261,7 +271,10 @@ async function addFormatModal() {
 
     const existing = loadCustomFormats();
 
-    const index = existing.findIndex(f => f.value === name);
+    const index =
+      existing.findIndex(
+        f => f.value === name
+      );
 
     if (index !== -1) {
       existing[index] = newFormat;
@@ -276,15 +289,18 @@ async function addFormatModal() {
     document.body.removeChild(modal);
   };
 
-  const cancelBtn = document.createElement("button");
+  const cancelBtn =
+    document.createElement("button");
+
   cancelBtn.textContent = "Cancel";
-  cancelBtn.className = "clear-btn";
 
   cancelBtn.onclick = () => {
     document.body.removeChild(modal);
   };
 
-  const btnRow = document.createElement("div");
+  const btnRow =
+    document.createElement("div");
+
   btnRow.className = "modal-buttons";
 
   btnRow.appendChild(saveBtn);
@@ -302,38 +318,62 @@ async function addFormatModal() {
   document.body.appendChild(modal);
 }
 
-function populateFormatDropdown() {
-  const selector = document.getElementById("format_selector");
+function cycleOperator(current) {
 
-  selector.innerHTML = "";
+  if (current === "<=") return "<";
+  if (current === "<") return "=";
 
-  getAllFormats().forEach(fmt => {
-    const opt = document.createElement("option");
-
-    opt.value = fmt.value;
-    opt.textContent = fmt.text;
-    opt.style.color = fmt.color || "#007bff";
-
-    selector.appendChild(opt);
-  });
+  return "<=";
 }
 
-//////////////////////
-// QUERY BUILDING
-//////////////////////
+function flipOperator(op) {
+
+  if (op === "<=") return ">=";
+  if (op === "<") return ">";
+  return "=";
+}
+
+function updateTypeButtonStyle(btn) {
+
+  const state = btn.dataset.state;
+
+  if (state === "default") {
+
+    btn.style.backgroundColor = "transparent";
+    btn.style.border = "2px solid #90ee90";
+    btn.style.textDecoration = "none";
+  }
+
+  if (state === "include") {
+
+    btn.style.backgroundColor = "#90ee90";
+    btn.style.border = "2px solid #90ee90";
+    btn.style.textDecoration = "none";
+  }
+
+  if (state === "exclude") {
+
+    btn.style.backgroundColor = "#ffa8a8";
+    btn.style.border = "2px solid #ffa8a8";
+    btn.style.textDecoration = "line-through";
+  }
+}
 
 function buildAttributeQuery(attrKey) {
+
   const attr = attributes[attrKey];
 
   const query = [];
 
   if (attr.min !== "") {
+
     query.push(
       `${attrKey}${flipOperator(attr.minOp)}${attr.min}`
     );
   }
 
   if (attr.max !== "") {
+
     query.push(
       `${attrKey}${attr.maxOp}${attr.max}`
     );
@@ -343,99 +383,101 @@ function buildAttributeQuery(attrKey) {
 }
 
 function getSearchSettings() {
-  const format = document.getElementById("format_selector").value;
-
-  const colors = Array.from(
-    document.querySelectorAll('input[name="color[]"]:checked')
-  ).map(el => el.value);
-
-  const rarities = Array.from(
-    document.querySelectorAll('input[name="rarity[]"]:checked')
-  ).map(el => el.value);
-
-  const oracle = document.getElementById("oracle").value.trim();
 
   const queryParts = [];
 
-  //////////////////////
-  // FORMAT
-  //////////////////////
+  const format =
+    document.getElementById("format_selector").value;
+
+  const oracle =
+    document.getElementById("oracle").value.trim();
+
+  const colors = Array.from(
+    document.querySelectorAll(
+      'input[name="color[]"]:checked'
+    )
+  ).map(el => el.value);
+
+  const rarities = Array.from(
+    document.querySelectorAll(
+      'input[name="rarity[]"]:checked'
+    )
+  ).map(el => el.value);
 
   if (format) {
-    const fmtObj = getAllFormats().find(f => f.value === format);
 
-    if (fmtObj && fmtObj.sets) {
-      const clause =
+    const fmt =
+      getAllFormats().find(
+        f => f.value === format
+      );
+
+    if (fmt && fmt.sets) {
+
+      queryParts.push(
         "(" +
-        fmtObj.sets.map(s => "set:" + s).join(" OR ") +
-        ")";
+        fmt.sets.map(s => `set:${s}`).join(" OR ") +
+        ")"
+      );
 
-      queryParts.push(clause);
     } else {
-      queryParts.push("is:" + format);
+
+      queryParts.push(`is:${format}`);
     }
   }
-
-  //////////////////////
-  // COLORS
-  //////////////////////
 
   if (colors.length > 0) {
-    const toggle = document.getElementById("colorToggle").textContent.trim();
+
+    const toggle =
+      document.getElementById("colorToggle")
+        .textContent
+        .trim();
 
     if (toggle === "Exactly") {
-      queryParts.push("c=" + colors.join(""));
+      queryParts.push(`c=${colors.join("")}`);
     } else {
-      queryParts.push("c<=" + colors.join(""));
+      queryParts.push(`c<=${colors.join("")}`);
     }
   }
 
-  //////////////////////
-  // TYPES
-  //////////////////////
+  document.querySelectorAll(".type-btn")
+    .forEach(btn => {
 
-  document.querySelectorAll(".type-btn").forEach(btn => {
-    const state = btn.dataset.state;
-    const type = btn.dataset.type;
+      const state = btn.dataset.state;
+      const type = btn.dataset.type;
 
-    if (state === "include") {
-      queryParts.push("t:" + type);
-    }
+      if (state === "include") {
+        queryParts.push(`t:${type}`);
+      }
 
-    if (state === "exclude") {
-      queryParts.push("-t:" + type);
-    }
-  });
-
-  //////////////////////
-  // RARITIES
-  //////////////////////
-
-  if (rarities.length > 0) {
-    const rarityQueries = [];
-
-    rarities.forEach(r => {
-      const cfg = CONFIG.rarities.find(x => x.label === r);
-
-      if (cfg) {
-        rarityQueries.push("r:" + cfg.full);
+      if (state === "exclude") {
+        queryParts.push(`-t:${type}`);
       }
     });
 
-    queryParts.push("(" + rarityQueries.join(" OR ") + ")");
-  }
+  if (rarities.length > 0) {
 
-  //////////////////////
-  // ATTRIBUTES
-  //////////////////////
+    const rarityQueries = [];
+
+    rarities.forEach(r => {
+
+      const cfg =
+        CONFIG.rarities.find(
+          x => x.label === r
+        );
+
+      if (cfg) {
+        rarityQueries.push(`r:${cfg.full}`);
+      }
+    });
+
+    queryParts.push(
+      "(" + rarityQueries.join(" OR ") + ")"
+    );
+  }
 
   queryParts.push(...buildAttributeQuery("cmc"));
   queryParts.push(...buildAttributeQuery("pow"));
   queryParts.push(...buildAttributeQuery("tou"));
-
-  //////////////////////
-  // ORACLE
-  //////////////////////
 
   if (oracle) {
     queryParts.push(`oracle:${oracle}`);
@@ -443,202 +485,193 @@ function getSearchSettings() {
 
   queryParts.push("(game:paper)");
 
-  const url =
-    "https://scryfall.com/search?as=grid&order=name&q=" +
-    encodeURIComponent(queryParts.join(" "));
-
   return {
-    url
+
+    url:
+      "https://scryfall.com/search?as=grid&order=name&q=" +
+      encodeURIComponent(queryParts.join(" "))
   };
 }
 
 function performSearch() {
-  const settings = getSearchSettings();
 
-  window.location.href = settings.url;
+  const settings =
+    getSearchSettings();
+
+  window.location.href =
+    settings.url;
 }
 
-//////////////////////
-// TYPE BUTTONS
-//////////////////////
-
-function updateTypeButtonStyle(btn) {
-  const state = btn.dataset.state;
-
-  if (state === "default") {
-    btn.style.backgroundColor = "transparent";
-    btn.style.border = "2px solid #90ee90";
-    btn.style.textDecoration = "none";
-  }
-
-  if (state === "include") {
-    btn.style.backgroundColor = "#90ee90";
-    btn.style.border = "2px solid #90ee90";
-    btn.style.textDecoration = "none";
-  }
-
-  if (state === "exclude") {
-    btn.style.backgroundColor = "#ffa8a8";
-    btn.style.border = "2px solid #ffa8a8";
-    btn.style.textDecoration = "line-through";
-  }
-}
-
-//////////////////////
-// INIT
-//////////////////////
-
-document.addEventListener("DOMContentLoaded", function () {
-
-  //////////////////////
-  // VERSION
-  //////////////////////
-
-  document.getElementById("versionIndicator").textContent = "v0.6.00";
-
-  //////////////////////
-  // FORMAT DROPDOWN
-  //////////////////////
+document.addEventListener("DOMContentLoaded", () => {
 
   populateFormatDropdown();
-
-  //////////////////////
-  // ADD FORMAT BUTTON
-  //////////////////////
 
   document.getElementById("addFormatButton")
     .addEventListener("click", addFormatModal);
 
-  //////////////////////
-  // COLOR BUTTONS
-  //////////////////////
+  document.querySelectorAll(".color-btn")
+    .forEach(btn => {
 
-  document.querySelectorAll(".color-btn").forEach(btn => {
+      const color =
+        btn.dataset.color;
 
-    const color = btn.dataset.color;
-
-    const cfg = CONFIG.colorData.find(c => c.val === color);
-
-    btn.innerHTML =
-      `<img src="${cfg.icon}" class="mana-icon">`;
-
-    btn.addEventListener("click", function () {
-
-      const checkbox =
-        document.querySelector(
-          `input[name="color[]"][value="${color}"]`
+      const cfg =
+        CONFIG.colorData.find(
+          c => c.val === color
         );
 
-      checkbox.checked = !checkbox.checked;
+      btn.innerHTML =
+        `<img src="${cfg.icon}" class="mana-icon">`;
 
-      if (checkbox.checked) {
-        btn.style.backgroundColor = cfg.color;
-        btn.style.color = cfg.textColor;
-      } else {
-        btn.style.backgroundColor = "#f8f9fa";
-        btn.style.color = "#000";
-      }
+      btn.addEventListener("click", () => {
+
+        const checkbox =
+          document.querySelector(
+            `input[name="color[]"][value="${color}"]`
+          );
+
+        checkbox.checked =
+          !checkbox.checked;
+
+        if (checkbox.checked) {
+
+          btn.style.backgroundColor =
+            cfg.color;
+
+          btn.style.color =
+            cfg.textColor;
+
+        } else {
+
+          btn.style.backgroundColor =
+            "#f8f9fa";
+
+          btn.style.color =
+            "#000";
+        }
+      });
     });
-  });
 
-  //////////////////////
-  // TYPE BUTTONS
-  //////////////////////
+  document.querySelectorAll(".type-btn")
+    .forEach(btn => {
 
-  document.querySelectorAll(".type-btn").forEach(btn => {
-
-    btn.dataset.state = "default";
-
-    updateTypeButtonStyle(btn);
-
-    btn.addEventListener("click", function () {
-
-      const current = btn.dataset.state;
-
-      let next = "default";
-
-      if (current === "default") next = "include";
-      else if (current === "include") next = "exclude";
-
-      btn.dataset.state = next;
+      btn.dataset.state = "default";
 
       updateTypeButtonStyle(btn);
+
+      btn.addEventListener("click", () => {
+
+        const current =
+          btn.dataset.state;
+
+        let next = "default";
+
+        if (current === "default") {
+          next = "include";
+        } else if (current === "include") {
+          next = "exclude";
+        }
+
+        btn.dataset.state = next;
+
+        updateTypeButtonStyle(btn);
+      });
     });
-  });
 
-  //////////////////////
-  // RARITY BUTTONS
-  //////////////////////
+  document.querySelectorAll(".rarity-btn")
+    .forEach(btn => {
 
-  document.querySelectorAll(".rarity-btn").forEach(btn => {
+      const rarity =
+        btn.dataset.rarity;
 
-    const rarity = btn.dataset.rarity;
-
-    const cfg =
-      CONFIG.rarities.find(r => r.label === rarity);
-
-    btn.addEventListener("click", function () {
-
-      const checkbox =
-        document.querySelector(
-          `input[name="rarity[]"][value="${rarity}"]`
+      const cfg =
+        CONFIG.rarities.find(
+          r => r.label === rarity
         );
 
-      checkbox.checked = !checkbox.checked;
+      btn.style.border =
+        `2px solid ${cfg.color}`;
 
-      if (checkbox.checked) {
-        btn.style.backgroundColor = cfg.color;
-        btn.style.color = "#fff";
-      } else {
-        btn.style.backgroundColor = "transparent";
-        btn.style.color = "#000";
-      }
-    });
-  });
+      btn.addEventListener("click", () => {
 
-  //////////////////////
-  // ATTRIBUTE INPUTS
-  //////////////////////
+        const checkbox =
+          document.querySelector(
+            `input[name="rarity[]"][value="${rarity}"]`
+          );
 
-  ["cmc", "pow", "tou"].forEach(attr => {
+        checkbox.checked =
+          !checkbox.checked;
 
-    const minInput =
-      document.getElementById(`${attr}Min`);
+        if (checkbox.checked) {
 
-    const maxInput =
-      document.getElementById(`${attr}Max`);
+          btn.style.backgroundColor =
+            cfg.color;
 
-    const minOp =
-      document.getElementById(`${attr}MinOp`);
+          btn.style.color =
+            "#fff";
 
-    const maxOp =
-      document.getElementById(`${attr}MaxOp`);
+        } else {
 
-    minInput.addEventListener("input", () => {
-      updateAttributeState(attr, "min", minInput.value.trim());
+          btn.style.backgroundColor =
+            "transparent";
+
+          btn.style.color =
+            "#000";
+        }
+      });
     });
 
-    maxInput.addEventListener("input", () => {
-      updateAttributeState(attr, "max", maxInput.value.trim());
-    });
+  ["cmc", "pow", "tou"]
+    .forEach(attr => {
 
-    minOp.addEventListener("click", () => {
-      updateOperator(attr, "min", minOp);
-    });
+      const minInput =
+        document.getElementById(`${attr}Min`);
 
-    maxOp.addEventListener("click", () => {
-      updateOperator(attr, "max", maxOp);
-    });
-  });
+      const maxInput =
+        document.getElementById(`${attr}Max`);
 
-  //////////////////////
-  // COLOR TOGGLE
-  //////////////////////
+      const minOp =
+        document.getElementById(`${attr}MinOp`);
+
+      const maxOp =
+        document.getElementById(`${attr}MaxOp`);
+
+      minInput.addEventListener("input", () => {
+
+        attributes[attr].min =
+          minInput.value.trim();
+      });
+
+      maxInput.addEventListener("input", () => {
+
+        attributes[attr].max =
+          maxInput.value.trim();
+      });
+
+      minOp.addEventListener("click", () => {
+
+        attributes[attr].minOp =
+          cycleOperator(attributes[attr].minOp);
+
+        minOp.textContent =
+          attributes[attr].minOp;
+      });
+
+      maxOp.addEventListener("click", () => {
+
+        attributes[attr].maxOp =
+          cycleOperator(attributes[attr].maxOp);
+
+        maxOp.textContent =
+          attributes[attr].maxOp;
+      });
+    });
 
   document.getElementById("colorToggle")
-    .addEventListener("click", function () {
+    .addEventListener("click", () => {
 
-      const btn = document.getElementById("colorToggle");
+      const btn =
+        document.getElementById("colorToggle");
 
       btn.textContent =
         btn.textContent.trim() === "At Most"
@@ -646,11 +679,6 @@ document.addEventListener("DOMContentLoaded", function () {
           : "At Most";
     });
 
-  //////////////////////
-  // SEARCH
-  //////////////////////
-
   document.getElementById("searchActionButton")
     .addEventListener("click", performSearch);
-
 });
