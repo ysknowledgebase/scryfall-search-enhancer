@@ -434,40 +434,26 @@ button:hover {
   font-weight: bold;
 }
 
-
-
-
-
-/* Version 0.5.63 */
+/* Version 0.5.64 */
 /* =========================
-   MOBILE OPTIMIZATION
+   REAL MOBILE FIXES
 ========================= */
 
 @media (max-width: 768px) {
 
   /* =========================
-     GENERAL
+     CONTAINER
   ========================= */
 
-  body {
+  #enhancer-container {
 
-    font-size: 14px;
-  }
-
-  .container {
+    margin: 8px;
 
     padding: 10px;
   }
 
-  h2,
-  h3,
-  h4 {
-
-    font-size: 20px;
-  }
-
   /* =========================
-     FORMAT ROW
+     FORMAT SECTION
   ========================= */
 
   #formatGroup .selector-row {
@@ -476,14 +462,14 @@ button:hover {
 
     flex-wrap: wrap;
 
-    align-items: center;
+    gap: 6px;
 
-    gap: 8px;
+    align-items: center;
   }
 
   #format_selector {
 
-    flex: 1;
+    width: 100%;
 
     min-width: 0;
   }
@@ -498,25 +484,14 @@ button:hover {
 
     font-size: 16px !important;
 
-    flex-shrink: 0;
+    flex: 0 0 auto;
   }
 
   /* =========================
-     ORACLE
+     ATTRIBUTE FILTERS
   ========================= */
 
-  #oracle {
-
-    min-height: 80px;
-
-    font-size: 16px;
-  }
-
-  /* =========================
-     FAVORITES ROW
-  ========================= */
-
-  .favorite-expansion-row {
+  .attribute-filter-row {
 
     display: flex;
 
@@ -525,6 +500,171 @@ button:hover {
     align-items: center;
 
     gap: 6px;
+
+    margin-bottom: 10px;
+  }
+
+  .attribute-title {
+
+    min-width: 40px;
+
+    font-size: 15px;
+  }
+
+  .attr-input {
+
+    width: 72px !important;
+
+    height: 38px !important;
+
+    font-size: 15px;
+  }
+
+  .attr-op-btn {
+
+    width: 42px;
+
+    min-width: 42px;
+
+    height: 38px;
+
+    font-size: 18px;
+  }
+
+  .attr-center-label {
+
+    min-width: 38px;
+
+    font-size: 14px;
+  }
+
+  /* =========================
+     COLOR BUTTONS
+  ========================= */
+
+  #colorButtons {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+  }
+
+  #colorButtons button {
+
+    width: 52px !important;
+
+    height: 52px !important;
+
+    padding: 0 !important;
+
+    flex: 0 0 auto;
+  }
+
+  #colorButtons img {
+
+    width: 24px;
+
+    height: 24px;
+  }
+
+  /* =========================
+     TYPES
+  ========================= */
+
+  #typeButtons,
+  #addedTypesContainer {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+  }
+
+  #typeButtons button,
+  #addedTypesContainer button {
+
+    min-width: 54px;
+
+    height: 38px;
+
+    padding: 4px 8px;
+
+    font-size: 13px;
+
+    flex: 0 0 auto;
+  }
+
+  /* =========================
+     RARITIES
+  ========================= */
+
+  #rarityButtons {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+  }
+
+  #rarityButtons button {
+
+    width: 54px;
+
+    height: 38px;
+
+    font-size: 15px;
+
+    flex: 0 0 auto;
+  }
+
+  /* =========================
+     EXPANSIONS
+  ========================= */
+
+  .expansion-header-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    gap: 6px;
+  }
+
+  .expansion-header {
+
+    font-size: 15px;
+
+    padding: 10px;
+  }
+
+  .expansion-btn {
+
+    height: 34px;
+
+    padding: 4px 8px;
+
+    font-size: 12px;
+  }
+
+  /* =========================
+     FAVORITES
+  ========================= */
+
+  .favorite-expansion-row {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    align-items: center;
   }
 
   .favorite-title {
@@ -544,267 +684,19 @@ button:hover {
   }
 
   /* =========================
-     ATTRIBUTE FILTERS
+     PLAYABLE CHECKBOX
   ========================= */
 
-  .attribute-row {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    align-items: center;
-
-    gap: 6px;
-
-    margin-bottom: 10px;
-  }
-
-  .attribute-row input {
-
-    width: 80px !important;
-
-    height: 38px !important;
+  .playable-toggle {
 
     font-size: 15px;
   }
 
-  .attribute-row button {
+  .playable-toggle input {
 
-    min-width: 44px;
+    width: 18px;
 
-    height: 38px;
-
-    font-size: 16px;
-  }
-
-  /* =========================
-     COLOR BUTTONS
-  ========================= */
-
-  .color-row {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 6px;
-  }
-
-  .color-btn {
-
-    width: 52px !important;
-
-    height: 52px !important;
-
-    padding: 0 !important;
-  }
-
-  .color-btn img {
-
-    width: 24px;
-
-    height: 24px;
-  }
-
-  /* =========================
-     TYPE BUTTONS
-  ========================= */
-
-  .type-row,
-  #addedTypesContainer {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 6px;
-  }
-
-  .type-btn {
-
-    min-width: 58px;
-
-    height: 40px;
-
-    padding: 4px 8px;
-
-    font-size: 14px;
-  }
-
-  /* =========================
-     RARITY BUTTONS
-  ========================= */
-
-  .rarity-row {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 6px;
-  }
-
-  .rarity-btn {
-
-    width: 54px;
-
-    height: 40px;
-
-    font-size: 16px;
-  }
-
-  /* =========================
-     EXPANSIONS
-  ========================= */
-
-  .expansion-btn {
-
-    min-width: auto;
-
-    height: 36px;
-
-    padding: 4px 10px;
-
-    font-size: 13px;
-  }
-
-  .expansion-header {
-
-    font-size: 16px;
-
-    padding: 10px;
-  }
-
-  /* =========================
-     SEARCH BUTTONS
-  ========================= */
-
-  .search-btn {
-
-    height: 48px;
-
-    font-size: 18px;
-  }
-
-  /* =========================
-     PRESETS
-  ========================= */
-
-  .preset-controls {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 8px;
-  }
-
-  .preset-controls button {
-
-    flex: 1;
-
-    min-width: 120px;
-
-    height: 44px;
-
-    font-size: 14px;
-  }
-
-  /* =========================
-     MODALS
-  ========================= */
-
-  .modal,
-  .custom-modal {
-
-    width: calc(100vw - 20px) !important;
-
-    max-width: 95vw !important;
-
-    max-height: 90vh !important;
-
-    overflow-y: auto !important;
-  }
-
-  /* =========================
-     ADD / DELETE SMALL BUTTONS
-  ========================= */
-
-  .toggle-btn {
-
-    width: 42px;
-
-    height: 42px;
-
-    padding: 0;
-
-    font-size: 18px;
-  }
-}
-
-
-/* Version 0.5.63 */
-/* =========================
-   MOBILE OPTIMIZATION
-========================= */
-
-@media (max-width: 768px) {
-
-  /* =========================
-     GENERAL
-  ========================= */
-
-  body {
-
-    font-size: 14px;
-  }
-
-  .container {
-
-    padding: 10px;
-  }
-
-  h2,
-  h3,
-  h4 {
-
-    font-size: 20px;
-  }
-
-  /* =========================
-     FORMAT ROW
-  ========================= */
-
-  #formatGroup .selector-row {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    align-items: center;
-
-    gap: 8px;
-  }
-
-  #format_selector {
-
-    flex: 1;
-
-    min-width: 0;
-  }
-
-  #formatGroup .selector-row button {
-
-    width: 42px !important;
-
-    height: 42px !important;
-
-    padding: 0 !important;
-
-    font-size: 16px !important;
-
-    flex-shrink: 0;
+    height: 18px;
   }
 
   /* =========================
@@ -819,174 +711,21 @@ button:hover {
   }
 
   /* =========================
-     FAVORITES ROW
-  ========================= */
-
-  .favorite-expansion-row {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    align-items: center;
-
-    gap: 6px;
-  }
-
-  .favorite-title {
-
-    width: 100%;
-  }
-
-  .favorite-expansion-buttons {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 5px;
-
-    width: 100%;
-  }
-
-  /* =========================
-     ATTRIBUTE FILTERS
-  ========================= */
-
-  .attribute-row {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    align-items: center;
-
-    gap: 6px;
-
-    margin-bottom: 10px;
-  }
-
-  .attribute-row input {
-
-    width: 80px !important;
-
-    height: 38px !important;
-
-    font-size: 15px;
-  }
-
-  .attribute-row button {
-
-    min-width: 44px;
-
-    height: 38px;
-
-    font-size: 16px;
-  }
-
-  /* =========================
-     COLOR BUTTONS
-  ========================= */
-
-  .color-row {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 6px;
-  }
-
-  .color-btn {
-
-    width: 52px !important;
-
-    height: 52px !important;
-
-    padding: 0 !important;
-  }
-
-  .color-btn img {
-
-    width: 24px;
-
-    height: 24px;
-  }
-
-  /* =========================
-     TYPE BUTTONS
-  ========================= */
-
-  .type-row,
-  #addedTypesContainer {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 6px;
-  }
-
-  .type-btn {
-
-    min-width: 58px;
-
-    height: 40px;
-
-    padding: 4px 8px;
-
-    font-size: 14px;
-  }
-
-  /* =========================
-     RARITY BUTTONS
-  ========================= */
-
-  .rarity-row {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 6px;
-  }
-
-  .rarity-btn {
-
-    width: 54px;
-
-    height: 40px;
-
-    font-size: 16px;
-  }
-
-  /* =========================
-     EXPANSIONS
-  ========================= */
-
-  .expansion-btn {
-
-    min-width: auto;
-
-    height: 36px;
-
-    padding: 4px 10px;
-
-    font-size: 13px;
-  }
-
-  .expansion-header {
-
-    font-size: 16px;
-
-    padding: 10px;
-  }
-
-  /* =========================
      SEARCH BUTTONS
   ========================= */
 
-  .search-btn {
+  #searchButtons {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+  .action-btn {
+
+    width: 100%;
 
     height: 48px;
 
@@ -997,24 +736,26 @@ button:hover {
      PRESETS
   ========================= */
 
-  .preset-controls {
+  #preset-section button {
 
-    display: flex;
+    width: 100%;
 
-    flex-wrap: wrap;
-
-    gap: 8px;
+    margin-bottom: 8px;
   }
 
-  .preset-controls button {
+  /* =========================
+     SMALL +/- BUTTONS
+  ========================= */
 
-    flex: 1;
+  .toggle-btn {
 
-    min-width: 120px;
+    width: 40px;
 
-    height: 44px;
+    height: 40px;
 
-    font-size: 14px;
+    padding: 0;
+
+    font-size: 18px;
   }
 
   /* =========================
@@ -1032,19 +773,5 @@ button:hover {
 
     overflow-y: auto !important;
   }
-
-  /* =========================
-     ADD / DELETE SMALL BUTTONS
-  ========================= */
-
-  .toggle-btn {
-
-    width: 42px;
-
-    height: 42px;
-
-    padding: 0;
-
-    font-size: 18px;
-  }
 }
+
