@@ -1,135 +1,258 @@
+<!-- Version 0.5.34 -->
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>Scryfall Enhancer</title>
-
-  <link rel="stylesheet" href="styles.css">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scryfall Advanced Search Enhancer</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
-
 <body>
-
   <div id="enhancer-container">
-
-    <div id="versionIndicator">
-      v0.6.02
+    <!-- Version Indicator -->
+    <div id="versionIndicator">Version 0.5.34</div>
+    
+    <!-- 1. Format Selector -->
+    <div class="option-group" id="formatGroup">
+      <label for="format_selector">Format:</label>
+      <div class="selector-row">
+        <select id="format_selector">
+          <option value="">Select Format</option>
+          <option value="standard">Standard</option>
+          <option value="futureStandard">Future Standard</option>
+          <option value="frontier">Frontier</option>
+          <option value="fdn">FDN</option>
+          <option value="dft">DFT</option>
+          <option value="tdm">TDM</option>
+          <option value="fin">FIN</option>
+          <option value="eoe">EOE</option>
+          <option value="spm">SPM</option>
+          <option value="tla">TLA</option>
+          <option value="ecl">ECL</option>
+          <option value="tmt">TMT</option>
+          <option value="sos">SOS</option>
+        </select>
+        <button class="clear-btn" id="clearFormat">Clear</button>
+      </div>
     </div>
 
-    <!-- FORMAT -->
+<!-- Version 0.5.43 -->
+<!-- Oracle Text -->
 
-    <div class="option-group">
+<div class="option-group" id="oracleGroup">
 
-      <label class="section-label">
-        Format
-      </label>
+  <label>Oracle Text:</label>
 
-      <div class="format-row">
+  <textarea
+    id="oracle"
+    placeholder="Enter oracle text..."
+  ></textarea>
 
-        <select id="format_selector"></select>
+  <!-- Version 0.5.51 -->
 
-        <button
-          type="button"
-          id="addFormatButton"
-        >
-          +
-        </button>
+<div class="oracle-button-row">
 
+  <button
+    class="clear-btn"
+    id="clearOracle"
+  >
+    Clear
+  </button>
+<!-- Version 0.5.57 -->
+  <div
+    id="mostUsedExpansionButtons"
+  ></div>
+<!-- Version 0.5.60 -->
+
+<div class="favorite-expansion-row">
+
+  <span class="favorite-title">
+    Favorites:
+  </span>
+
+  <div
+    id="favoriteExpansionButtons"
+    class="favorite-expansion-buttons"
+  ></div>
+
+  <button
+    class="toggle-btn"
+    id="addFavoriteExpansionBtn"
+  >
+    +
+  </button>
+
+  <button
+    class="toggle-btn"
+    id="deleteFavoriteExpansionBtn"
+  >
+    -
+  </button>
+
+</div>
+
+
+</div>
+
+</div>
+
+<!-- Version 0.5.35 -->
+<!-- 2. Attributes Section (Textbox Filters) -->
+
+<div class="option-group" id="attributeGroup">
+
+  <!-- Mana Value -->
+  <div class="attribute-filter-row">
+
+    <span class="attribute-title">CMC</span>
+
+    <input
+      type="number"
+      id="cmcLowerInput"
+      class="attr-input"
+      placeholder=""
+    >
+
+    <button
+      type="button"
+      id="cmcLowerOp"
+      class="attr-op-btn"
+    ><</button>
+
+    <span class="attr-center-label">CMC</span>
+
+    <button
+      type="button"
+      id="cmcUpperOp"
+      class="attr-op-btn"
+    ><</button>
+
+    <input
+      type="number"
+      id="cmcUpperInput"
+      class="attr-input"
+      placeholder=""
+    >
+
+    <button class="clear-btn" id="clearCmc">Clear</button>
+
+  </div>
+
+  <!-- Power -->
+  <div class="attribute-filter-row">
+
+    <span class="attribute-title">POW</span>
+
+    <input
+      type="number"
+      id="powLowerInput"
+      class="attr-input"
+      placeholder=""
+    >
+
+    <button
+      type="button"
+      id="powLowerOp"
+      class="attr-op-btn"
+    ><</button>
+
+    <span class="attr-center-label">POW</span>
+
+    <button
+      type="button"
+      id="powUpperOp"
+      class="attr-op-btn"
+    ><</button>
+
+    <input
+      type="number"
+      id="powUpperInput"
+      class="attr-input"
+      placeholder=""
+    >
+
+    <button class="clear-btn" id="clearPow">Clear</button>
+
+  </div>
+
+  <!-- Toughness -->
+  <div class="attribute-filter-row">
+
+    <span class="attribute-title">TOU</span>
+
+    <input
+      type="number"
+      id="touLowerInput"
+      class="attr-input"
+      placeholder=""
+    >
+
+    <button
+      type="button"
+      id="touLowerOp"
+      class="attr-op-btn"
+    ><</button>
+
+    <span class="attr-center-label">TOU</span>
+
+    <button
+      type="button"
+      id="touUpperOp"
+      class="attr-op-btn"
+    ><</button>
+
+    <input
+      type="number"
+      id="touUpperInput"
+      class="attr-input"
+      placeholder=""
+    >
+
+    <button class="clear-btn" id="clearTou">Clear</button>
+
+  </div>
+
+</div>
+    
+    <!-- 3. Color Selector -->
+    <div class="option-group" id="colorGroup">
+      <label>Colors:</label>
+      <div class="selector-row" id="colorButtons">
+        <button class="color-btn" data-color="W"><img src="assets/white.svg" alt="W" class="mana-icon"></button>
+        <button class="color-btn" data-color="U"><img src="assets/blue.svg" alt="U" class="mana-icon"></button>
+        <button class="color-btn" data-color="B"><img src="assets/black.svg" alt="B" class="mana-icon"></button>
+        <button class="color-btn" data-color="R"><img src="assets/red.svg" alt="R" class="mana-icon"></button>
+        <button class="color-btn" data-color="G"><img src="assets/green.svg" alt="G" class="mana-icon"></button>
+        <button class="color-btn" data-color="C"><img src="assets/colorless.svg" alt="C" class="mana-icon"></button>
+   <!-- Version 0.5.42 -->
+
+<button class="toggle-btn" id="colorToggle">
+  At Most
+</button>
+
+<label class="playable-toggle">
+  <input
+    type="checkbox"
+    id="playableColorToggle"
+  >
+  Playables
+</label>
+        <button class="clear-btn" id="clearColor">Clear</button>
       </div>
-
-    </div>
-
-    <!-- COLORS -->
-
-    <div class="option-group">
-
-      <label class="section-label">
-        Colors
-      </label>
-
-      <div class="color-section">
-
-        <div id="colorButtons">
-
-          <button
-            class="color-btn"
-            data-color="W"
-            type="button"
-          ></button>
-
-          <button
-            class="color-btn"
-            data-color="U"
-            type="button"
-          ></button>
-
-          <button
-            class="color-btn"
-            data-color="B"
-            type="button"
-          ></button>
-
-          <button
-            class="color-btn"
-            data-color="R"
-            type="button"
-          ></button>
-
-          <button
-            class="color-btn"
-            data-color="G"
-            type="button"
-          ></button>
-
-          <button
-            class="color-btn"
-            data-color="C"
-            type="button"
-          ></button>
-
-        </div>
-
-        <button
-          type="button"
-          id="colorToggle"
-          class="toggle-btn"
-        >
-          At Most
-        </button>
-
-      </div>
-
-      <div style="display:none">
-
+      <div id="colorCheckboxes" style="display:none;">
         <input type="checkbox" name="color[]" value="W">
         <input type="checkbox" name="color[]" value="U">
         <input type="checkbox" name="color[]" value="B">
         <input type="checkbox" name="color[]" value="R">
         <input type="checkbox" name="color[]" value="G">
         <input type="checkbox" name="color[]" value="C">
-
       </div>
-
     </div>
-
-    <!-- TYPES -->
-
-    <div class="option-group">
-
-      <label class="section-label">
-        Types
-      </label>
-
-      <div id="typeButtons">
-
+    
+    <!-- 4. Type Selector -->
+    <div class="option-group" id="typeGroup">
+      <label>Types:</label>
+      <div class="selector-row" id="typeButtons">
         <button class="type-btn" data-type="artifact">AR</button>
         <button class="type-btn" data-type="enchantment">EN</button>
         <button class="type-btn" data-type="aura">AU</button>
@@ -139,211 +262,119 @@
         <button class="type-btn" data-type="equipment">EQ</button>
         <button class="type-btn" data-type="land">LD</button>
         <button class="type-btn" data-type="planeswalker">PW</button>
+<!-- Version 0.5.44 -->
 
+<button class="toggle-btn" id="typePartialToggle">
+  =
+</button>
+
+<!-- Version 0.5.49 -->
+
+<button
+  class="toggle-btn"
+  id="addCustomTypeBtn"
+>
+  +
+</button>
+
+<button
+  class="toggle-btn"
+  id="deleteCustomTypeBtn"
+>
+  -
+</button>
+        <button class="clear-btn" id="clearType">Clear</button>
       </div>
-
+      <div id="typeCheckboxes" style="display:none;">
+        <input type="checkbox" name="type[]" value="artifact">
+        <input type="checkbox" name="type[]" value="enchantment">
+        <input type="checkbox" name="type[]" value="aura">
+        <input type="checkbox" name="type[]" value="creature">
+        <input type="checkbox" name="type[]" value="sorcery">
+        <input type="checkbox" name="type[]" value="instant">
+        <input type="checkbox" name="type[]" value="equipment">
+        <input type="checkbox" name="type[]" value="land">
+        <input type="checkbox" name="type[]" value="planeswalker">
+      </div>
     </div>
+    <!-- Version 0.5.44 -->
 
-    <!-- RARITY -->
+<div id="addedTypesWrapper">
 
-    <div class="option-group">
+  <div class="added-types-title">
+    Added Types
+  </div>
 
-      <label class="section-label">
-        Rarity
-      </label>
+  <div id="addedTypesContainer"></div>
 
-      <div id="rarityButtons">
-
+</div>
+    
+    <!-- 5. Rarity Selector -->
+    <div class="option-group" id="rarityGroup">
+      <label>Rarities:</label>
+      <div class="selector-row" id="rarityButtons">
         <button class="rarity-btn" data-rarity="C">C</button>
         <button class="rarity-btn" data-rarity="U">U</button>
         <button class="rarity-btn" data-rarity="R">R</button>
         <button class="rarity-btn" data-rarity="M">M</button>
-
+        <button class="clear-btn" id="clearRarity">Clear</button>
       </div>
-
-      <div style="display:none">
-
+      <div id="rarityCheckboxes" style="display:none;">
         <input type="checkbox" name="rarity[]" value="C">
         <input type="checkbox" name="rarity[]" value="U">
         <input type="checkbox" name="rarity[]" value="R">
         <input type="checkbox" name="rarity[]" value="M">
-
       </div>
-
     </div>
+    
 
-    <!-- CMC -->
+    
+    <!-- 7. Expansions Section -->
+    <div class="option-group" id="expansionGroup">
+<!-- Version 0.5.56 -->
 
-    <div class="option-group">
+<div class="expansion-header-row">
 
-      <label class="section-label">
-        Mana Value (CMC)
-      </label>
+  <label>Expansions:</label>
 
-      <div class="attribute-row">
+  <button
+    class="toggle-btn"
+    id="addExpansionBtn"
+  >
+    +
+  </button>
 
-        <input
-          type="number"
-          id="cmcMin"
-          class="attribute-input"
-          placeholder="Min"
-        >
+  <button
+    class="toggle-btn"
+    id="deleteExpansionBtn"
+  >
+    -
+  </button>
 
-        <button
-          type="button"
-          id="cmcMinOp"
-          class="operator-btn"
-        >
-          <=
-        </button>
-
-        <div class="attribute-center">
-          CMC
-        </div>
-
-        <button
-          type="button"
-          id="cmcMaxOp"
-          class="operator-btn"
-        >
-          <=
-        </button>
-
-        <input
-          type="number"
-          id="cmcMax"
-          class="attribute-input"
-          placeholder="Max"
-        >
-
-      </div>
-
+</div>
+      <div id="expansionsContainer"></div>
     </div>
-
-    <!-- POW -->
-
-    <div class="option-group">
-
-      <label class="section-label">
-        Power (POW)
-      </label>
-
-      <div class="attribute-row">
-
-        <input
-          type="number"
-          id="powMin"
-          class="attribute-input"
-          placeholder="Min"
-        >
-
-        <button
-          type="button"
-          id="powMinOp"
-          class="operator-btn"
-        >
-          <=
-        </button>
-
-        <div class="attribute-center">
-          POW
-        </div>
-
-        <button
-          type="button"
-          id="powMaxOp"
-          class="operator-btn"
-        >
-          <=
-        </button>
-
-        <input
-          type="number"
-          id="powMax"
-          class="attribute-input"
-          placeholder="Max"
-        >
-
-      </div>
-
-    </div>
-
-    <!-- TOU -->
-
-    <div class="option-group">
-
-      <label class="section-label">
-        Toughness (TOU)
-      </label>
-
-      <div class="attribute-row">
-
-        <input
-          type="number"
-          id="touMin"
-          class="attribute-input"
-          placeholder="Min"
-        >
-
-        <button
-          type="button"
-          id="touMinOp"
-          class="operator-btn"
-        >
-          <=
-        </button>
-
-        <div class="attribute-center">
-          TOU
-        </div>
-
-        <button
-          type="button"
-          id="touMaxOp"
-          class="operator-btn"
-        >
-          <=
-        </button>
-
-        <input
-          type="number"
-          id="touMax"
-          class="attribute-input"
-          placeholder="Max"
-        >
-
-      </div>
-
-    </div>
-
-    <!-- ORACLE -->
-
-    <div class="option-group">
-
-      <label class="section-label">
-        Oracle Text
-      </label>
-
-      <textarea id="oracle"></textarea>
-
-    </div>
-
-    <!-- SEARCH -->
-
+    
+    <!-- 8. Search Buttons -->
     <div id="searchButtons">
-
-      <button
-        id="searchActionButton"
-        class="action-btn"
-      >
-        Search
-      </button>
-
+      <button id="searchActionButton" class="action-btn">Search</button>
+      <button id="searchFrontierActionButton" class="action-btn">Search Frontier</button>
     </div>
-
+    
+    <!-- 9. Preset Management Section -->
+    <div id="preset-section">
+      <h3>Search Presets</h3>
+      <button id="savePresetButton">💾 Save Preset</button>
+      <select id="presetDropdown">
+        <option value="">Select a preset...</option>
+      </select>
+      <button id="deletePresetButton">🗑 Delete Preset</button>
+      <button id="exportPresetButton">⬇ Export Presets</button>
+      <button id="importPresetButton">⬆ Import Presets</button>
+      <input type="file" id="importFile" accept=".json" style="display:none;">
+    </div>
+    
   </div>
-
-  <script src="app.js"></script>
-
+  <script src="js/app.js"></script>
 </body>
 </html>
