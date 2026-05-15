@@ -143,6 +143,75 @@ function loadCustomFormats() {
   return formats;
 }
 
+
+/* Version 0.6.17 */
+
+// =========================
+// SETTINGS EXPORT/IMPORT
+// =========================
+
+function collectAllUserSettings(){
+
+  return {
+
+    version:
+      "0.6.17",
+
+    exportedAt:
+      new Date()
+        .toISOString(),
+
+    customFormats:
+      loadCustomFormats(),
+
+    customExpansions:
+      loadCustomExpansions(),
+
+    favoriteExpansions:
+      loadFavoriteExpansions(),
+
+    expansionUsage:
+      loadExpansionUsage(),
+
+    customTypes:
+      JSON.parse(
+        localStorage.getItem(
+          CUSTOM_TYPES_STORAGE_KEY
+        ) || "[]"
+      ),
+
+    searchPresets:
+      Object.keys(localStorage)
+        .filter(
+          key =>
+            key.startsWith("preset_") ||
+            key.startsWith("autosave_")
+        )
+        .reduce(
+          (obj, key) => {
+
+            obj[key] =
+              JSON.parse(
+                localStorage.getItem(
+                  key
+                )
+              );
+
+            return obj;
+
+          },
+          {}
+        ),
+
+    customSearchFormat:
+      loadCustomSearchFormat(),
+
+    builtinFormatOverrides:
+      loadBuiltinFormatOverrides()
+  };
+}
+
+
 function saveCustomFormats(data) {
 
   localStorage.setItem(
@@ -361,6 +430,52 @@ select.appendChild(
     select.value = "";
   }
 }
+
+/* Version 0.6.13 */
+
+function updateCustomSearchButton(){
+
+  const btn =
+    document.getElementById(
+      "customSearchBtn"
+    );
+
+  if (!btn) {
+    return;
+  }
+
+  const value =
+    loadCustomSearchFormat();
+
+  if (!value) {
+
+    btn.textContent =
+      "+🔍";
+
+    return;
+  }
+
+  const fmt =
+    getAllFormats().find(
+      f => f.value === value
+    );
+
+  if (!fmt) {
+
+    btn.textContent =
+      "+🔍";
+
+    return;
+  }
+
+  btn.textContent =
+    "🔍 " + (
+      fmt.text ||
+      fmt.value
+    );
+}
+
+
 
 function createMiniButton(text, color) {
 
@@ -989,11 +1104,19 @@ const CUSTOM_EXPANSIONS_KEY =
 const FAVORITE_EXPANSIONS_KEY =
   "favoriteExpansions_v1";
 
+  /* Version 0.6.13 */
+
+const CUSTOM_SEARCH_BUTTON_KEY =
+  "customSearchButton_v1";
 /* Version 0.5.44 */
 
 /* Version 0.5.49 */
 
 let customTypeButtons = [];
+/* Version 0.6.05 */
+
+// quick temporary types
+let quickSelectedTypes = [];
 
 const CUSTOM_TYPES_STORAGE_KEY =
   "customAddedTypes_v1";
@@ -1175,11 +1298,24 @@ else {
   queryParts.push(
     "f:" + format
   );
+  
 }
   }
-/* Version 0.5.37 */
 
-/* Version 0.5.42 */
+  
+
+const standardLegalOnly =
+  document.getElementById(
+    "standardLegalOnly"
+  )?.checked;
+
+if (standardLegalOnly) {
+
+  queryParts.push(
+    "legal:standard"
+  );
+}
+
 
 if (colors.length > 0) {
 
@@ -1300,6 +1436,27 @@ if (colors.length > 0) {
       }
     });
   }
+
+
+
+/* Version 0.6.07 */
+
+quickSelectedTypes.forEach(obj => {
+
+  if (obj.exclude) {
+
+    queryParts.push(
+      "-t:" + obj.type
+    );
+
+  } else {
+
+    queryParts.push(
+      "t:" + obj.type
+    );
+  }
+});
+
   if(rarities.length > 0){
     const rarityMap = {"C": "common", "U": "uncommon", "R": "rare", "M": "mythic"};
     let rarityQueries = [];
@@ -1426,6 +1583,7 @@ function loadPreset(){
   document.querySelectorAll(".type-btn").forEach(btn => {
     btn.dataset.state = "default";
     updateTypeButtonStyle(btn);
+    updateSelectedTypesInline();
   });
   if(preset.types){
     preset.types.forEach(obj => {
@@ -1433,6 +1591,7 @@ function loadPreset(){
       if(btn){
         btn.dataset.state = obj.state;
         updateTypeButtonStyle(btn);
+        updateSelectedTypesInline();
       }
     });
   }
@@ -1557,13 +1716,40 @@ function importPresetsFromFile(event){
 
 
 
+/* Version 0.6.21 */
+
 //////////////////////
 // Search Function
 //////////////////////
+
 function performSearch(){
-  let settings = getSearchSettings();
-  console.log("Query:", settings.url);
-  window.location.href = settings.url;
+
+  let settings =
+    getSearchSettings();
+
+  console.log(
+    "Query:",
+    settings.url
+  );
+
+  const openInNewTab =
+
+    document.getElementById(
+      "openInNewTabCheckbox"
+    )?.checked;
+
+  if (openInNewTab) {
+
+    window.open(
+      settings.url,
+      "_blank"
+    );
+
+  } else {
+
+    window.location.href =
+      settings.url;
+  }
 }
 
 //////////////////////
@@ -1589,7 +1775,271 @@ function updateTypeButtonStyle(btn){
   }
 }
 
-/* Version 0.5.44 */
+
+/* Version 0.6.06 */
+
+function updateSelectedTypesInline() {
+
+  const target =
+    document.getElementById(
+      "selectedTypesInline"
+    );
+
+  if (!target) {
+    return;
+  }
+
+  target.innerHTML = "";
+
+  const selected = [];
+
+  // =========================
+  // NORMAL TYPE BUTTONS
+  // =========================
+
+  document
+    .querySelectorAll(
+      ".type-btn"
+    )
+    .forEach(btn => {
+
+      if (
+        btn.dataset.state !==
+        "default"
+      ) {
+
+        selected.push({
+          type:
+            btn.dataset.type,
+
+          quick:false
+        });
+      }
+    });
+
+  // =========================
+  // QUICK TYPES
+  // =========================
+
+  /* Version 0.6.07 */
+
+// quick types
+quickSelectedTypes
+  .forEach(obj => {
+
+    if (
+      !selected.some(
+        s => s.type === obj.type
+      )
+    ) {
+
+      selected.push({
+
+        type:obj.type,
+
+        quick:true,
+
+        exclude:
+          obj.exclude
+      });
+    }
+  });
+
+  // =========================
+  // RENDER TAGS
+  // =========================
+
+  selected.forEach(item => {
+
+    const tag =
+      document.createElement(
+        "span"
+      );
+
+    tag.style.display =
+       "fit-content";
+
+    tag.style.alignItems =
+      "center";
+
+    tag.style.gap =
+      "4px";
+
+    tag.style.marginRight =
+      "6px";
+
+    tag.style.padding =
+      "2px 6px";
+
+    tag.style.background =
+      "#ddd";
+/* Version 0.6.07 */
+
+if (item.exclude) {
+
+  tag.style.background =
+    "#ffb3b3";
+
+  tag.style.textDecoration =
+    "line-through";
+}
+
+    tag.style.borderRadius =
+      "10px";
+
+    tag.style.fontSize =
+      "11px";
+
+/* Version 0.6.09 */
+
+// separate text node
+const text =
+  document.createElement(
+    "span"
+  );
+
+text.textContent =
+  item.type;
+
+tag.appendChild(
+  text
+);
+
+/* Version 0.6.07 */
+
+// toggle include/exclude
+if (item.quick) {
+
+  tag.style.cursor =
+    "pointer";
+
+/* Version 0.6.11 */
+
+tag.onclick =
+  function(e){
+
+    // stop parent handlers
+    e.stopPropagation();
+
+    // ignore remove button
+    if (
+      e.target.tagName ===
+      "BUTTON"
+    ) {
+      return;
+    }
+
+    const found =
+      quickSelectedTypes.find(
+        t =>
+          t.type === item.type
+      );
+
+    if (!found) {
+      return;
+    }
+
+    // toggle exclude mode
+    found.exclude =
+      !found.exclude;
+
+    updateSelectedTypesInline();
+  };
+}
+
+    // quick types removable
+    if (item.quick) {
+
+/* Version 0.6.12 */
+
+// =========================
+// REMOVE BUTTON
+// =========================
+
+const remove =
+  document.createElement(
+    "span"
+  );
+
+// unique class
+remove.className =
+  "quick-type-remove";
+
+// unique attribute
+remove.dataset.type =
+  item.type;
+
+remove.textContent =
+  "×";
+
+remove.style.display =
+  "inline-flex";
+
+remove.style.alignItems =
+  "center";
+
+remove.style.justifyContent =
+  "center";
+
+remove.style.width =
+  "12px";
+
+remove.style.height =
+  "12px";
+
+remove.style.marginLeft =
+  "3px";
+
+remove.style.fontSize =
+  "11px";
+
+remove.style.cursor =
+  "pointer";
+
+remove.style.userSelect =
+  "none";
+
+remove.style.flex =
+  "0 0 12px";
+
+// append ONLY after styling
+tag.appendChild(remove);
+    }
+
+    target.appendChild(
+      tag
+    );
+    /* Version 0.6.12 */
+
+// bind remove ONLY to x
+const removeBtn =
+  tag.querySelector(
+    ".quick-type-remove"
+  );
+
+if (removeBtn) {
+
+  removeBtn.addEventListener(
+    "click",
+    function(e){
+
+      e.preventDefault();
+
+      e.stopPropagation();
+
+      quickSelectedTypes =
+        quickSelectedTypes.filter(
+          t =>
+            t.type !==
+            item.type
+        );
+
+      updateSelectedTypesInline();
+    }
+  );
+}
+  });
+}
 
 //////////////////////
 // CUSTOM TYPE SYSTEM
@@ -1642,7 +2092,7 @@ function createCustomTypeButton(typeName) {
     typeName.toUpperCase();
 
   updateTypeButtonStyle(btn);
-
+updateSelectedTypesInline();
   btn.addEventListener(
     "click",
     function () {
@@ -1661,6 +2111,7 @@ function createCustomTypeButton(typeName) {
         next;
 
       updateTypeButtonStyle(btn);
+      updateSelectedTypesInline();
       saveCustomTypes();
     }
   );
@@ -2702,6 +3153,85 @@ function saveFavoriteExpansions(data) {
   );
 }
 
+/* Version 0.6.13 */
+
+/* Version 0.6.18 */
+
+// =========================
+// CUSTOM SEARCH BUTTON
+// =========================
+
+function saveCustomSearchFormat(
+  value
+){
+
+  localStorage.setItem(
+
+    CUSTOM_SEARCH_BUTTON_KEY,
+
+    value || ""
+  );
+}
+
+function loadCustomSearchFormat(){
+
+  return (
+    localStorage.getItem(
+      CUSTOM_SEARCH_BUTTON_KEY
+    ) || ""
+  );
+}
+/* Version 0.6.20 */
+
+// =========================
+// ASSIGN CUSTOM SEARCH
+// =========================
+
+function setupAssignCustomSearchButton(){
+
+  const btn =
+    document.getElementById(
+      "setCustomSearchBtn"
+    );
+
+  if (!btn) {
+    return;
+  }
+
+  btn.onclick =
+    function(){
+
+      const selector =
+        document.getElementById(
+          "format_selector"
+        );
+
+      if (!selector) {
+        return;
+      }
+
+      const value =
+        selector.value;
+
+      if (!value) {
+
+        alert(
+          "Select a format first."
+        );
+
+        return;
+      }
+
+      saveCustomSearchFormat(
+        value
+      );
+
+      updateCustomSearchButton();
+    };
+}
+
+
+
 function renderFavoriteExpansionButtons() {
 
   const container =
@@ -3081,19 +3611,24 @@ row.onclick = () => {
       const current =
         loadFavoriteExpansions();
 
-      saveFavoriteExpansions([
+   /* Version 0.6.03 */
 
-        ...new Set([
-          ...current,
-          ...selected
-        ])
-      ]);
+saveFavoriteExpansions([
 
-      renderFavoriteExpansionButtons();
+  ...new Set([
+    ...current,
+    ...selected
+  ])
+]);
 
-      document.body.removeChild(
-        modal
-      );
+// rerender BOTH sections
+renderFavoriteExpansionButtons();
+
+renderMostUsedExpansionButtons();
+
+document.body.removeChild(
+  modal
+);
     };
 
   cancelBtn.onclick =
@@ -3631,6 +4166,12 @@ if (
     saveFavoriteExpansions(
       favs
     );
+    /* Version 0.6.02 */
+
+// rerender immediately
+renderMostUsedExpansionButtons();
+
+renderFavoriteExpansionButtons();
   }
 }
 
@@ -3869,8 +4410,20 @@ function openDeleteExpansionEditor() {
 
 function trackExpansionUsage(label) {
 
-  let usage =
-    loadExpansionUsage();
+/* Version 0.6.00 */
+
+let usage =
+  loadExpansionUsage();
+
+const favorites =
+  loadFavoriteExpansions();
+
+if (
+  favorites.includes(label)
+) {
+
+  return;
+}
 
   // =========================
   // INITIALIZE
@@ -4068,6 +4621,17 @@ function renderMostUsedExpansionButtons() {
   const usage =
     loadExpansionUsage();
 
+    /* Version 0.6.01 */
+
+// remove favorites from ranking
+const favorites =
+  loadFavoriteExpansions();
+
+favorites.forEach(label => {
+
+  delete usage[label];
+});
+
   // =========================
   // SORTING RULES
   // =========================
@@ -4217,6 +4781,7 @@ document.querySelectorAll(".type-btn").forEach(btn => {
   btn.dataset.state = "default";
 
   updateTypeButtonStyle(btn);
+  updateSelectedTypesInline();
 
   btn.addEventListener("click", function(){
 
@@ -4232,6 +4797,7 @@ document.querySelectorAll(".type-btn").forEach(btn => {
     btn.dataset.state = next;
 
     updateTypeButtonStyle(btn);
+    updateSelectedTypesInline();
   });
 });
 
@@ -4258,7 +4824,111 @@ document
   );
 
 restoreCustomTypes();
-  
+/* Version 0.6.05 */
+
+// populate quick type suggestions
+fetchAllTypes()
+  .then(types => {
+
+    const datalist =
+      document.getElementById(
+        "quickTypeSuggestions"
+      );
+
+    if (!datalist) {
+      return;
+    }
+
+    datalist.innerHTML = "";
+
+    types.forEach(type => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        type;
+
+      datalist.appendChild(
+        option
+      );
+    });
+  });
+
+  /* Version 0.6.05 */
+
+const quickTypeInput =
+  document.getElementById(
+    "quickTypeInput"
+  );
+
+if (quickTypeInput) {
+
+  /* Version 0.6.07 */
+
+function addQuickType(value){
+
+  value =
+    value
+      .trim()
+      .toLowerCase();
+
+  if (!value) {
+    return;
+  }
+
+  // avoid duplicates
+  const exists =
+    quickSelectedTypes.some(
+      t => t.type === value
+    );
+
+  if (!exists) {
+
+    quickSelectedTypes.push({
+
+      type:value,
+
+      exclude:false
+    });
+  }
+
+  updateSelectedTypesInline();
+
+  quickTypeInput.value = "";
+}
+
+quickTypeInput.addEventListener(
+  "change",
+  function(){
+
+    addQuickType(
+      this.value
+    );
+  }
+);
+
+quickTypeInput.addEventListener(
+  "keydown",
+  function(e){
+
+    if (e.key !== "Enter") {
+      return;
+    }
+
+    e.preventDefault();
+
+    addQuickType(
+      this.value
+    );
+  }
+);
+}
+
+updateSelectedTypesInline();
+
   // Rarity Buttons.
   document.querySelectorAll(".rarity-btn").forEach(btn => {
     let rarity = btn.getAttribute("data-rarity");
@@ -4388,7 +5058,14 @@ document
     document.querySelectorAll(".type-btn").forEach(btn => {
       btn.dataset.state = "default";
       updateTypeButtonStyle(btn);
+      updateSelectedTypesInline();
     });
+    /* Version 0.6.06 */
+
+// clear quick temporary types
+quickSelectedTypes = [];
+
+updateSelectedTypesInline();
   });
   document.getElementById("clearRarity").addEventListener("click", function(){
     document.querySelectorAll('input[name="rarity[]"]').forEach(chk => { chk.checked = false; });
@@ -4480,5 +5157,339 @@ if (
 updatePresetDropdown();
 
 
+updateCustomSearchButton();
 
+
+/* Version 0.6.20 */
+
+// =========================
+// CUSTOM SEARCH EXECUTION
+// =========================
+
+const customSearchBtn =
+  document.getElementById(
+    "customSearchBtn"
+  );
+
+if (customSearchBtn) {
+updateCustomSearchButton();
+  customSearchBtn.onclick =
+    function(){
+
+      const saved =
+        loadCustomSearchFormat();
+
+      if (!saved) {
+
+        alert(
+          "No format assigned."
+        );
+
+        return;
+      }
+
+      const selector =
+        document.getElementById(
+          "format_selector"
+        );
+
+      if (!selector) {
+        return;
+      }
+
+      const previous =
+        selector.value;
+
+      selector.value =
+        saved;
+
+      performSearch();
+
+      selector.value =
+        previous;
+    };
+}
+
+setupAssignCustomSearchButton();
+/* Version 0.6.17 */
+
+// =========================
+// EXPORT SETTINGS
+// =========================
+
+const exportAllSettingsBtn =
+  document.getElementById(
+    "exportAllSettingsBtn"
+  );
+
+if (exportAllSettingsBtn) {
+
+  exportAllSettingsBtn
+    .addEventListener(
+      "click",
+      function(){
+
+        const data =
+          collectAllUserSettings();
+
+        const blob =
+          new Blob(
+            [
+              JSON.stringify(
+                data,
+                null,
+                2
+              )
+            ],
+            {
+              type:
+                "application/json"
+            }
+          );
+
+        const url =
+          URL.createObjectURL(
+            blob
+          );
+
+        const a =
+          document.createElement(
+            "a"
+          );
+
+        a.href =
+          url;
+
+        a.download =
+          "mtg-enhancer-settings.json";
+
+        a.click();
+
+        URL.revokeObjectURL(
+          url
+        );
+      }
+    );
+}
+
+// =========================
+// IMPORT SETTINGS
+// =========================
+
+const importAllSettingsBtn =
+  document.getElementById(
+    "importAllSettingsBtn"
+  );
+
+const settingsImportFile =
+  document.getElementById(
+    "settingsImportFile"
+  );
+
+if (
+  importAllSettingsBtn &&
+  settingsImportFile
+) {
+
+  importAllSettingsBtn
+    .addEventListener(
+      "click",
+      function(){
+
+        settingsImportFile.click();
+      }
+    );
+
+  settingsImportFile
+    .addEventListener(
+      "change",
+      async function(){
+
+        const file =
+          this.files[0];
+
+        if (!file) {
+          return;
+        }
+
+        try {
+
+          const text =
+            await file.text();
+
+          const data =
+            JSON.parse(text);
+
+          // =====================
+          // RESTORE SETTINGS
+          // =====================
+
+          localStorage.setItem(
+            CUSTOM_FORMAT_KEY,
+            JSON.stringify(
+              data.customFormats || []
+            )
+          );
+
+          localStorage.setItem(
+            CUSTOM_EXPANSIONS_KEY,
+            JSON.stringify(
+              data.customExpansions || []
+            )
+          );
+
+          localStorage.setItem(
+            FAVORITE_EXPANSIONS_KEY,
+            JSON.stringify(
+              data.favoriteExpansions || []
+            )
+          );
+
+          localStorage.setItem(
+            EXPANSION_USAGE_KEY,
+            JSON.stringify(
+              data.expansionUsage || {}
+            )
+          );
+
+          localStorage.setItem(
+            CUSTOM_TYPES_STORAGE_KEY,
+            JSON.stringify(
+              data.customTypes || []
+            )
+          );
+
+          Object.entries(
+            data.searchPresets || {}
+          ).forEach(
+            ([key,val]) => {
+
+              localStorage.setItem(
+                key,
+                JSON.stringify(val)
+              );
+            }
+          );
+
+          localStorage.setItem(
+            CUSTOM_SEARCH_BUTTON_KEY,
+            data.customSearchFormat || ""
+          );
+
+          localStorage.setItem(
+            BUILTIN_FORMAT_OVERRIDE_KEY,
+            JSON.stringify(
+              data.builtinFormatOverrides || []
+            )
+          );
+
+          alert(
+            "Settings imported successfully."
+          );
+
+          location.reload();
+
+        } catch(err){
+
+          console.error(err);
+
+          alert(
+            "Failed to import settings."
+          );
+        }
+      }
+    );
+}
+
+// =========================
+// CLEAR ALL SETTINGS
+// =========================
+
+const clearAllSettingsBtn =
+  document.getElementById(
+    "clearAllSettingsBtn"
+  );
+
+if (clearAllSettingsBtn) {
+
+  clearAllSettingsBtn
+    .addEventListener(
+      "click",
+      function(){
+
+        const ok =
+          confirm(
+
+`Are you sure?
+
+Exporting beforehand highly recommended.
+
+This will remove:
+- formats
+- presets
+- favorites
+- expansions
+- custom search button
+- usage history
+- all saved user settings`
+          );
+
+        if (!ok) {
+          return;
+        }
+
+        localStorage.removeItem(
+          CUSTOM_FORMAT_KEY
+        );
+
+        localStorage.removeItem(
+          CUSTOM_EXPANSIONS_KEY
+        );
+
+        localStorage.removeItem(
+          FAVORITE_EXPANSIONS_KEY
+        );
+
+        localStorage.removeItem(
+          EXPANSION_USAGE_KEY
+        );
+
+        localStorage.removeItem(
+          CUSTOM_TYPES_STORAGE_KEY
+        );
+
+        localStorage.removeItem(
+          CUSTOM_SEARCH_BUTTON_KEY
+        );
+
+        localStorage.removeItem(
+          BUILTIN_FORMAT_OVERRIDE_KEY
+        );
+
+        Object.keys(localStorage)
+          .forEach(key => {
+
+            if (
+              key.startsWith(
+                "preset_"
+              ) ||
+              key.startsWith(
+                "autosave_"
+              )
+            ) {
+
+              localStorage.removeItem(
+                key
+              );
+            }
+          });
+
+        alert(
+          "All settings cleared."
+        );
+
+        location.reload();
+      }
+    );
+}
 });
