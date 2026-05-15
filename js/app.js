@@ -56,17 +56,91 @@ const CONFIG = {
 
 const CUSTOM_FORMAT_KEY = "customFormats_v1";
 
+/* Version 0.5.92 */
+
+const BUILTIN_FORMAT_OVERRIDE_KEY =
+  "builtinFormatOverrides_v1";
+
+
+/* Version 0.5.80 */
+
 function loadCustomFormats() {
 
+  let formats = [];
+
   try {
-    return JSON.parse(
-      localStorage.getItem(CUSTOM_FORMAT_KEY)
-    ) || [];
+
+    formats =
+      JSON.parse(
+        localStorage.getItem(
+          CUSTOM_FORMAT_KEY
+        ) || "[]"
+      );
 
   } catch {
 
-    return [];
+    formats = [];
   }
+
+  // fallback old storage keys
+  if (!formats.length) {
+
+    try {
+
+      formats =
+        JSON.parse(
+          localStorage.getItem(
+            "customFormats"
+          ) || "[]"
+        );
+
+    } catch {}
+  }
+
+  if (!formats.length) {
+
+    try {
+
+      formats =
+        JSON.parse(
+          localStorage.getItem(
+            "formats"
+          ) || "[]"
+        );
+
+    } catch {}
+  }
+
+  // normalize
+  formats =
+    formats.map(fmt => {
+
+      return {
+
+        value:
+          fmt.value ||
+          fmt.code ||
+          fmt.name ||
+          fmt.label ||
+          "",
+
+        text:
+          fmt.text ||
+          fmt.label ||
+          fmt.name ||
+          fmt.value ||
+          "",
+
+        color:
+          fmt.color ||
+          "#007bff",
+
+        sets:
+          fmt.sets || []
+      };
+    });
+
+  return formats;
 }
 
 function saveCustomFormats(data) {
@@ -77,22 +151,90 @@ function saveCustomFormats(data) {
   );
 }
 
+
+
+function loadBuiltinFormatOverrides() {
+
+  try {
+
+    return JSON.parse(
+      localStorage.getItem(
+        BUILTIN_FORMAT_OVERRIDE_KEY
+      ) || "[]"
+    );
+
+  } catch {
+
+    return [];
+  }
+}
+
+function saveBuiltinFormatOverrides(
+  formats
+) {
+
+  localStorage.setItem(
+    BUILTIN_FORMAT_OVERRIDE_KEY,
+    JSON.stringify(formats)
+  );
+}
+
+/* Version 0.5.87 */
+
+/* Version 0.5.90 */
+
 function getAllFormats() {
 
-  const base = CONFIG.formatData.formats;
-  const custom = loadCustomFormats();
+  // built-in formats from CONFIG
+  const builtIn =
+    CONFIG.formatData.formats || [];
 
-  const map = new Map();
+  // user-created formats
+  const custom =
+    loadCustomFormats();
 
-  base.forEach(f => {
-    map.set(f.value, { ...f });
+    /* Version 0.5.92 */
+
+// edited built-in formats
+const overrides =
+  loadBuiltinFormatOverrides();
+
+  // merge while preserving full objects
+  const map =
+    new Map();
+
+  // preserve baked formats
+  builtIn.forEach(f => {
+
+    map.set(
+      f.value,
+      { ...f }
+    );
   });
 
-  custom.forEach(f => {
-    map.set(f.value, { ...f });
-  });
+/* Version 0.5.92 */
 
-  return Array.from(map.values());
+// edited built-ins overwrite defaults
+overrides.forEach(f => {
+
+  map.set(
+    f.value,
+    { ...f }
+  );
+});
+
+// custom formats overwrite everything
+custom.forEach(f => {
+
+  map.set(
+    f.value,
+    { ...f }
+  );
+});
+
+  return Array.from(
+    map.values()
+  );
 }
 
 async function fetchScryfallSets() {
@@ -116,30 +258,108 @@ async function fetchScryfallSets() {
     return [];
   }
 }
+/* Version 0.5.75 */
+
+/* Version 0.5.91 */
 
 function updateFormatDropdown() {
 
   const select =
-    document.getElementById("format_selector");
+    document.getElementById(
+      "format_selector"
+    );
 
-  if (!select) return;
+  if (!select) {
+    return;
+  }
 
-  const formats = getAllFormats();
+  // preserve current selection
+  const previousValue =
+    select.value;
 
+  // clear dropdown
   select.innerHTML = "";
 
-  formats.forEach(fmt => {
+  // =========================
+  // PLACEHOLDER
+  // =========================
 
-    const opt = document.createElement("option");
+  const placeholder =
+    document.createElement(
+      "option"
+    );
 
-    opt.value = fmt.value;
-    opt.textContent = fmt.text;
+  placeholder.value = "";
 
-    opt.style.color =
-      fmt.color || "#007bff";
+  placeholder.textContent =
+    "Select Format";
 
-    select.appendChild(opt);
+  select.appendChild(
+    placeholder
+  );
+
+  // =========================
+  // LOAD FORMATS
+  // =========================
+
+  const allFormats =
+    getAllFormats();
+
+  allFormats.forEach(fmt => {
+
+    // skip duplicate blank entry
+    if (!fmt.value) {
+      return;
+    }
+
+   /* Version 0.5.94 */
+
+const option =
+  document.createElement(
+    "option"
+  );
+
+option.value =
+  fmt.value;
+
+option.textContent =
+  fmt.text ||
+  fmt.value;
+
+// apply saved color
+if (fmt.color) {
+
+  option.style.color =
+    fmt.color;
+}
+
+select.appendChild(
+  option
+);
   });
+
+  // =========================
+  // RESTORE SELECTION
+  // =========================
+
+  const exists =
+    Array.from(
+      select.options
+    ).some(
+      o =>
+        o.value ===
+        previousValue
+    );
+
+  if (exists) {
+
+    select.value =
+      previousValue;
+
+  } else {
+
+    select.value = "";
+  }
 }
 
 function createMiniButton(text, color) {
@@ -196,9 +416,9 @@ async function openFormatEditor(existingFormat = null) {
   modal.style.width = "350px";
 
   modal.style.maxHeight = "500px";
-/* Version 0.5.58 */
 
-modal.style.overflowY =
+
+ modal.style.overflowY =
   "auto";
   const title = document.createElement("div");
 
@@ -228,7 +448,7 @@ modal.style.overflowY =
     existingFormat?.color || "#007bff";
 
  
-/* Version 0.5.41 */
+
 
 const searchInput =
   document.createElement("input");
@@ -351,6 +571,11 @@ function syncSelection() {
   updateStyle();
 }
 
+
+
+
+
+
 checkbox.addEventListener(
   "click",
   e => {
@@ -421,62 +646,186 @@ searchInput.addEventListener("input", () => {
 
   modal.appendChild(buttonRow);
 
-  saveBtn.onclick = () => {
+/* Version 0.5.81 */
 
-    const name =
-      nameInput.value.trim();
+saveBtn.onclick = () => {
 
-    if (!name) {
+  const name =
+    nameInput.value.trim();
 
-      alert("Enter format name");
+  if (!name) {
 
-      return;
-    }
+    alert(
+      "Enter format name"
+    );
 
-    const custom =
-      loadCustomFormats();
+    return;
+  }
 
-    const newFormat = {
+  const custom =
+    loadCustomFormats();
 
-      value: name,
+  // preserve original value when editing
+  const internalValue =
+    existingFormat?.value ||
+    name.toLowerCase()
+      .replace(/\s+/g, "_");
 
-      text: name,
+  const newFormat = {
 
-      color: colorInput.value,
+    value:
+      internalValue,
 
-      sets: Array.from(selectedSets)
-    };
+    text:
+      name,
 
-    const idx =
-      custom.findIndex(
-        f => f.value === name
-      );
+    color:
+      colorInput.value,
 
-    if (idx !== -1) {
+    sets:
+      Array.from(
+        selectedSets
+      )
+  };
 
-      custom[idx] = newFormat;
+  // editing existing
+  const idx =
+    custom.findIndex(
+      f =>
+        f.value ===
+        internalValue
+    );
 
-    } else {
+  if (idx !== -1) {
 
-      custom.push(newFormat);
-    }
+    custom[idx] =
+      newFormat;
 
-    saveCustomFormats(custom);
+  } else {
 
-    updateFormatDropdown();
+    custom.push(
+      newFormat
+    );
+  }
 
+/* Version 0.5.92 */
+
+const isBuiltIn =
+  CONFIG.formatData.formats.some(
+    f =>
+      f.value ===
+      internalValue
+  );
+
+if (isBuiltIn) {
+
+  const overrides =
+    loadBuiltinFormatOverrides();
+
+  const idx =
+    overrides.findIndex(
+      f =>
+        f.value ===
+        internalValue
+    );
+
+  if (idx !== -1) {
+
+    overrides[idx] =
+      newFormat;
+
+  } else {
+
+    overrides.push(
+      newFormat
+    );
+  }
+
+  saveBuiltinFormatOverrides(
+    overrides
+  );
+
+} else {
+
+  saveCustomFormats(
+    custom
+  );
+}
+
+  updateFormatDropdown();
+
+  const selector =
     document.getElementById(
       "format_selector"
-    ).value = name;
+    );
 
-    document.body.removeChild(modal);
-  };
+  selector.value =
+    internalValue;
+
+  document.body.removeChild(
+    modal
+  );
+};
 
   cancelBtn.onclick = () => {
 
     document.body.removeChild(modal);
   };
 }
+
+/* Version 0.5.77 */
+
+function editSelectedFormat() {
+
+  const selector =
+    document.getElementById(
+      "format_selector"
+    );
+
+  const value =
+    selector.value;
+
+  if (!value) {
+
+    alert(
+      "Select format"
+    );
+
+    return;
+  }
+
+  const customFormats =
+    loadCustomFormats();
+
+let found =
+  customFormats.find(
+    f => f.value === value
+  );
+
+/* Version 0.5.93 */
+
+// fallback to ALL merged formats
+if (!found) {
+
+  found =
+    getAllFormats().find(
+      f => f.value === value
+    );
+}
+
+if (!found) {
+
+  alert(
+    "Format not found."
+  );
+
+  return;
+}
+
+  openFormatEditor(found);
+}
+
+/* Version 0.5.74 */
 
 function deleteCurrentFormat() {
 
@@ -490,6 +839,16 @@ function deleteCurrentFormat() {
   if (!value) {
 
     alert("Select a format");
+
+    return;
+  }
+
+  // ADD THIS BLOCK
+  if (
+    !confirm(
+      "Delete this format?"
+    )
+  ) {
 
     return;
   }
@@ -516,71 +875,9 @@ function deleteCurrentFormat() {
   select.value = "";
 }
 
-function injectFormatButtons() {
+/* Version 0.5.70 */
 
-  const wrapper =
-    document.querySelector(
-      "#formatGroup .selector-row"
-    );
-
-  if (!wrapper) return;
-
-  const addBtn =
-    createMiniButton("+", "#28a745");
-
-  addBtn.title = "Add Format";
-
-  addBtn.onclick = () => {
-
-    openFormatEditor();
-  };
-
-  const editBtn =
-    createMiniButton("✎", "#17a2b8");
-
-  editBtn.title = "Edit Format";
-
-  editBtn.onclick = () => {
-
-    const value =
-      document.getElementById(
-        "format_selector"
-      ).value;
-
-    if (!value) {
-
-      alert("Select format");
-
-      return;
-    }
-
-    const formats =
-      getAllFormats();
-
-    const fmt =
-      formats.find(
-        f => f.value === value
-      );
-
-    if (!fmt) return;
-
-    openFormatEditor(fmt);
-  };
-
-  const deleteBtn =
-    createMiniButton("🗑", "#dc3545");
-
-  deleteBtn.title = "Delete Format";
-
-  deleteBtn.onclick =
-    deleteCurrentFormat;
-
-  wrapper.appendChild(addBtn);
-
-  wrapper.appendChild(editBtn);
-
-  wrapper.appendChild(deleteBtn);
-}
+/////function injectFormatButtons()//////
 
 const EXPANSIONS_DATA = {
   common: [
@@ -1090,11 +1387,7 @@ if (colors.length > 0) {
     url: url
   };
 }
-function performSearch(){
-  let settings = getSearchSettings();
-  console.log("Query:", settings.url);
-  window.location.href = settings.url;
-}
+
 
 //////////////////////
 // Preset Management
@@ -4111,16 +4404,41 @@ document
     document.getElementById("oracle").value = "";
   });
   
-  // Action Buttons.
-  document.getElementById("searchActionButton").addEventListener("click", function(){
-    autoSaveSearch();
-    performSearch();
-  });
-  document.getElementById("searchFrontierActionButton").addEventListener("click", function(){
-    document.getElementById("format_selector").value = "frontier";
-    autoSaveSearch();
-    performSearch();
-  });
+/* Version 0.5.86 */
+
+// Action Buttons.
+
+document
+  .getElementById(
+    "searchBtn"
+  )
+  .addEventListener(
+    "click",
+    function(){
+
+      autoSaveSearch();
+
+      performSearch();
+    }
+  );
+
+document
+  .getElementById(
+    "frontierBtn"
+  )
+  .addEventListener(
+    "click",
+    function(){
+
+      document.getElementById(
+        "format_selector"
+      ).value = "frontier";
+
+      autoSaveSearch();
+
+      performSearch();
+    }
+  );
   
   // Preset Management.
   document.getElementById("savePresetButton").addEventListener("click", savePreset);
@@ -4134,9 +4452,33 @@ document
   
   /* Version 0.5.39 */
 
+injectCustomExpansions();
+
+buildExpansionsToggles();
+
+
+/* Version 0.5.88 */
+
 updateFormatDropdown();
 
-injectFormatButtons();
+if (
+  typeof injectFormatButtons ===
+  "function"
+) {
+
+  const container =
+    document.getElementById(
+      "formatActionButtons"
+    );
+
+  if (container) {
+
+    injectFormatButtons();
+  }
+}
 
 updatePresetDropdown();
+
+
+
 });
