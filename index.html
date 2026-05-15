@@ -10,11 +10,82 @@
 <body>
   <div id="enhancer-container">
     <!-- Version Indicator -->
-    <div id="versionIndicator">Version 0.5.34</div>
+<!-- Version 0.6.21 -->
+
+<div
+  id="topBar"
+  style="
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:8px;
+  "
+>
+
+  <div id="versionIndicator">
+    Version 0.6.21
+  </div>
+
+  <label
+    style="
+      font-size:12px;
+      display:flex;
+      align-items:center;
+      gap:4px;
+      cursor:pointer;
+    "
+  >
+
+    <input
+      type="checkbox"
+      id="openInNewTabCheckbox"
+      checked
+    >
+
+    Open in new tab
+
+  </label>
+
+</div>
     
     <!-- 1. Format Selector -->
     <div class="option-group" id="formatGroup">
-      <label for="format_selector">Format:</label>
+      <label for="format_selector">Format:</label><label
+    style="
+      margin-left:8px;
+      font-size:12px;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+    "
+  >
+
+    <input
+      type="checkbox"
+      id="standardLegalOnly"
+      checked
+    >
+
+    Std Legal
+
+
+
+
+  </label>
+  
+  <button
+    type="button"
+    class="action-btn"
+    id="setCustomSearchBtn"
+    title="Set selected format as custom search"
+    style="
+      padding:4px 10px;
+      min-width:auto;
+    "
+  >
+    +🔍
+  </button>
+        
 <!-- Version 0.5.70 -->
 
 <!-- Version 0.5.72 -->
@@ -265,6 +336,7 @@
   <input
     type="checkbox"
     id="playableColorToggle"
+    checked
   >
   Playables
 </label>
@@ -282,7 +354,47 @@
     
     <!-- 4. Type Selector -->
     <div class="option-group" id="typeGroup">
-      <label>Types:</label>
+    <!-- Version 0.6.04 -->
+
+<label
+  id="typesHeader"
+  style="
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  "
+>
+
+  <span>
+    Types:
+  </span>
+
+  <span
+    id="selectedTypesInline"
+    style="
+      font-size:12px;
+      color:#777;
+    "
+  ></span>
+
+<!-- Version 0.6.05 -->
+
+<input
+  type="text"
+  id="quickTypeInput"
+  list="quickTypeSuggestions"
+  placeholder="+ type"
+  style="
+    width:110px;
+    padding:3px 6px;
+    font-size:12px;
+  "
+>
+
+<datalist id="quickTypeSuggestions"></datalist>
+
+</label>
       <div class="selector-row" id="typeButtons">
         <button class="type-btn" data-type="artifact">AR</button>
         <button class="type-btn" data-type="enchantment">EN</button>
@@ -391,6 +503,8 @@
 
 
 
+<!-- Version 0.6.13 -->
+
 <div id="searchButtons">
 
   <button
@@ -407,6 +521,14 @@
     Search Frontier
   </button>
 
+  <button
+    class="action-btn"
+    id="customSearchBtn"
+    title="Right click to set selected format"
+  >
+    +🔍
+  </button>
+
 </div>
     
     <!-- 9. Preset Management Section -->
@@ -421,8 +543,81 @@
       <button id="importPresetButton">⬆ Import Presets</button>
       <input type="file" id="importFile" accept=".json" style="display:none;">
     </div>
+
+    <!-- Version 0.6.17 -->
+
+<!-- ========================= -->
+<!-- SETTINGS MANAGEMENT -->
+<!-- ========================= -->
+
+<div
+  id="settingsManagement"
+  style="
+    margin-top:40px;
+    padding:12px;
+    border-top:1px solid #ccc;
+  "
+>
+
+  <div
+    style="
+      font-weight:bold;
+      margin-bottom:8px;
+    "
+  >
+    Settings Backup
+  </div>
+
+  <div
+    style="
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    "
+  >
+
+    <button
+      class="action-btn"
+      id="exportAllSettingsBtn"
+    >
+      Export Settings
+    </button>
+
+    <button
+      class="action-btn"
+      id="importAllSettingsBtn"
+    >
+      Import Settings
+    </button>
+
+    <button
+      class="action-btn"
+      id="clearAllSettingsBtn"
+      style="
+        background:#c62828;
+        color:white;
+      "
+    >
+      Clear All Settings
+    </button>
+
+  </div>
+
+  <input
+    type="file"
+    id="settingsImportFile"
+    accept=".json"
+    style="display:none;"
+  >
+
+</div>
+
     <div id="searchButtonsSpacer"></div>
   </div>
   <script src="js/app.js"></script>
+
+
+
+
 </body>
 </html>
