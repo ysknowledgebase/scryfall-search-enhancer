@@ -473,7 +473,7 @@ button:hover {
 
     min-width: 0;
 
-    display: inline-block;
+    display: flex;
 
     vertical-align: middle;
   }
@@ -488,7 +488,7 @@ button:hover {
 
     font-size: 14px !important;
 
-    display: inline-block;
+    display: flex;
 
     vertical-align: middle;
 
@@ -783,3 +783,117 @@ button:hover {
   }
 }
 
+/* Version 0.5.66 */
+/* =========================
+   FIXED SEARCH BAR
+========================= */
+
+#searchButtons {
+
+  position: fixed;
+
+  bottom: 0;
+
+  left: 0;
+
+  width: 100%;
+
+  display: flex;
+
+  gap: 8px;
+
+  padding: 10px;
+
+  background: rgba(245,245,245,0.96);
+
+  backdrop-filter: blur(6px);
+
+  border-top:
+    1px solid #ccc;
+
+  z-index: 9999;
+
+  box-sizing: border-box;
+}
+
+/* Spacer prevents content
+   from being hidden behind
+   fixed search bar */
+
+#searchButtonsSpacer {
+
+  height: 90px;
+}
+
+/* Buttons */
+
+#searchButtons .action-btn {
+
+  flex: 1;
+
+  margin: 0;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media screen and (max-width: 768px) {
+
+  #searchButtons {
+
+    padding:
+      8px max(8px, env(safe-area-inset-right))
+      calc(8px + env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+
+    gap: 6px;
+  }
+
+  #searchButtons .action-btn {
+
+    height: 44px !important;
+
+    font-size: 15px !important;
+  }
+
+  #searchButtonsSpacer {
+
+    height: 80px;
+  }
+}
+/* Version 0.5.70 */
+
+#formatActionButtons {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 4px;
+}
+
+@media screen and (max-width: 768px) {
+
+  #formatActionButtons {
+
+    display: inline-flex !important;
+
+    gap: 3px !important;
+  }
+
+  #formatActionButtons button {
+
+    width: 28px !important;
+
+    min-width: 28px !important;
+
+    max-width: 28px !important;
+
+    height: 28px !important;
+
+    padding: 0 !important;
+
+    font-size: 12px !important;
+  }
+}
