@@ -15,25 +15,56 @@
     <!-- 1. Format Selector -->
     <div class="option-group" id="formatGroup">
       <label for="format_selector">Format:</label>
-      <div class="selector-row">
-        <select id="format_selector">
-          <option value="">Select Format</option>
-          <option value="standard">Standard</option>
-          <option value="futureStandard">Future Standard</option>
-          <option value="frontier">Frontier</option>
-          <option value="fdn">FDN</option>
-          <option value="dft">DFT</option>
-          <option value="tdm">TDM</option>
-          <option value="fin">FIN</option>
-          <option value="eoe">EOE</option>
-          <option value="spm">SPM</option>
-          <option value="tla">TLA</option>
-          <option value="ecl">ECL</option>
-          <option value="tmt">TMT</option>
-          <option value="sos">SOS</option>
-        </select>
-        <button class="clear-btn" id="clearFormat">Clear</button>
-      </div>
+<!-- Version 0.5.70 -->
+
+<!-- Version 0.5.72 -->
+
+<div class="selector-row" id="formatSelectorRow">
+
+ <!-- Version 0.5.83 -->
+
+<select id="format_selector">
+
+  <option value="">
+    Select Format
+  </option>
+
+</select>
+  <button
+    class="clear-btn"
+    id="clearFormat"
+  >
+    Clear
+  </button>
+
+<button
+  class="toggle-btn"
+  id="addFormatBtn"
+  title="Add Format"
+  onclick="openFormatEditor()"
+>
+  +
+</button>
+
+<button
+  class="toggle-btn"
+  id="editFormatBtn"
+  title="Edit Format"
+  onclick="editSelectedFormat()"
+>
+  ✎
+</button>
+
+<button
+  class="toggle-btn"
+  id="deleteFormatBtn"
+  title="Delete Format"
+  onclick="deleteCurrentFormat()"
+>
+  🗑
+</button>
+
+</div>
     </div>
 
 <!-- Version 0.5.43 -->
@@ -356,10 +387,27 @@
     </div>
     
     <!-- 8. Search Buttons -->
-    <div id="searchButtons">
-      <button id="searchActionButton" class="action-btn">Search</button>
-      <button id="searchFrontierActionButton" class="action-btn">Search Frontier</button>
-    </div>
+<!-- Version 0.5.66 -->
+
+
+
+<div id="searchButtons">
+
+  <button
+    class="action-btn"
+    id="searchBtn"
+  >
+    Search
+  </button>
+
+  <button
+    class="action-btn"
+    id="frontierBtn"
+  >
+    Search Frontier
+  </button>
+
+</div>
     
     <!-- 9. Preset Management Section -->
     <div id="preset-section">
@@ -373,7 +421,7 @@
       <button id="importPresetButton">⬆ Import Presets</button>
       <input type="file" id="importFile" accept=".json" style="display:none;">
     </div>
-    
+    <div id="searchButtonsSpacer"></div>
   </div>
   <script src="js/app.js"></script>
 </body>
