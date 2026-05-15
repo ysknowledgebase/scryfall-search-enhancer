@@ -458,7 +458,7 @@ button:hover {
 
   #formatGroup .selector-row {
 
-    display: flex;
+    display: block;
 
     flex-wrap: wrap;
 
@@ -469,22 +469,30 @@ button:hover {
 
   #format_selector {
 
-    width: 100%;
+       width: 50%;
 
     min-width: 0;
+
+    display: inline-block;
+
+    vertical-align: middle;
   }
 
   #formatGroup .selector-row button {
 
-    width: 42px !important;
+    width: 34px !important;
 
-    height: 42px !important;
+    height: 34px !important;
 
     padding: 0 !important;
 
-    font-size: 16px !important;
+    font-size: 14px !important;
 
-    flex: 0 0 auto;
+    display: inline-block;
+
+    vertical-align: middle;
+
+    margin-left: 4px;
   }
 
   /* =========================
@@ -513,7 +521,7 @@ button:hover {
 
   .attr-input {
 
-    width: 72px !important;
+    width: 42px !important;
 
     height: 38px !important;
 
@@ -522,13 +530,13 @@ button:hover {
 
   .attr-op-btn {
 
-    width: 42px;
+    width: 34px;
 
-    min-width: 42px;
+    min-width: 34px;
 
-    height: 38px;
+    height: 34px;
 
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .attr-center-label {
@@ -553,9 +561,9 @@ button:hover {
 
   #colorButtons button {
 
-    width: 52px !important;
+    width: 36px !important;
 
-    height: 52px !important;
+    height: 36px !important;
 
     padding: 0 !important;
 
@@ -564,9 +572,9 @@ button:hover {
 
   #colorButtons img {
 
-    width: 24px;
+    width: 18px;
 
-    height: 24px;
+    height: 18px;
   }
 
   /* =========================
@@ -586,13 +594,13 @@ button:hover {
   #typeButtons button,
   #addedTypesContainer button {
 
-    min-width: 54px;
+    min-width: 42px;
 
-    height: 38px;
+    height: 34px;
 
-    padding: 4px 8px;
+    padding: 2px 6px;
 
-    font-size: 13px;
+    font-size: 12px;
 
     flex: 0 0 auto;
   }
@@ -612,11 +620,11 @@ button:hover {
 
   #rarityButtons button {
 
-    width: 54px;
+    width: 42px;
 
-    height: 38px;
+    height: 34px;
 
-    font-size: 15px;
+    font-size: 13px;
 
     flex: 0 0 auto;
   }
